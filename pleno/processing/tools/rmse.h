@@ -1,0 +1,19 @@
+#pragma once
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// https://en.wikipedia.org/wiki/Root-mean-square_deviation
+struct RMSE
+{
+    double value;
+    int size = 0;
+    
+    void add(double d) { size+=1; value += d * d; }
+    void add(const P2D& p) { value += p.squaredNorm(); size+=1; }
+    void add(const P3D& p) { value += p.squaredNorm(); size+=1; }
+
+    double get() const { 
+    	return size == 0 ? 0. : std::sqrt(sum() / static_cast<double>(size));
+    }
+    double sum() const {
+    	return value; // / 2; //FIXME: /2 to be homogeneous with LMA, find why ?
+    }
+};

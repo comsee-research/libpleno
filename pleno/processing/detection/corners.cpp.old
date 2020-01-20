@@ -1,0 +1,614 @@
+#include "detection.h"
+
+#include <numeric>
+#include <array>
+
+#include <libv/charlib/tools/tools.hpp>
+
+#include "gui.h"
+#include "utils.h"
+
+#include "model/microimage.h"
+
+#include "tools/improcess.h"
+#include "tools/dbscan.h"
+
+/*
+ * @orientation_histogram compute an histogram based on orientation and magnitude image gradients
+ */
+std::vector<double>
+hist_orientation(
+	const Image& orientation, 
+	const Image& magnitude,
+    const double stepsize,
+	const Image& mask    
+)
+{
+    const int num_bins = int(360.0 / stepsize);
+
+	std::vector<double> histogram(num_bins, 0.);
+
+	const int width 	= orientation.cols;
+	const int height 	= orientation.rows;
+	
+	const double *o, *w;
+	const uchar *m;
+	for(int y = 0 ; y < height ; ++y) //for each row
+	{
+		o = orientation.ptr<const double>(y);
+		w = magnitude.ptr<const double>(y);
+		m = mask.ptr<const uchar>(y);
+		
+		for(int x = 0 ; x < width ; ++x) //for each column
+		{
+			if(m[x] == 0) continue; //if off the mask skip it
+
+			const int bin = int(o[x] / stepsize);
+        	histogram.at(bin) += w[x];
+		}
+	}
+
+#if 0 //For debug purpose only	
+	GUI(
+		for (size_t i = 0; i < histogram.size(); ++i)
+        {
+        	PRINT_DEBUG("magnitude at " << i*stepsize + stepsize/2 <<"° = " << histogram.at(i));
+			Viewer::context().layer(Viewer::layer()).name("histogram")
+                    .pen_width(2)
+                    .pen_color(v::blue)
+                    .add_line(i, 0, i, -histogram.at(i));
+        }
+		Viewer::update();
+	);
+#endif
+	
+	return histogram;
+}
+
+/*
+ * @orientation_histogram compute an histogram based on orientation and magnitude image gradients
+ */
+std::vector<double>
+hist_orientation_modulo_180(
+	const Image& orientation, 
+	const Image& magnitude,
+    const double stepsize,
+	const Image& mask    
+)
+{
+    const int num_bins = int(180.0 / stepsize);
+
+	std::vector<double> histogram(num_bins, 0.);
+
+	const int width 	= orientation.cols;
+	const int height 	= orientation.rows;
+	
+	const double *o, *w;
+	const uchar *m;
+	for(int y = 0 ; y < height ; ++y) //for each row
+	{
+		o = orientation.ptr<const double>(y);
+		w = magnitude.ptr<const double>(y);
+		m = mask.ptr<const uchar>(y);
+		
+		for(int x = 0 ; x < width ; ++x) //for each column
+		{
+			if(m[x] == 0) continue; //if off the mask skip it
+
+			const int bin =  (int(o[x]) % 180) / int(stepsize);
+        	histogram.at(bin) += w[x];
+		}
+	}
+
+#if 0 //For debug purpose only	
+	GUI(
+		for (size_t i = 0; i < histogram.size(); ++i)
+        {
+        	PRINT_DEBUG("magnitude at " << i*stepsize + stepsize/2 <<"° = " << histogram.at(i));
+			Viewer::context().layer(Viewer::layer()).name("histogram")
+                    .pen_width(2)
+                    .pen_color(v::blue)
+                    .add_line(i, 0, i, -histogram.at(i));
+        }
+		Viewer::update();
+	);
+#endif
+	
+	return histogram;
+}
+
+
+std::vector<double>
+compute_polar_histogram(
+    const Image& img,
+    const Image& mask,
+    const double scale = 1.0
+)
+{
+    //Convert the image to DBL format
+    Image dbl_input;
+    img.convertTo(dbl_input, CV_64FC1);
+
+    //Computing gradients the image
+    Image x_grad, y_grad;
+    x_gradient<double>(dbl_input, x_grad);
+    y_gradient<double>(dbl_input, y_grad);
+
+    //convert the image gradients from cartesian to polar coordinate system 
+    cv::Mat grad_orientation, grad_magnitude;
+    cv::cartToPolar(x_grad, y_grad, grad_magnitude, grad_orientation, true /*use_degree */);
+	
+	//DEBUG_VAR(grad_magnitude);
+	//DEBUG_VAR(grad_orientation);
+	
+    //compute the histogram
+    return hist_orientation(grad_orientation, grad_magnitude, scale, mask);
+    //return hist_orientation_modulo_180(grad_orientation, grad_magnitude, scale, mask);
+}
+
+/**
+ * @Brief 	Filter peaks according to the max angle distance separating them. 
+ *			Pack together too closed peaks, and mean the magnitude.
+ **/
+void filter_peaks(Peaks& peaks, const double maxdist)
+{
+	Peaks filtered_peaks; //peaks = (angle, magnitude)
+	filtered_peaks.reserve(peaks.size());
+	
+    double nbr_of_angles = 1.;
+    double cumulated_value = peaks.at(0).magnitude;
+
+    for (size_t i = 1; i < peaks.size(); ++i)
+    {
+        //if peaks are close enough (according to max_distance_between_2_peaks)
+        if (peaks.at(i).angle - peaks.at(i - 1).angle < maxdist)
+        {
+            cumulated_value += peaks.at(i).magnitude;
+            ++nbr_of_angles;
+        }
+        else
+        {
+            // push_back the average of cumulated angles magnitude
+            filtered_peaks.emplace_back( 
+            	Peak{peaks.at(i - 1).angle, cumulated_value / nbr_of_angles} 
+            );
+            
+            // reset values
+            cumulated_value = peaks.at(i).magnitude;
+            nbr_of_angles = 1.;
+        }
+    }
+    //FIXME: not really convince by this
+    // push_back the average of cumulated angles
+    // at the end of the loop, we take into account the last elements of peaks;
+    filtered_peaks.emplace_back( 
+    	Peak{ peaks.at(peaks.size() - 1).angle, cumulated_value / nbr_of_angles}
+    );
+
+    peaks.swap(filtered_peaks);
+    peaks.shrink_to_fit();
+}
+
+MicroImageModel 
+compute_model(const Image& mi, const Image& mask)
+{
+	assert(mi.channels() == 1 and mask.channels() == 1);
+	constexpr double scale = 20.0;
+	
+	std::vector<double> histogram = compute_polar_histogram(mi, mask, scale);
+	
+	MicroImageModel model;
+	
+    // getting highest peaks of the histogram
+    constexpr double max_distance_between_2_peaks = 20.;
+    constexpr double threshold_on_magnitude_per_angle = 255.; //at least two pixel at the same gradient
+    
+    Peaks peaks; //vector containing peaks (angle, magnitude)
+    
+    // get peaks
+    for (size_t i = 0; i < histogram.size(); ++i)
+    {
+        if (histogram.at(i) > threshold_on_magnitude_per_angle)
+        {
+            double angle_to_store = i * scale + 90.; //reoriente gradient as it's perpendicular to the edge
+            angle_to_store = rad_to_deg(restrict_to_circle(deg_to_rad(angle_to_store)));
+
+            peaks.emplace_back(
+            	Peak{angle_to_store, histogram.at(i)}
+            );
+        }
+    }
+    
+    if ( peaks.size() > 1u ) filter_peaks(peaks, max_distance_between_2_peaks);
+    	
+	auto satisfy_orthogonality = [&max_distance_between_2_peaks](const double diff) {
+		return (diff >= 90 - max_distance_between_2_peaks and diff <  90 + max_distance_between_2_peaks)
+			or (diff >= 270 - max_distance_between_2_peaks and diff <  270 + max_distance_between_2_peaks);
+	};
+        	    
+	switch(peaks.size())
+	{
+		case 0u: //if no peak then it's a FULL
+			model.type = FULL;
+    		model.colors[0] = model.colors[1] = static_cast<float>(mi.at<uchar>(mi.rows / 2, mi.cols / 2));
+    	break;
+		
+		case 1u: //if there is only one peak then it's a BORDER
+			model.type = BORDER;
+        	model.lines_angles[0] = deg_to_rad(peaks[0].angle);
+		break;
+		
+		case 2u: //if there is 2 peaks left, we check if there are opposed
+		{	if(satisfy_orthogonality(peaks[1].angle - peaks[0].angle))
+			{
+				model.type = CORNER;
+			    model.lines_angles[0] = deg_to_rad(peaks[0].angle);
+			    model.lines_angles[1] = deg_to_rad(peaks[1].angle);
+			}
+			else //FIXME: check if we are always a border in this configuration
+			{
+				//model.type = NONE;
+				model.type = BORDER;
+        		model.lines_angles[0] = deg_to_rad(peaks[0].angle);
+			}
+        }
+		break;
+		
+		// if there is more than 3 peaks after filtering
+       	// they represent more than 2 angles so ther is a CORNER
+		default: 
+			model.type = CORNER;
+	        model.lines_angles[0] = deg_to_rad(peaks[0].angle);
+	        model.lines_angles[1] = deg_to_rad(peaks[1].angle);
+        break;
+	}
+	
+	return model;
+}
+
+std::array<int, 4> extract_checkerboard_coordinates(
+	const Image& gray, const MIA& grid, double radius
+)
+{
+	PRINT_WARN("Extracting coordinates of checkerboard in image...");
+	
+	bool gui_state = Viewer::enable();
+	if(!gui_state) PRINT_INFO("Enabling GUI...");
+	Viewer::enable(true);
+	
+	const double ratio = double(gray.rows) / double(gray.cols);
+	const int base_size = 800;
+	
+	GUI(
+		RENDER_DEBUG_2D(
+			Viewer::context().size(base_size,base_size*ratio).layer(Viewer::layer()).name("Checkerboard"), 
+			gray
+		);
+    );
+    Viewer::update();
+		
+	const auto& t = grid.pose().translation();
+	const double offsetx = t[0];
+	const double offsety = t[1];
+	
+	int k_min = 0, k_max = grid.width(), l_min = 0, l_max = grid.height();
+	volatile bool finished = false;
+	int nbclick = 0;
+	
+	PRINT_INFO("=== Click on the top micro-image delimiting the checkerboard view (setting l_min)");
+	Viewer::context().on_click([&](float x, float y)
+    {
+		const int k = static_cast<int>( x * grid.width() /  gray.cols );
+		const int l = static_cast<int>( y * grid.height() / gray.rows );
+
+		auto is_out_of_range = [&](int k, int l) {
+			return ((k < 0 or k > grid.width() or l < 0  or l > grid.height()) and nbclick == 0)
+			or  ((k <= 0 or k > grid.width() or l <= l_min  or l > grid.height()) and nbclick == 1)
+			or  ((k <= k_min or k > grid.width() or l <= l_min  or l > grid.height()) and nbclick == 2)
+			or  ((k <= k_min or k > k_max or l <= l_min  or l > grid.height()) and nbclick == 3) ;
+		};
+		
+		if(is_out_of_range(k,l))
+		{
+			PRINT_ERR("Click out of bound, unvalidated.");
+			return;
+		}
+				
+		GUI(
+			auto c = grid.nodeInWorld(k,l);
+  			Viewer::context().layer(Viewer::layer())
+  				.name("Checkerboard bounds")
+  				.pen_color(v::purple).pen_width(5)
+  				.add_circle(c[0], c[1], radius)
+  				.update();
+		);
+				
+        switch(nbclick)
+        {
+        	case 0:
+        		l_min = l;
+			
+				PRINT_INFO("Top bound set to ("<<k <<", "<<l<<")");
+				PRINT_INFO("=== Click on the left micro-image delimiting the checkerboard view (setting k_min)");
+        	break;
+        		
+        	case 1:
+        		k_min = k; 
+			
+				PRINT_INFO("Top bound set to ("<<k <<", "<<l<<")");
+				PRINT_INFO("=== Click on the right micro-image delimiting the checkerboard view (setting k_max)");
+        	break;
+        	
+        	case 2:
+        		k_max = k;
+	
+				PRINT_INFO("Right bound set to ("<<k <<", "<<l<<")");
+				PRINT_INFO("=== Click on the bottom micro-image delimiting the checkerboard view (setting l_max)");	
+        	break;
+        	
+        	case 3:
+        		l_max = l;  		
+	
+				PRINT_INFO("Bottom bound set to ("<<k <<", "<<l<<")");
+				
+        		finished = true;
+        	break;
+        	
+        	default: //more than 4
+        	break;   
+        }
+        
+        nbclick++;
+    });
+	
+	while(not finished);
+	
+	Viewer::context().on_click([](float,float){});	
+	Viewer::enable(gui_state);
+	
+	return { k_min, k_max, l_min, l_max };
+}
+
+
+CBObservations clusterize_observations(const CBObservations& obs, double eps, std::size_t min_pts)
+{
+	CBObservations filtered;
+	filtered.reserve(obs.size());
+
+//Clusterize
+	std::vector<NNS::Index> idx(obs.size());
+	std::iota(idx.begin(), idx.end(), NNS::Index(0));
+	
+	PRINT_DEBUG("Scanning...");
+	DBSCAN<CheckerBoardObservation> dbscan(obs, eps, min_pts);
+	
+	dbscan.clusterize();
+	PRINT_DEBUG("Scanned!");
+	const auto& clusters = dbscan.clusters;
+	DEBUG_VAR(clusters.size());
+	
+	GUI(
+		v::Palette<std::size_t> palette;
+		for (std::size_t i = 0; i < clusters.size(); ++i)
+		{
+			for(auto& id : clusters[i])
+			{
+				auto& c = obs[id].p;
+				
+				RENDER_DEBUG_2D(
+		  			Viewer::context().layer(Viewer::layer())
+		  				.name("clusters")
+		  				.pen_color(palette[i]).pen_width(8),
+		  			c
+				);	
+			}
+		}
+	);
+	
+	Viewer::update();
+	
+//Remove non-homogeneous clusters
+	constexpr std::size_t magic_number = 6u;
+	
+	std::vector<std::size_t> sizes;
+	sizes.reserve(clusters.size());
+	for (std::size_t i = 0; i < clusters.size() ; ++i)
+		sizes.push_back(clusters[i].size());
+		
+	std::nth_element(sizes.begin(), sizes.begin() + sizes.size() / 2, sizes.end());
+    std::size_t medsize = sizes[sizes.size() / 2];
+    DEBUG_VAR(medsize);
+	
+	int clusterid = 0;
+	for (std::size_t i = 0; i < clusters.size() ; ++i)
+	{
+		//apply filtering only if the medsize is over a magic value (10)
+		if( (medsize > magic_number) and
+			(clusters[i].size() < medsize * 0.6 or clusters[i].size() > medsize * 1.4)
+		) continue;
+			
+//Update observation
+		for(const auto& id : clusters[i])
+		{
+			CheckerBoardObservation o = obs[id]; 
+			o.cluster_idx = clusterid;
+			filtered.emplace_back(o);		
+		}
+		
+		++clusterid;
+	}
+	
+	GUI(
+		v::Palette<int> palette;
+		for (const auto& o : filtered)
+		{				
+			RENDER_DEBUG_2D(
+	  			Viewer::context().layer(Viewer::layer())
+	  				.name("clusters_filtered")
+	  				.pen_color(palette[o.cluster_idx]).pen_width(8),
+	  			o.p
+			);	
+		}
+	
+		Viewer::update();
+	);
+
+	filtered.shrink_to_fit();
+	return filtered;
+}
+
+/**
+ *  @Brief fit_template_on
+ */
+Transformation fit_template_on(
+    const cv::Mat& observation
+    , const cv::Mat& intial_template
+    , const cv::Mat& mask
+    , double& final_residual
+    , const bool verbose = false
+    )
+{
+    v::UnifiedCameraModel ucm(100,100,50,50,0);
+    Transformation t{AFF, 2, ucm}; //SO=1, SE=3, SIM=4, AFF=6
+    // v::apply_rotation(t.total_matrix, Eigen::Vector3d{0.0,0.0,-0.3});
+
+    //running optimisation
+    LevenbergMarquardt lm{verbose, 1e3, 1e-10, observation, intial_template, mask};
+    final_residual = std::get<1>( lm.run(t, 0.001, 2) );
+
+    return t;
+}
+
+
+CBObservations
+detection_corners(const Image& raw, const MIA& mia, const InternalParameters& params)
+{
+	constexpr int roiw=28;
+    constexpr int roih=28;
+    
+    constexpr int kernel_size = 3;
+    //constexpr double lower_threshold = 100.;
+    constexpr double ratio = 3.; //Canny recommended a upper:lower ratio between 2:1 and 3:1.
+    
+    const double radius = (params.m / params.N + params.c[0]) / params.scale ;
+    
+    static const decltype(v::red) colors[4] = {v::red, v::green, v::blue, v::yellow};
+        
+    PRINT_INFO("Grayscale conversion");
+    Image img = Image::zeros(raw.rows, raw.cols, CV_8UC1);
+    cv::cvtColor(raw, img, cv::COLOR_BGR2GRAY);
+    
+    RENDER_DEBUG_2D(
+    	Viewer::context().layer(Viewer::layer()++).name("corners:image"), 
+    	img
+    );  
+
+    CBObservations obs;
+    obs.reserve(mia.size());
+    
+    auto [k_min, k_max, l_min, l_max] = extract_checkerboard_coordinates(img, mia, radius);
+    
+    Viewer::stash();
+//1) For each micro-image, determine the type of the mi: NONE, FULL, BORDER, CORNER
+    for(std::size_t k = k_min; k < k_max ; ++k) //iterate through columns //x-axis
+    {
+    	for(std::size_t l = l_min ; l < l_max ; ++l) //iterate through lines //y-axis
+		{
+	 		Viewer::pop();	
+	 				
+	 		const auto& c = mia.nodeInWorld(k,l); //col,row
+			const int t = static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
+			const double r = (params.m / params.N + params.c[t]) / params.scale ; //radius
+			
+			//crop image aroud the center
+			float X = c[0], Y = c[1]; 
+ 	
+	//1.1) EXTRACT ROI			
+    		Image roi = extract_roi(img, X, Y, roiw, roih).clone(); //crop
+    		
+//	 	RENDER_DEBUG_2D(
+//	 		Viewer::context().layer(Viewer::layer()).name("corners:roi"), 
+//	 		roi,(EXCLUDED_BORDER_SIZE + 0)*roiw, (EXCLUDED_BORDER_SIZE-1)*roih
+//	 	); 
+	 	
+ 			cv::threshold(roi, roi, 100, 255, cv::THRESH_BINARY); //cv::THRESH_TOZERO); //
+ 			trim(roi, r, -2. );
+ 			
+//    	RENDER_DEBUG_2D(
+//    		Viewer::context().layer(Viewer::layer()).name("corners:roi"), 
+//    		roi, (EXCLUDED_BORDER_SIZE + 1)*roiw, (EXCLUDED_BORDER_SIZE-1)*roih
+//    	); 
+ 			
+ 	//1.2) COMPUTE MASK (only keeping internal edges)
+ 	
+#if 0 //USING CANNY EDGES
+ 			Image mask;
+ 			//https://www.pyimagesearch.com/2015/04/06/zero-parameter-automatic-canny-edge-detection-with-python-and-opencv/
+ 			const double lower_threshold = std::max(static_cast<double>(cv::mean(roi)[0] * (1. - 0.33)), 0.); //sigma 0.333		
+ 			const double upper_threshold = std::min(static_cast<double>(cv::mean(roi)[0] * (1. + 0.33)), 255.); //sigma 0.333
+	 		cv::Canny(roi, mask, lower_threshold, upper_threshold, kernel_size); //compute edge
+    	
+    	RENDER_DEBUG_2D(
+    		Viewer::context().layer(Viewer::layer()).name("corners:canni"), 
+    		mask, (EXCLUDED_BORDER_SIZE + 2)*roiw,(EXCLUDED_BORDER_SIZE-1)*roih
+    	);
+    		
+ 			trim(mask, r, - 0.4 * r ); //set mask (kernel_size + 1.)
+    	
+    	RENDER_DEBUG_2D(
+    		Viewer::context().layer(Viewer::layer()).name("corners:mask"), 
+    		mask, (EXCLUDED_BORDER_SIZE + 3)*roiw, (EXCLUDED_BORDER_SIZE-1)*roih
+    	); 
+    		
+    		Viewer::update();
+#else //USING TRUNCATED ROI
+ 			Image mask = roi.clone();
+ 			trim(mask, r, - 0.4 * r);
+#endif    	
+	
+ 	//1.3) COMPUTE MI MODEL	
+			MicroImageModel mimodel = compute_model(roi, mask);
+			mimodel.width(r);
+			mimodel.height(r);
+			
+			RENDER_DEBUG_2D(
+	  			Viewer::context().layer(Viewer::layer()++)
+	  				.name("corners:type(NONE:red,FULL:green,BORDER:blue,CORNER:yellow)")
+	  				.pen_color(colors[mimodel.type]).pen_width(5),
+	  			Disk{c,r}
+			);
+			RENDER_DEBUG_2D(
+	  			Viewer::context().layer(Viewer::layer()++)
+	  				.name("mi:type(0:red,1:green,2:blue)")
+	  				.pen_color(colors[t]).pen_width(5),
+	  			c
+			);		
+	
+	//1.4) SAVE OBSERVATIONS AND ITS MODEL
+			if(mimodel.type == CORNER)
+			{
+				//DO THINGS		
+				//PRINT_WARN("MI("<<k <<", "<<l <<") is a CORNER");
+				obs.emplace_back(
+					CheckerBoardObservation{
+						//mimodel, 
+						c, static_cast<int>(k), static_cast<int>(l)
+					}
+				);
+			}
+		}		
+	}
+	
+	Viewer::update();
+	
+	//TODO: set the color of the model?
+	
+
+//2) Optimize position of the corner (using the computed model and a warping process)
+
+//3) Clusterize micro-image, and remove outlier
+	CBObservations filtered; // = clusterize_observations(obs, radius*2.2, 3u);
+
+	
+	return filtered;
+};
