@@ -1,0 +1,16 @@
+# - Config file for the libpleno package
+# It defines the following variables
+# libpleno_INCLUDE_DIRS - include directories for pleno
+# libpleno_LIBRARIES    - libraries to link against
+
+# Compute paths
+get_filename_component(PLENO_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+set(libpleno_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(LIBPLENO_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(pleno_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+set(PLENO_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+
+set(libpleno_LIBRARIES "@PLENO_LIB@;@EXTERNAL_LIBS@")
+set(LIBPLENO_LIBRARIES "@PLENO_LIB@;@EXTERNAL_LIBS@")
+set(pleno_LIBRARIES "@PLENO_LIB@;@EXTERNAL_LIBS@")
+set(PLENO_LIBRARIES "@PLENO_LIB@;@EXTERNAL_LIBS@")
