@@ -3,6 +3,9 @@
 #include <cmath>
 #include <iostream>
 
+#include "io/printer.h"
+
+
 // PinholeCameraModel::PinholeCameraModel(const double fl, const double sk, const double sl, const P2D& ctr)
 // : focal(fl), k(sk), l(sl), center(ctr)
 // {}
@@ -112,22 +115,18 @@ double ThinLensCameraModel::diameter() const
 **/
 bool ThinLensCameraModel::project(const P3D& p3d_cam, P3D& p3d_out) const
 {
-    assert(this->diameter() >= 0.0 && "ThinLensCameraModel::project: diameter >= 0.0");
-
     //the distance according to z axis
     const double dist2pt = std::fabs(p3d_cam[2]);
 
     if (dist2pt == 0.0)
     {
-        std::cerr << "Warning: ThinLensCameraModel::project: "
-                  << "the point is on the lens plane!" << std::endl;
+        PRINT_WARN("ThinLensCameraModel::project: the point is on the lens plane!");
         return false;
     }
 
     if (dist2pt == this->f())
     {
-        std::cerr << "Warning: ThinLensCameraModel::project: "
-                  << "the point is on the focal plane!" << std::endl;
+        PRINT_WARN("ThinLensCameraModel::project: the point is on the focal plane!");
         return false;
     }
 
@@ -145,8 +144,7 @@ bool ThinLensCameraModel::project(const P3D& p3d_cam, P3D& p3d_out) const
 bool ThinLensCameraModel::project(const P3DS& p3ds_cam, P3DS& p3ds_out) const
 {
     p3ds_out.clear();
-    assert(this->diameter() >= 0.0 && "ThinLensCameraModel::project: diameter >= 0.0");
-
+    
     // the distance according to z axis
     std::vector<double> dist2pt (p3ds_cam.size());
     for (size_t i = 0; i < dist2pt.size(); ++i)
@@ -172,7 +170,7 @@ bool ThinLensCameraModel::project(const P3DS& p3ds_cam, P3DS& p3ds_out) const
     for (size_t p = 0; p < p3ds_out.size(); ++p)
         p3ds_out[p] =  values[p] * p3ds_out[p];
 
-    return p3ds_out.size() != 0 ? true : false;
+    return (p3ds_out.size() != 0u);
 }
 
 /*
@@ -195,15 +193,13 @@ bool ThinLensCameraModel::raytrace(const Ray3D& ray_in, Ray3D& ray_out) const
 
         // Testing if the ray hit the lens
         if ( is_on_disk(ray_out.origin().head(2), this->diameter()) )
-        // if ( Disk{P2D{0,0}, this->diameter() / 2.0}.is_inside(ray_out.origin.head(2)) )
         {
             ray_out.config(ray_out.origin(), projected_point);
             return true;
         }
         else
         {
-            // std::cout << "Warning: ThinLensCameraModel::raytrace: "
-            //           << "the ray does not hit the lens!" << std::endl;
+            PRINT_DEBUG("ThinLensCameraModel::raytrace: the ray does not hit the lens!");
             return false;
         }
     }
@@ -267,14 +263,8 @@ OrthographicCameraModel::~OrthographicCameraModel(){}
 
 bool OrthographicCameraModel::project(const P3D& p3d_cam, P2D& pixel) const
 {
-    // bool is_visible = is_p3d_visible(p3d_cam);
-    //TODO do we do that ???? think about the galilean mode
+    PRINT_ERR("OrthographicCameraModel::project not implemented yet.");
 
-    //projecting the point
-    // pixel[0] = (focal / k) * p3d_cam[0] / p3d_cam[2] + center[0];
-    // pixel[1] = (focal / l) * p3d_cam[1] / p3d_cam[2] + center[1];
-
-    // return is_visible;
     return false;
 }
 

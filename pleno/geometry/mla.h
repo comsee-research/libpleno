@@ -18,7 +18,6 @@ public:
 		this->height() = config.mesh().height();
 		this->edge_length() = config.mesh().pitch();
 		this->pose() = config.mesh().pose();
-		this->angle() = config.mesh().angle();
 		
 		assert(config.focal_lengths().size() == 3u);
 		this->_focals[0].f = config.focal_lengths()[0]; 

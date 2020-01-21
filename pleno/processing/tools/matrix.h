@@ -4,15 +4,14 @@
 #include <cmath>
 #include <iostream>
 
+#include "io/printer.h"
+
 /*
  * @Brief index_to_colRow returns the (col,row) coords of a desired element of an orthogonal matrix
 **/
 inline std::array<size_t, 2> index_to_colRow(size_t matrix_width, size_t index)
 {
-    if (matrix_width <= 0)
-        std::cerr << "Error: index_to_colRow: "
-                  << "the matrix width has not a good value (" << matrix_width << ")."
-                  <<  std::endl;
+    DEBUG_ASSERT(matrix_width != 0, "Wrong width given during conversion of index to (col,row)");
 
     std::array<size_t, 2> indices;
     indices[1] = index / matrix_width;

@@ -435,7 +435,6 @@ void save(std::string path, const MultiFocusPlenopticCamera& pcm)
     config.sensor().pose().translation() = pcm.sensor().pose().translation();
     config.sensor().width() = pcm.sensor().width();
     config.sensor().height() = pcm.sensor().height();
-    //config.sensor().size() = std::vector<size_t>({pcm.sensor().width(), pcm.sensor().height()});
     config.sensor().scale() = pcm.sensor().scale();
     
      // Configuring the MicroImagesArray
@@ -446,7 +445,6 @@ void save(std::string path, const MultiFocusPlenopticCamera& pcm)
     config.mia().mesh().pitch() = pcm.mia().edge_length();
     config.mia().mesh().geometry() = pcm.mia().geometry();
     config.mia().mesh().orientation() = pcm.mia().orientation();
-    config.mia().mesh().angle() = pcm.mia().angle();
     
      // Configuring the MicroLensesArray
     config.mla().mesh().pose().rotation() = pcm.mla().pose().rotation();
@@ -456,7 +454,6 @@ void save(std::string path, const MultiFocusPlenopticCamera& pcm)
     config.mla().mesh().pitch() = pcm.mla().edge_length();
     config.mla().mesh().geometry() = pcm.mla().geometry();
     config.mla().mesh().orientation() = pcm.mla().orientation();
-    config.mla().mesh().angle() = pcm.mla().angle();
     
     config.mla().focal_lengths()[0] = pcm.mla().f(0);
     config.mla().focal_lengths()[1] = pcm.mla().f(1);

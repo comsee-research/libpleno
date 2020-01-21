@@ -26,12 +26,11 @@ std::ostream& operator<<(std::ostream& o, const Orientation& orientation)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<std::size_t Dim>
 GridMesh_<Dim>::GridMesh_(const P2D& e,
-                       double a,
                        size_t w,
                        size_t h,
                        Geometry g,
                        Orientation o)
-: _edge_length(e), _angle(a), _width(w), _height(h), _geometry(g), _orientation(o)
+: _edge_length(e), _width(w), _height(h), _geometry(g), _orientation(o)
 {}
 
 template<std::size_t Dim>
@@ -57,16 +56,6 @@ template<std::size_t Dim>
 P2D& GridMesh_<Dim>::edge_length()
 {
     return _edge_length;
-}
-template<std::size_t Dim>
-double GridMesh_<Dim>::angle() const
-{
-    return _angle;
-}
-template<std::size_t Dim>
-double& GridMesh_<Dim>::angle()
-{
-    return _angle;
 }
 template<std::size_t Dim>
 size_t GridMesh_<Dim>::width() const
@@ -125,7 +114,7 @@ typename GridMesh_<Dim>::Node
 GridMesh_<Dim>::node(size_t col, size_t row) const
 {
     constexpr double sin60 = std::sin(60.0 / 180.0 * M_PI);
-    
+   
     using Node = typename GridMesh_<Dim>::Node;
     
     if (col >= this->_width)
@@ -134,13 +123,30 @@ GridMesh_<Dim>::node(size_t col, size_t row) const
     if (row >= this->_height)
         std::cerr << "Error: GridMesh::node: wrong row index (" << row << ")"
                   << std::endl;
+	
 
     Node p = Node::Zero();
-
+    
+    if (col >= this->_width or row >= this->_height)
+    {
+    	PRINT_ERR("GridMesh::node: wrong indexes");    
+    }
+    else 
+    {
+    	p[0] = this->_edge_length[0] 
+    		* (double(col) + ((this->_geometry == Orthogonal) ? row : (this->_orientation == Horizontal and row%2 == 0) ? 0.5 : 0.0 )) 
+    		* (this->_orientation == Vertical ? sin60 : 1.0);
+    
+   	 	p[1] = this->_edge_length[1] 
+    		* (double(row) + ((this->_geometry == Orthogonal) ? col : (this->_orientation == Vertical and col%2 == 0) ? 0.5 : 0.0 )) 
+    		* (this->_orientation == Horizontal ? sin60 : 1.0);
+	}
+	
+#if 0
     if (this->_geometry == Orthogonal)
     {
-        p[0] = this->_edge_length[0] * ( double(col) + double(row) * std::sin(this->_angle) );
-        p[1] = this->_edge_length[1] * ( double(row) + double(col) * std::sin(this->_angle) );
+        p[0] = this->_edge_length[0] * ( double(col) + double(row) );
+        p[1] = this->_edge_length[1] * ( double(row) + double(col) );
 
         return p;
     }
@@ -182,7 +188,7 @@ GridMesh_<Dim>::node(size_t col, size_t row) const
                   << "wrong geometry value (" << this->_geometry << ")."
                   << std::endl;
     }
-
+#endif
     return p;
 }
 template<std::size_t Dim>

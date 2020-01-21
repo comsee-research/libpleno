@@ -21,7 +21,6 @@ public:
 		this->height() = config.mesh().height();
 		this->edge_length() = config.mesh().pitch();
 		this->pose() = config.mesh().pose();
-		this->angle() = config.mesh().angle();
 	}
 
 	MicroImage at(std::size_t k, std::size_t l) const {

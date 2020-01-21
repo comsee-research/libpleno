@@ -1,6 +1,8 @@
 #include "transformation.h"
 
 #include "processing/tools/range.h"
+#include "io/printer.h"
+
 
 Eigen::Matrix<double, 3, 3> Transformation::operator()() const
 {
@@ -54,9 +56,6 @@ Eigen::Matrix<double, 3, 3> exponential_map(auto range, const Eigen::VectorXd& x
 
     Eigen::Matrix<double, 3, 3> TMP = exp_map;
 
-    // comes from eigen unsupported so it is not stable
-    // exp_map = exp_map.exp();
-
     // compute the exponential map
     const std::array<double, 5> factorials {{1.0, 1.0, 2.0, 6.0, 24.0}};
     const std::array<Eigen::Matrix<double, 3, 3>, 5> trucs {{Eigen::Matrix<double, 3, 3>::Identity(),
@@ -103,20 +102,16 @@ Eigen::Matrix<double, 3, 3> compute_exponential_map(const Eigen::VectorXd& x, in
 
 Eigen::Matrix<double, 3, 3> get_exponential_map(const Transformation& t, const Eigen::VectorXd& a)
 {
-    Mode mode = t.mode;
-
-    if (mode == SO)
-        return compute_exponential_map(a, 1);
-    if (mode == SE)
-        return compute_exponential_map(a, 3);
-    if (mode == SIM)
-        return compute_exponential_map(a, 4);
-    if (mode == AFF)
-        return compute_exponential_map(a, 6);
-
-    assert("Error: get_exponential_map: ");
-    std::cout << "arrête de désactiver les assertions" << std::endl;
-    abort();
+    switch(t.mode)
+    {
+    	case SO: return compute_exponential_map(a, 1); break;
+    	case SE: return compute_exponential_map(a, 3); break;
+     	case SIM: return compute_exponential_map(a, 4); break;
+   		case AFF: return compute_exponential_map(a, 6); break;
+   		default:
+   			PRINT_ERR("Unknown mode to get_exponential_map, return SE by default.");
+       	 	return compute_exponential_map(a, 3); 		 
+    }
 }
 
 // the jacobian is a  9 * mode matrix
@@ -135,7 +130,7 @@ const Eigen::MatrixXd get_transformation_jacobian(const Transformation& t)
     {
         tmp = generators.transpose();
 
-        for (std::size_t s = 0; s < tmp.size(); ++s)
+        for (int s = 0; s < tmp.size(); ++s)
         {
             jacobian(i) = tmp(s);
             ++i;

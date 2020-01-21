@@ -13,6 +13,5 @@ public:
 		this->height() = config.y_grid();
 		this->edge_length() = P2D{config.lph(), config.lph()};
 		this->pose() = config.pose();
-		this->angle() = 0.;
 	}
 };

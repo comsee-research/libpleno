@@ -36,7 +36,7 @@ public:
 private:
     Pose_t _pose; // the pose of the grid (from node 0)
     P2D _edge_length; // the mean distance between two nodes
-    double _angle; // the angle between an horizontal edge and an horizontal line (radian)
+    
     size_t _width, _height; // the size of the grid (number of nodes)
     Geometry _geometry;
     Orientation _orientation;
@@ -45,7 +45,6 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     GridMesh_( const P2D& e = P2D::Zero(),
-               double a = 0.0,
                size_t w = 0,
                size_t h = 0,
                Geometry g = Geometry::Orthogonal,
@@ -58,9 +57,6 @@ public:
 
     const P2D& edge_length() const;
           P2D& edge_length();
-
-    double angle() const;
-    double& angle();
 
     size_t width() const;
     size_t& width();
@@ -107,7 +103,6 @@ operator<<(std::ostream& o, const GridMesh_<Dim>& g)
     o << "Orientation: " << g.orientation() << "\n";
     o << "Dimensions: [" << g.width() << ", " << g.height() << "]\n";
     o << "Edge length (mm): [" << g.edge_length()[0] << ", " << g.edge_length()[1] << "]\n";
-    o << "Angle (radian): " << g.angle() << "\n";
     o << "Pose:\n" << g.pose();
 
     return o;

@@ -165,24 +165,6 @@ Eigen::VectorXd GenericLevenbergMarquardt<ImageType>::solve_equation(const Eigen
     Eigen::MatrixXd hessian = compute_hessian(jacobian);
     add_lambda_to_hessian(hessian, lambda);
 
-#if 0
-    if ( hessian.determinant() < 1e-3 and hessian.determinant() > -1e-3)
-    {
-         std::cout << std::string(100, '-') << std::endl;
-         std::cout << yellow("GenericLevenbergMarquardt::solve_equation: ");
-         std::cout << yellow("Mauvais conditionnement !") << std::endl;
-         std::cout << "jacobian:\n" << jacobian << std::endl;
-         std::cout << "\n\n\n" << std::endl;
-         std::cout << "hessian:\n" << hessian << std::endl;
-         std::cout << "\n\n\n" << std::endl;
-         std::cout << "determinant: " << hessian.determinant() << std::endl;
-         std::cout << "\n\n\n" << std::endl;
-         std::cout << "lambda: " << lambda << std::endl;
-         std::cout << std::string(100, '-') << std::endl;
-    //     std::getchar();
-    }
-#endif
-
     return hessian.fullPivLu().solve( jacobian.transpose() * error);
 }
 
@@ -314,13 +296,11 @@ std::tuple<int, double> GenericLevenbergMarquardt<ImageType>::run(Transformation
 				
 		        Image display_observation;
 		        observation.convertTo(display_observation, CV_8UC1);
-		        // std::cout << display_observation << std::endl;
 		        RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()).name("observation"), display_observation, 0, 0);
 		        Viewer::update();
 		        
 		        Image display_mask;
 		        mask.convertTo(display_mask, CV_8UC1);
-		        // std::cout << display_mask << std::endl;
 		        RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()).name("mask"), display_mask, 0, (vh + 10));            
 		        Viewer::update();
 		        

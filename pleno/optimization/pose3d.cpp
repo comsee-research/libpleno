@@ -12,10 +12,13 @@ void apply_increment(Pose& p, const double delta[Size<Pose>::value], const lma::
     p.translation()[0] += delta[0];
     p.translation()[1] += delta[1];
     p.translation()[2] += delta[2];
+
+    v::apply_rotation(p.rotation(), Eigen::Vector3d(delta[3], delta[4], delta[5]));
+#if 0
     v::apply_rotation(p.rotation(), Eigen::Vector3d(delta[3], 0.0, 0.0));
     v::apply_rotation(p.rotation(), Eigen::Vector3d(0.0, delta[4], 0.0));
     v::apply_rotation(p.rotation(), Eigen::Vector3d(0.0, 0.0, delta[5]));
-    
+#endif
     //v::rotation_orthogonalize(p.rotation());
 }
 

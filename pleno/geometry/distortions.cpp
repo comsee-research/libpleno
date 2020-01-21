@@ -1,5 +1,7 @@
 #include "distortions.h"
 
+#include "io/printer.h"
+
 inline double Distortions::radius(const P2D& p) const
 {
     //TODO: check performance over std::sqrt
@@ -121,8 +123,7 @@ void Distortions::apply(P3DS& ps) const
 **/
 void Distortions::unapply(P3D& p) const
 {
-    std::cerr << "Distortions::unapply: TODO" << std::endl;
-
+    PRINT_WARN("Distortions::unapply not implemented yet");
 }
 
 std::ostream& operator<<(std::ostream& o, const Distortions& dist)

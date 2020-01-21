@@ -29,8 +29,7 @@ public:
 		proj = to_coordinate_system_of(sensor.pose(), proj); // SENSOR
 
 		pixel = sensor.metric2pxl(proj).head(2); // IMAGE XY
-		
-//FIXME:TEST_INVERSION      	
+  	
     	xy2uv(pixel); //IMAGE UV
 
 		return is_projected;
