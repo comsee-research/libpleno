@@ -7,30 +7,18 @@ std::ostream& operator<<(std::ostream& o, const Geometry& geometry)
     switch(geometry)
     {
     	case Orthogonal: o << "Orthogonal"; break;
-    	case Hexagonal:  o << "Hexagonal"; break;
-    	default: break;    
+    	case HexagonalRowsAligned: o << "Hexagonal Rows-aligned"; break;
+    	case HexagonalColsAligned: o << "Hexagonal Columns-aligned"; break;
+    	default: o << "Unknown geometry"; break; 
     }
     return o;
 }
 
-std::ostream& operator<<(std::ostream& o, const Orientation& orientation)
-{
-    switch(orientation)
-    {
-    	case Horizontal: o << "Horizontal"; break;
-    	case Vertical:  o << "Vertical"; break;
-    	default: break;    
-    }
-    return o;
-}
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<std::size_t Dim>
-GridMesh_<Dim>::GridMesh_(const P2D& e,
-                       size_t w,
-                       size_t h,
-                       Geometry g,
-                       Orientation o)
-: _edge_length(e), _width(w), _height(h), _geometry(g), _orientation(o)
+GridMesh_<Dim>::GridMesh_(
+	const P2D& e, size_t w, size_t h, Geometry g)
+: _edge_length(e), _width(w), _height(h), _geometry(g)
 {}
 
 template<std::size_t Dim>
@@ -87,16 +75,7 @@ Geometry& GridMesh_<Dim>::geometry()
 {
     return _geometry;
 }
-template<std::size_t Dim>
-Orientation GridMesh_<Dim>::orientation() const
-{
-    return _orientation;
-}
-template<std::size_t Dim>
-Orientation& GridMesh_<Dim>::orientation()
-{
-    return _orientation;
-}
+
 template<std::size_t Dim>
 size_t GridMesh_<Dim>::nodeNbr() const
 {
@@ -112,93 +91,27 @@ size_t GridMesh_<Dim>::size() const
 template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 
 GridMesh_<Dim>::node(size_t col, size_t row) const
-{
-    constexpr double sin60 = std::sin(60.0 / 180.0 * M_PI);
+{        
+    static constexpr double sin60 = std::sin(60.0 / 180.0 * M_PI);
    
-    using Node = typename GridMesh_<Dim>::Node;
-    
-    if (col >= this->_width)
-        std::cerr << "Error: GridMesh::node: wrong col index (" << col << ")"
-                  << std::endl;
-    if (row >= this->_height)
-        std::cerr << "Error: GridMesh::node: wrong row index (" << row << ")"
-                  << std::endl;
+	DEBUG_ASSERT(col < width() and row < height(), "GridMesh::node: wrong indexes");
 	
-
-    Node p = Node::Zero();
+    typename GridMesh_<Dim>::Node node;
     
-    if (col >= this->_width or row >= this->_height)
-    {
-    	PRINT_ERR("GridMesh::node: wrong indexes");    
-    }
-    else 
-    {
-    	p[0] = this->_edge_length[0] 
-    		* (double(col) + ((this->_geometry == Orthogonal) ? row : (this->_orientation == Horizontal and row%2 == 0) ? 0.5 : 0.0 )) 
-    		* (this->_orientation == Vertical ? sin60 : 1.0);
+    const double colOffset = ((this->_geometry == HexagonalRowsAligned and row%2 == 0) ? 0.5 : 0.0) ;
+    const double rowOffset = ((this->_geometry == HexagonalColsAligned and col%2 == 0) ? 0.5 : 0.0) ;
     
-   	 	p[1] = this->_edge_length[1] 
-    		* (double(row) + ((this->_geometry == Orthogonal) ? col : (this->_orientation == Vertical and col%2 == 0) ? 0.5 : 0.0 )) 
-    		* (this->_orientation == Horizontal ? sin60 : 1.0);
-	}
-	
-#if 0
-    if (this->_geometry == Orthogonal)
-    {
-        p[0] = this->_edge_length[0] * ( double(col) + double(row) );
-        p[1] = this->_edge_length[1] * ( double(row) + double(col) );
+	node[0] = this->_edge_length[0] * (double(col) + colOffset) * ((this->_geometry == HexagonalColsAligned) ? sin60 : 1.0);
+ 	node[1] = this->_edge_length[1] * (double(row) + rowOffset) * ((this->_geometry == HexagonalRowsAligned) ? sin60 : 1.0);
 
-        return p;
-    }
-    if (this->_geometry == Hexagonal)
-    {
-        if (this->_orientation == Horizontal)
-        {
-            double val = 0.0;
-            if (row%2 == 0)
-                val = 0.5;
-
-            p[0] = (double(col) + val) * this->_edge_length[0];
-            p[1] = double(row) * this->_edge_length[1] * sin60;
-
-            return p;
-
-        }
-        if (this->_orientation == Vertical)
-        {
-            double val = 0.0;
-            if (col%2 == 0)
-                val = 0.5;
-
-            p[0] = double(col) * this->_edge_length[0] * sin60;
-            p[1] = (double(row) + val) * this->_edge_length[1];
-
-            return p;
-        }
-        else
-        {
-            std::cerr << "Error: GridMesh::node: "
-                      << "wrong orientation value (" << this->_orientation << ")."
-                      << std::endl;
-        }
-    }
-    else
-    {
-        std::cerr << "Error: GridMesh::node: "
-                  << "wrong geometry value (" << this->_geometry << ")."
-                  << std::endl;
-    }
-#endif
-    return p;
+    return node;
 }
+
 template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 
 GridMesh_<Dim>::node(size_t i) const
 {
-    if (i >= this->nodeNbr())
-        std::cerr << "Error: GridMesh::node: "
-                  << "wrong node value (" << i << ")."
-                  << std::endl;
+    DEBUG_ASSERT(i < this->nodeNbr(), "GridMesh::node: wrong node value (" << i << ").");
 
     const std::array<size_t, 2> coords = index_to_colRow(this->_width, i);
     return node(coords[0], coords[1]);
@@ -209,12 +122,7 @@ template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 
 GridMesh_<Dim>::nodeInWorld(size_t col, size_t row) const
 {
-    if (col >= this->_width)
-        std::cerr << "Error: GridMesh::nodeInWorld: wrong col index (" << col << ")"
-                  << std::endl;
-    if (row >= this->_height)
-        std::cerr << "Error: GridMesh::nodeInWorld: wrong row index (" << row << ")"
-                  << std::endl;
+	DEBUG_ASSERT(col < width() and row < height(), "GridMesh::node: wrong indexes ("<< col <<", "<< row <<")");
 
     //initalize the grid at the position of the first node
     return from_coordinate_system_of(this->_pose, node(col, row));
@@ -223,10 +131,7 @@ template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 
 GridMesh_<Dim>::nodeInWorld(size_t i) const
 {
-    if (i >= this->nodeNbr())
-        std::cerr << "Error: GridMesh::nodeInWorld: "
-                  << "wrong node value (" << i << ")."
-                  << std::endl;
+    DEBUG_ASSERT(i < this->nodeNbr(), "GridMesh::node: wrong node value (" << i << ").");
 
     const std::array<size_t, 2> coords = index_to_colRow(this->_width, i);
     return nodeInWorld(coords[0], coords[1]);

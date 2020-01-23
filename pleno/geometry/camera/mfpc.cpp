@@ -131,7 +131,6 @@ void MultiFocusPlenopticCamera::init(
 	
 	//MLA
 	_mla.geometry() 	= _mia.geometry();
-	_mla.orientation() 	= _mia.orientation();
 	_mla.width() 		= _mia.width();
 	_mla.height() 		= _mia.height();
 	_mla.edge_length() 	= P2D{kappa_approx, kappa_approx};
@@ -444,7 +443,6 @@ void save(std::string path, const MultiFocusPlenopticCamera& pcm)
     config.mia().mesh().height() = pcm.mia().height();
     config.mia().mesh().pitch() = pcm.mia().edge_length();
     config.mia().mesh().geometry() = pcm.mia().geometry();
-    config.mia().mesh().orientation() = pcm.mia().orientation();
     
      // Configuring the MicroLensesArray
     config.mla().mesh().pose().rotation() = pcm.mla().pose().rotation();
@@ -453,7 +451,6 @@ void save(std::string path, const MultiFocusPlenopticCamera& pcm)
     config.mla().mesh().height() = pcm.mla().height();
     config.mla().mesh().pitch() = pcm.mla().edge_length();
     config.mla().mesh().geometry() = pcm.mla().geometry();
-    config.mla().mesh().orientation() = pcm.mla().orientation();
     
     config.mla().focal_lengths()[0] = pcm.mla().f(0);
     config.mla().focal_lengths()[1] = pcm.mla().f(1);

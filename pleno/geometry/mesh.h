@@ -3,13 +3,9 @@
 #include "types.h"
 #include "geometry/pose.h"
 
-// The geometry of the grid: Orthogonal, Hexagonal
-enum Geometry: std::uint8_t {Orthogonal = 0, Hexagonal = 1};
-// The orientation of the hexagonal grid
-enum Orientation : std::uint8_t {Horizontal = 0, Vertical = 1};
-
+// The geometry of the grid: Orthogonal, Hexagonal Rows Aligned, Hexagonal Cols Aligned
+enum Geometry: std::int8_t {Orthogonal = 0, HexagonalRowsAligned = 1, HexagonalColsAligned = 2};
 std::ostream& operator<<(std::ostream& o, const Geometry& geometry);
-std::ostream& operator<<(std::ostream& o, const Orientation& orientation);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<std::size_t Dim>
@@ -39,7 +35,6 @@ private:
     
     size_t _width, _height; // the size of the grid (number of nodes)
     Geometry _geometry;
-    Orientation _orientation;
     	
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -47,8 +42,7 @@ public:
     GridMesh_( const P2D& e = P2D::Zero(),
                size_t w = 0,
                size_t h = 0,
-               Geometry g = Geometry::Orthogonal,
-               Orientation o = Orientation::Horizontal);
+               Geometry g = Geometry::Orthogonal);
 
     ~GridMesh_();
 
@@ -66,9 +60,6 @@ public:
 
     Geometry geometry() const;
     Geometry& geometry();
-
-    Orientation orientation() const;
-    Orientation& orientation();
 
     size_t nodeNbr() const;
     size_t size() const;
@@ -100,9 +91,8 @@ inline std::ostream&
 operator<<(std::ostream& o, const GridMesh_<Dim>& g)
 {
     o << "Geometry: " << g.geometry() << "\n";
-    o << "Orientation: " << g.orientation() << "\n";
     o << "Dimensions: [" << g.width() << ", " << g.height() << "]\n";
-    o << "Edge length (mm): [" << g.edge_length()[0] << ", " << g.edge_length()[1] << "]\n";
+    o << "Edge length: [" << g.edge_length()[0] << ", " << g.edge_length()[1] << "]\n";
     o << "Pose:\n" << g.pose();
 
     return o;

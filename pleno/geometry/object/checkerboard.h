@@ -7,8 +7,7 @@
 struct CheckerBoard : public GridMesh3D {
 public:
 	CheckerBoard(const CheckerboardConfig& config) {
-		this->geometry() = Orthogonal;
-		this->orientation() = Horizontal;
+		this->geometry() = Geometry::Orthogonal;
 		this->width() = config.x_grid();
 		this->height() = config.y_grid();
 		this->edge_length() = P2D{config.lph(), config.lph()};

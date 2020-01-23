@@ -16,7 +16,6 @@ struct MicroImagesArray : public GridMesh2D {
 public:
 	MicroImagesArray(const MIAConfig& config = {}) {
 		this->geometry() = Geometry(config.mesh().geometry());
-		this->orientation() = Orientation(config.mesh().orientation());
 		this->width() = config.mesh().width();
 		this->height() = config.mesh().height();
 		this->edge_length() = config.mesh().pitch();
