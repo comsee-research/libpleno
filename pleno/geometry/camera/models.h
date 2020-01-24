@@ -46,10 +46,10 @@ class ThinLensCameraModel
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW	
 	double& f() { return _f; }
-	const double& f() const { return _f; }
+	double f() const { return _f; }
 	
 	double& aperture() { return _aperture; }
-	const double& aperture() const { return _aperture; }
+	double aperture() const { return _aperture; }
 	
 	Pose& pose() { return _pose; }
 	const Pose& pose() const { return _pose; }

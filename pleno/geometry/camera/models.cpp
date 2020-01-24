@@ -10,96 +10,96 @@
 // : focal(fl), k(sk), l(sl), center(ctr)
 // {}
 
-PinholeCameraModel::PinholeCameraModel(const double f, const Sensor& s)
-: focal(f), _sensor(s)
-{}
+//PinholeCameraModel::PinholeCameraModel(const double f, const Sensor& s)
+//: focal(f), _sensor(s)
+//{}
 
-PinholeCameraModel::~PinholeCameraModel()
-{}
+//PinholeCameraModel::~PinholeCameraModel()
+//{}
 
-const Sensor& PinholeCameraModel::sensor() const
-{
-    return _sensor;
-}
+//const Sensor& PinholeCameraModel::sensor() const
+//{
+//    return _sensor;
+//}
 
-Sensor& PinholeCameraModel::sensor()
-{
-    return _sensor;
-}
+//Sensor& PinholeCameraModel::sensor()
+//{
+//    return _sensor;
+//}
 
-bool PinholeCameraModel::project(const P3D& p3d_cam, P2D& pixel) const
-{
-    auto hit_the_sensor = [&sensor = sensor()](const P2D& p) {
-		return p[0] >= 0.0 and p[1] >= 0.0 and p[0] < sensor.width() and p[1] < sensor.height();
-	};
-    
-    Ray3D ray;
-    ray.config(P3D{0.0, 0.0, 0.0}, p3d_cam); // CAMERA
+//bool PinholeCameraModel::project(const P3D& p3d_cam, P2D& pixel) const
+//{
+//    auto hit_the_sensor = [&sensor = sensor()](const P2D& p) {
+//		return p[0] >= 0.0 and p[1] >= 0.0 and p[0] < sensor.width() and p[1] < sensor.height();
+//	};
+//    
+//    Ray3D ray;
+//    ray.config(P3D{0.0, 0.0, 0.0}, p3d_cam); // CAMERA
 
-    P3D p3d = line_plane_intersection(sensor().planeInWorld(), ray); // CAMERA
-    p3d = to_coordinate_system_of(sensor().pose(), p3d); // SENSOR
+//    P3D p3d = line_plane_intersection(sensor().planeInWorld(), ray); // CAMERA
+//    p3d = to_coordinate_system_of(sensor().pose(), p3d); // SENSOR
 
-    pixel = sensor().metric2pxl(p3d).head(2);
+//    pixel = sensor().metric2pxl(p3d).head(2);
 
-    return hit_the_sensor(pixel);
-}
+//    return hit_the_sensor(pixel);
+//}
 
-bool PinholeCameraModel::project(const P3DS& p3ds_cam, P2DS& pixels) const
-{
-    auto hit_the_sensor = [&sensor = sensor()](const P2D& p) {
-		return p[0] >= 0.0 and p[1] >= 0.0 and p[0] < sensor.width() and p[1] < sensor.height();
-	};
-	
-    pixels.clear();
+//bool PinholeCameraModel::project(const P3DS& p3ds_cam, P2DS& pixels) const
+//{
+//    auto hit_the_sensor = [&sensor = sensor()](const P2D& p) {
+//		return p[0] >= 0.0 and p[1] >= 0.0 and p[0] < sensor.width() and p[1] < sensor.height();
+//	};
+//	
+//    pixels.clear();
 
-    const P3D camera_center {0.0, 0.0, 0.0};
-    AlignedVector<Ray3D> rays (p3ds_cam.size());
-    for (std::size_t i = 0; i < rays.size(); ++i)
-        rays[i].config(camera_center, p3ds_cam[i]); // CAMERA
+//    const P3D camera_center {0.0, 0.0, 0.0};
+//    AlignedVector<Ray3D> rays (p3ds_cam.size());
+//    for (std::size_t i = 0; i < rays.size(); ++i)
+//        rays[i].config(camera_center, p3ds_cam[i]); // CAMERA
 
-    P3DS p3ds (p3ds_cam.size());
-    for (std::size_t i = 0; i < p3ds.size(); ++i)
-        p3ds[i] = line_plane_intersection(sensor().planeInWorld(), rays[i]); // CAMERA
+//    P3DS p3ds (p3ds_cam.size());
+//    for (std::size_t i = 0; i < p3ds.size(); ++i)
+//        p3ds[i] = line_plane_intersection(sensor().planeInWorld(), rays[i]); // CAMERA
 
-    for (std::size_t i = 0; i < p3ds.size(); ++i)
-        p3ds[i] = to_coordinate_system_of(sensor().pose(), p3ds[i]); // SENSOR
+//    for (std::size_t i = 0; i < p3ds.size(); ++i)
+//        p3ds[i] = to_coordinate_system_of(sensor().pose(), p3ds[i]); // SENSOR
 
-    for (std::size_t i = 0; i < p3ds.size(); ++i)
-    {
-        P2D p = sensor().metric2pxl(p3ds[i]).head(2);
-        if (hit_the_sensor(p))
-            pixels.push_back(p);
-    }
-}
+//    for (std::size_t i = 0; i < p3ds.size(); ++i)
+//    {
+//        P2D p = sensor().metric2pxl(p3ds[i]).head(2);
+//        if (hit_the_sensor(p))
+//            pixels.push_back(p);
+//    }
+//}
 
-/*
- * A ray originating from the camera
-**/
-bool PinholeCameraModel::raytrace(const P2D& pixel, Ray3D& ray) const
-{
-    auto hit_the_sensor = [&sensor = sensor()](const P2D& p) {
-		return p[0] >= 0.0 and p[1] >= 0.0 and p[0] < sensor.width() and p[1] < sensor.height();
-	};
-	
-    bool is_projected = hit_the_sensor(pixel);
+///*
+// * A ray originating from the camera
+//**/
+//bool PinholeCameraModel::raytrace(const P2D& pixel, Ray3D& ray) const
+//{
+//    auto hit_the_sensor = [&sensor = sensor()](const P2D& p) {
+//		return p[0] >= 0.0 and p[1] >= 0.0 and p[0] < sensor.width() and p[1] < sensor.height();
+//	};
+//	
+//    bool is_projected = hit_the_sensor(pixel);
 
-    P3D p_metric = sensor().pxl2metric(P3D{pixel[0], pixel[1], 0.0}); // SENSOR
-    p_metric = from_coordinate_system_of(sensor().pose(), p_metric); // CAMERA
+//    P3D p_metric = sensor().pxl2metric(P3D{pixel[0], pixel[1], 0.0}); // SENSOR
+//    p_metric = from_coordinate_system_of(sensor().pose(), p_metric); // CAMERA
 
-    ray.config(p_metric, P3D{0.0, 0.0, 0.0});
+//    ray.config(p_metric, P3D{0.0, 0.0, 0.0});
 
-    return is_projected;
-}
+//    return is_projected;
+//}
 
-std::ostream& operator<<(std::ostream& o, const PinholeCameraModel& pcm)
-{
-    // o << "Focal (mm): " << pcm.focal << "\n";
-    // o << "Scale (k, l) (pixels/mm): " << pcm.k << ", " << pcm.l << "\n";
-    // o << "Skew: " << pcm.skew << "\n";
-    // o << "Center (pixels): " << pcm.center.transpose();
+//std::ostream& operator<<(std::ostream& o, const PinholeCameraModel& pcm)
+//{
+//    // o << "Focal (mm): " << pcm.focal << "\n";
+//    // o << "Scale (k, l) (pixels/mm): " << pcm.k << ", " << pcm.l << "\n";
+//    // o << "Skew: " << pcm.skew << "\n";
+//    // o << "Center (pixels): " << pcm.center.transpose();
 
-    return o;
-}
+//    return o;
+//}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
