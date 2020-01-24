@@ -3,6 +3,7 @@
 #include <Eigen/Core>
 #include <cmath>
 
+#include <libv/geometry/rotation.hpp> 
 /**
  *
  * Apply a rotation to a transformation.
@@ -17,6 +18,13 @@ inline void apply_rotation(Eigen::Matrix2d& matrix, const double theta)
     std::cos(theta), -std::sin(theta),
     std::sin(theta),  std::cos(theta);
 }
+
+using v::apply_rotation;
+
+//inline void apply_rotation(Eigen::Matrix3d& matrix, const Eigen::Vector3d& d)
+//{
+//  	v::apply_rotation(matrix, d);
+//}
 
 /**
  *
@@ -40,9 +48,9 @@ inline T restrict_to_circle(T rad)
 {
     auto still_superior_to_2pi = [](T& r)
     {
-        if (r > T(2 * M_PI))
+        if (r > T(2.0 * M_PI))
         {
-            r -= T(2 * M_PI);
+            r -= T(2.0 * M_PI);
             return true;
         }
 
@@ -51,21 +59,20 @@ inline T restrict_to_circle(T rad)
 
     auto still_inferior_to_2pi = [](T& r)
     {
-        if (r < -T(2 * M_PI))
+        if (r < -T(2.0 * M_PI))
         {
-            r += T(2 * M_PI);
+            r += T(2.0 * M_PI);
             return true;
         }
 
         return false;
     };
 
-    while (still_superior_to_2pi(rad)){}
-
-    while (still_inferior_to_2pi(rad)){}
+    while (still_superior_to_2pi(rad));
+    while (still_inferior_to_2pi(rad));
 
     return rad;
 };
 
-template<typename T> inline T deg_to_rad(const T angle){ return( angle * M_PI / T(180)); };
-template<typename T> inline T rad_to_deg(const T angle){ return(T(180) * angle / M_PI); };
+template<typename T> inline T deg_to_rad(const T angle){ return( angle * M_PI / T(180.0)); };
+template<typename T> inline T rad_to_deg(const T angle){ return(T(180.0) * angle / M_PI); };

@@ -46,7 +46,7 @@ Eigen::Matrix<double, 3, 3> exponential_map(auto range, const Eigen::VectorXd& x
     int i = 0;
     for (auto& r : range)
     {
-        for (std::size_t s = 0; s < r.size(); ++s)
+        for (int s = 0; s < r.size(); ++s)
         {
             if ( r(s) != 0 or x(i) != 0 )
                 exp_map(s) += x(i) * r(s);

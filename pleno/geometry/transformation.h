@@ -1,4 +1,4 @@
-#pragma once //from charlib
+#pragma once //from charlib, only for 2D transformation
 
 #include <Eigen/Core>
 
