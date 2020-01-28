@@ -15,19 +15,19 @@ class Sensor
 public:
     Sensor(size_t w, size_t h, double s);
     Sensor(const SensorConfig& config = {});
-    virtual ~Sensor();
+    ~Sensor();
 
     const Pose& pose() const;
           Pose& pose();
 
-    const double scale() const;
-          double& scale();
+    double scale() const;
+    double& scale();
 
-    const size_t width() const;
-          size_t& width();
+    size_t width() const;
+    size_t& width();
 
-    const size_t height() const;
-          size_t& height();
+    size_t height() const;
+    size_t& height();
 
 
     // the plane equation coefficients

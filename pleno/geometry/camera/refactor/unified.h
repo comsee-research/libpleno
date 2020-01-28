@@ -25,9 +25,7 @@ public:
     virtual ~UnifiedCamera() override {}
     
 //Accessors	
-	double focal() const { return _focal; }
-    double& focal() { return _focal; }   
- 
+
 //Project and Raytrace
     bool project(const P3D& p3d_cam, P2D& pixel) const override 
     {

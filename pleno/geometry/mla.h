@@ -5,10 +5,13 @@
 #include "cfg/mla.h"
 
 #include "types.h"
+#include "processing/tools/lens.h"
+
 
 struct MicroLensesArray : public GridMesh3D {
 private:
-	FocalLength _focals[3];
+	std::size_t _I = 3u; //number of micro-lens type
+	FocalLengths _focals;
 
 public:
 	MicroLensesArray(const MLAConfig& config = {}) {
@@ -18,30 +21,34 @@ public:
 		this->edge_length() = config.mesh().pitch();
 		this->pose() = config.mesh().pose();
 		
-		assert(config.focal_lengths().size() == 3u);
-		this->_focals[0].f = config.focal_lengths()[0]; 
-		this->_focals[1].f = config.focal_lengths()[1]; 
-		this->_focals[2].f = config.focal_lengths()[2]; 
+		init(config.focal_lengths().size())
+		
+		for(std::size_t i=0; i<I(); ++i) 
+			this->_focals[i].f = config.focal_lengths()[i];
 	}
 	
+	void init(std::size_t I_) { this->_I = I_; this->_focals.resize(I_); }
+	
+	std::size_t I() const { return _I; }
+	
 	double f(std::size_t i) const { 
-		assert(i<3); 
+		assert(i<I()); 
 		return _focals[i].f; 
 	}
 	double& f(std::size_t i) { 
-		assert(i<3); 
+		assert(i<I()); 
 		return _focals[i].f; 
 	}
 	
 	FocalLength f(std::size_t k, std::size_t l) const {
-		assert(k<width() and l<height());
-		const int t = static_cast<int>(std::fmod(std::fmod(l,2)+k, 3));
+		assert(I()!=0u and k<width() and l<height());
+		const int t = lens_type(I(), k, l);
 		return _focals[t];
 	}
 	
 	FocalLength& f(std::size_t k, std::size_t l) {
-		assert(k<width() and l<height());
-		const int t = static_cast<int>(std::fmod(std::fmod(l,2)+k, 3));
+		assert(I()!=0u and k<width() and l<height());
+		const int t = lens_type(I(), k, l);
 		return _focals[t];
 	}
 		

@@ -23,7 +23,7 @@ Pose& Sensor::pose()
 	return _pose;
 }
 
-const double Sensor::scale() const
+double Sensor::scale() const
 {
 	return _scale;
 }
@@ -32,7 +32,7 @@ double& Sensor::scale()
 	return _scale;
 }
 
-const size_t Sensor::width() const
+size_t Sensor::width() const
 {
 	return _width;
 }
@@ -41,7 +41,7 @@ size_t& Sensor::width()
 	return _width;
 }
 
-const size_t Sensor::height() const
+size_t Sensor::height() const
 {
 	return _height;
 }
@@ -88,9 +88,9 @@ template P3D Sensor::metric2pxl(const P3D&) const;
 
 std::ostream& operator<<(std::ostream& o, const Sensor& s)
 {
-    o << "Dimensions (pixels): [" << s.width() << ", " << s.height() << "]" << "\n";
-    o << "Scale (pixel/mm): " << s.scale() << "\n";
-    o << "Pose:\n" << s.pose();
+    o << "Dimensions (pixels) = [" << s.width() << ", " << s.height() << "]" << std::endl
+      << "Scale (pixel/mm) = " << s.scale() << std::endl
+      << "Pose = {" << std::endl << s.pose() << "}";
 
     return o;
 }

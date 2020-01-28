@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& os, const Ray_<N>& r)
     os 	<< "origin: " << r.origin().transpose() << std::endl
     	<< "direction: " << r.direction().transpose() << std::endl
     	<< "color: r=" 	<< r.color().r << ", g=" << r.color().g 
-    					<< ", b="  << r.color().b << ", a=" << r.color().a ;
+    		 << ", b="  << r.color().b << ", a=" << r.color().a;
    
     return os;
 }

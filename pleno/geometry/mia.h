@@ -21,10 +21,6 @@ public:
 		this->edge_length() = config.mesh().pitch();
 		this->pose() = config.mesh().pose();
 	}
-
-	MicroImage at(std::size_t k, std::size_t l) const {
-		return MicroImage{k,l, this->nodeInWorld(k,l), -1., static_cast<int>(std::fmod(std::fmod(l,2)+k, 3))};
-	}
 };
 
 using MI					= MicroImage;

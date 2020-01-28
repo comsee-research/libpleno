@@ -17,7 +17,9 @@ V_DEFINE_PROPERTIES(MultiFocusPlenopticCameraConfig)
     V_DEFINE_PROPERTY(main_lens, ThinLensConfig(), "Main Lens configuration")    
     V_DEFINE_PROPERTY(distortions, DistortionConfig(), "Distortions coefficients (radial and tangential)")
     
-    V_DEFINE_PROPERTY(dist_focus, double(1e42), "Focus distance (in mm)")
+    V_DEFINE_PROPERTY(dist_focus, double(1e8), "Focus distance (in mm)")
 )
 
 using MFPCConfig = MultiFocusPlenopticCameraConfig;
+
+using PlenopticCameraConfig = MultiFocusPlenopticCameraConfig;

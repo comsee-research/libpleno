@@ -47,6 +47,7 @@ struct CalibrationPose 		{ Pose pose; Index frame; };
 using CalibrationPoses 		= AlignedVector<CalibrationPose>;
 
 struct FocalLength 			{ Real f; };
+using FocalLengths 			= AlignedVector<FocalLength>;
 
 struct RGBA					{ Real r,g,b,a; };
 

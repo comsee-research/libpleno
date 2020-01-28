@@ -9,6 +9,8 @@
 #include "geometry/pose.h"
 #include "geometry/ray.h"
 
+#include "io/printer.h"
+
 ////////////////////////////////////////////ThinLensCamera//////////////////////////////////////
 class ThinLensCamera final : public PinholeCamera
 {
@@ -19,13 +21,14 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 //Ctor/Dtor
-    ThinLensCamera(double f, double aperture, const Sensor& s) : PinholeCamera{f, s}, _aperture{aperture} {}
+    ThinLensCamera(double f = 1.0, double aperture = 4.0, const Sensor& s = {}) : PinholeCamera{f, s}, _aperture{aperture} {}
     virtual ~ThinLensCamera() override {}
     
 //Accessors	    
 	double aperture() const { return _aperture; }
     double& aperture() { return _aperture; }   
-    
+
+//Computed parameters    
     double diameter() const { return std::fabs(this->focal()) / this->aperture(); }
     
 //Project and Raytrace
@@ -80,3 +83,12 @@ public:
 		return false;
     }   
 };
+
+inline std::ostream& operator<<(std::ostream& o, const ThinLensCamera& tcm)
+{
+    o << "Focal (mm) = " << tcm.focal() << std::endl
+      << "Diameter (mm) = " << tcm.diameter() << std::endl
+      << "Pose = {" << std::endl << tcm.pose() << "}" << std::endl;
+
+    return o;
+}
