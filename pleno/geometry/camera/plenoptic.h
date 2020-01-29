@@ -57,11 +57,11 @@ public:
     double distance_focus() const;
     double& distance_focus();
     
-    const ThinLensCameraModel& main_lens() const;
-          ThinLensCameraModel& main_lens();
+    const ThinLensCamera& main_lens() const;
+          ThinLensCamera& main_lens();
 
-    const Distortions& main_lensdistortions_() const;
-          Distortions& main_lensdistortions_();
+    const Distortions& main_lens_distortions() const;
+          Distortions& main_lens_distortions();
        
  	const MicroLensesArray& mla() const;
           MicroLensesArray& mla();
@@ -73,19 +73,25 @@ public:
           InternalParameters& params();   
   
 //Computed parameters           
+	double focal() const;
+    double& focal(); 
+    
+	double aperture() const;
+    double& aperture(); 
+ 
     PrincipalPoint pp() const;
 	PrincipalPoint mlpp(std::size_t k, std::size_t l) const;
     	
 //Project and Raytrace	
 	bool project(const P3D& p3d_cam, P2D& pixel) const override final
     {
-		PRINT_WARN("PlenopticCamera::project: No micro-lens' index specified.")
+		PRINT_WARN("PlenopticCamera::project: No micro-lens' index specified.");
 		return false;
     }
     
     bool raytrace(const P2D& pixel, Ray3D& ray) const override final
     {
-		PRINT_WARN("PlenopticCamera::raytrace: No micro-lens' index specified.")
+		PRINT_WARN("PlenopticCamera::raytrace: No micro-lens' index specified.");
 		return false;
     }	
     
@@ -111,15 +117,16 @@ protected:
     	return p.norm() <= disk_diameter / 2.0 ;
     }
     
-    bool hit_main_lens(const Ray3D& ray) {
+    bool hit_main_lens(const Ray3D& ray) const {
 		// compute the intersection point between the ray and the lens
 		P3D p = line_plane_intersection(Eigen::Vector4d{0.0, 0.0, 1.0, 0.0}, ray);
 		// Testing if the ray hit the lens
 		return is_on_disk(p.head(2), main_lens().diameter());
 	}
 	
-	bool project_throughmain_lens_(const P3D& p3d_cam, P3D& projection) const;
+	bool project_through_main_lens(const P3D& p3d_cam, P3D& projection) const;
 	bool project_through_micro_lens(const P3D& p, std::size_t k, std::size_t l, P2D& projection) const;
+	bool project_radius_through_micro_lens(const P3D& p, std::size_t k, std::size_t l, double& radius) const;
 };
 
 std::ostream& operator<<(std::ostream& os, const PlenopticCamera::Mode& mode);

@@ -34,7 +34,7 @@ static void imerode(const Image& raw, Image& preprocessed)
     const cv::Scalar mean =	cv::mean(preprocessed);
     
     PRINT_DEBUG("mean: " << mean);
-    contrastStrech(preprocessed, preprocessed, int(mean[0]));
+    contrast_strech(preprocessed, preprocessed, int(mean[0]));
    	RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).name("Preprocessing::contrasted"), preprocessed);
     
 #if 1
@@ -55,12 +55,12 @@ MICObservations detection_mic(const Image& raw)
 
 ////////////////////////////////////////Detecting contours//////////////////////////////////////////
     PRINT_INFO("Detecting contours");
-    std::vector<std::vector<cv::Point>> contours = detectShapes(preprocessed);
+    std::vector<std::vector<cv::Point>> contours = detect_shapes(preprocessed);
     
 /////////////////////////////Method Fitting polygon & Estimate centers///////////////////////////
     PRINT_INFO("Fitting polygon & Estimate centers");
     std::vector<cv::Point2f> unsorted_centers(contours.size()); //Lenslet centers
-    fitPolygons(contours, unsorted_centers);
+    fit_polygons(contours, unsorted_centers);
 
     PRINT_DEBUG("centers.size(): " << unsorted_centers.size());
 

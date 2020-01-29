@@ -6,8 +6,8 @@
 
 #include "types.h"
 
-LineCoefficients line_parameters_from_slope_and_one_point(const double s, const P2D& p);
-LineCoefficients line_parameters_from_angle_and_one_point(const double a, const P2D& p);
+LineCoefficients line_parameters_from_slope_and_one_point(double s, const P2D& p);
+LineCoefficients line_parameters_from_angle_and_one_point(double a, const P2D& p);
 
 /**
  * @Brief enum to determine the position of a 2d point from a 2d line
@@ -49,7 +49,7 @@ namespace std {
 
 struct MicroImageModel
 {
-    MicroImageModel(const MicroImageType t = NONE, const double width = 0., const double height = 0.);
+    MicroImageModel(MicroImageType t = NONE, double width = 0., double height = 0.);
 
     virtual ~MicroImageModel();
 
@@ -62,17 +62,17 @@ struct MicroImageModel
     std::array<double, 2> lines_angles; //this model is a vertical line
     std::array<double, 2> colors;
 
-    LineCoefficients parameters_of_lines(const size_t i) const;
+    LineCoefficients parameters_of_lines(size_t i) const;
 	
 	double& width();
-	const double& width() const;
+	double width() const;
 	void width(double w);
 	
 	double& height();
-	const double& height() const;
+	double height() const;
 	void height(double h);
 	
-    void resize(const double sw, const double sh);
+    void resize(double sw, double sh);
     Image generate() const;
 
 };

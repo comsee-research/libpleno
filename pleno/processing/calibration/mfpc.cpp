@@ -32,27 +32,25 @@
 #include "graphic/display.h"
 
 #include "link.h"
+#include "extrinsics.h"
+
 
 
 template<bool useCornerOnly>
 void optimize(
 	//OUT
 	CalibrationPoses& poses, /* extrinsics */
-	MultiFocusPlenopticCamera& model, /* intrinsics */
+	PlenopticCamera& model, /* intrinsics */
 	//IN
 	const CheckerBoard & checkboard,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const MICObservations& centers /* c_{k,l} */
 )
 {	
-	using CornerReprojectionError_t = CornerReprojectionError<MultiFocusPlenopticCamera>;
-	using RadiusReprojectionError_t = RadiusReprojectionError<MultiFocusPlenopticCamera>;
-	using MICReprojectionError_t 	= MicroImageCenterReprojectionError<MultiFocusPlenopticCamera>;
-
 	using Solver_t = typename
 		std::conditional<useCornerOnly,
-			lma::Solver<CornerReprojectionError_t, MICReprojectionError_t>,
-			lma::Solver<CornerReprojectionError_t, RadiusReprojectionError_t, MICReprojectionError_t>
+			lma::Solver<CornerReprojectionError, MicroImageCenterReprojectionError>,
+			lma::Solver<CornerReprojectionError, RadiusReprojectionError, MicroImageCenterReprojectionError>
 		>::type;
 
 	Solver_t solver{1e-4, 20, 1.0 - 1e-6};//std::numeric_limits<double>::epsilon()};
@@ -75,7 +73,7 @@ void optimize(
 		{
 			//ADD CORNER OBSERVATIONS
 			solver.add(
-				CornerReprojectionError_t{
+				CornerReprojectionError{
 					model, checkboard, o
 				},
 				&p,
@@ -89,7 +87,7 @@ void optimize(
 			{		
 				//ADD RADIUS OBSERVATIONS
 				solver.add(
-					RadiusReprojectionError_t{
+					RadiusReprojectionError{
 						model, checkboard, o
 					},
 					&p,
@@ -108,7 +106,7 @@ void optimize(
     {
     	//ADD CENTER OBSERVATIONS
 		solver.add(
-			MICReprojectionError_t{model, c},
+			MicroImageCenterReprojectionError{model, c},
 			&model.mla().pose(),
 			&model.mla(),
 			&model.sensor()
@@ -118,19 +116,18 @@ void optimize(
 }
 
 template void optimize<true>(
-	CalibrationPoses&, MultiFocusPlenopticCamera&, const CheckerBoard&,const BAPObservations&, const MICObservations&);
+	CalibrationPoses&, PlenopticCamera&, const CheckerBoard&,const BAPObservations&, const MICObservations&);
 template void optimize<false>(
-	CalibrationPoses&, MultiFocusPlenopticCamera&, const CheckerBoard&,const BAPObservations&, const MICObservations&);
+	CalibrationPoses&, PlenopticCamera&, const CheckerBoard&,const BAPObservations&, const MICObservations&);
 	
 	
 void optimize(
 	//OUT
 	CalibrationPoses& poses, /* extrinsics */
 	//IN
-	const MultiFocusPlenopticCamera& model, /* intrinsics */
+	const PlenopticCamera& model, /* intrinsics */
 	const CheckerBoard & checkboard,
-	const BAPObservations& observations, /*  (u,v,rho) */
-	bool useCornerOnly = false
+	const BAPObservations& observations /*  (u,v,rho) */
 )
 {
 	using ExtrinsicsBAPReprojectionError = ExtrinsicsBlurAwarePlenopticReprojectionError;
@@ -150,7 +147,6 @@ void optimize(
 			solver.add(
 				ExtrinsicsBAPReprojectionError{
 					model, checkboard, o
-					, useCornerOnly
 				},
 				&p
 			);
@@ -296,7 +292,7 @@ void link_cluster_to_node_index(
 	}
 }
 #endif
-
+#if 0
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -426,12 +422,12 @@ Pose estimate_pose(
 			
 	return extrinsics;
 }
-
+#endif
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
 void visualize(
-	const MultiFocusPlenopticCamera& mfpc,
+	const PlenopticCamera& mfpc,
 	const CalibrationPoses& poses,
 	const CheckerBoard & grid,
 	const BAPObservations& observations,
@@ -515,7 +511,7 @@ GUI(
 //******************************************************************************
 //******************************************************************************
 void evaluate_rmse(
-	const MultiFocusPlenopticCamera& mfpc,
+	const PlenopticCamera& mfpc,
 	const CalibrationPoses& poses,
 	const CheckerBoard & grid,
 	const BAPObservations& observations,
@@ -602,6 +598,7 @@ void evaluate_rmse(
 	ofs << oss.str();
 }
 
+#if 0
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -686,6 +683,7 @@ void init_extrinsics(
 	}
 }
 
+#endif
 
 //******************************************************************************
 //******************************************************************************
@@ -693,7 +691,7 @@ void init_extrinsics(
 template<bool useCornerOnly>
 void calibration_MFPC(                 
 	CalibrationPoses& poses, /* out */                                   
-	MultiFocusPlenopticCamera& model, /* out */
+	PlenopticCamera& model, /* out */
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const MICObservations& micenters, /* c_{k,l} */
@@ -807,10 +805,10 @@ Viewer::enable(true);
 }
 
 template void calibration_MFPC<true>(                 
-	CalibrationPoses&, MultiFocusPlenopticCamera&, const CheckerBoard&, 
+	CalibrationPoses&, PlenopticCamera&, const CheckerBoard&, 
 	const BAPObservations&, const MICObservations&, const std::vector<Image>&);
 template void calibration_MFPC<false>(                 
-	CalibrationPoses&, MultiFocusPlenopticCamera&, const CheckerBoard&, 
+	CalibrationPoses&, PlenopticCamera&, const CheckerBoard&, 
 	const BAPObservations&, const MICObservations&, const std::vector<Image>&);
 
 //******************************************************************************
@@ -818,7 +816,7 @@ template void calibration_MFPC<false>(
 //******************************************************************************
 void calibration_ExtrinsicsMFPC(                        
 	CalibrationPoses& poses, /* out */                   
-	const MultiFocusPlenopticCamera& model, /* in */   
+	const PlenopticCamera& model, /* in */   
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const std::vector<Image>& pictures, /* for GUI only */
@@ -857,7 +855,7 @@ void calibration_ExtrinsicsMFPC(
 	PRINT_INFO("=== Run optimization");
 	display(grid); display(poses);
 	
-	optimize(poses, model, grid, features, useCornerOnly);
+	optimize(poses, model, grid, features);
 
 	PRINT_DEBUG("Optimized poses:");
 	{

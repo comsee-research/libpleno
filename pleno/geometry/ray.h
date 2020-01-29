@@ -9,9 +9,9 @@ public:
 	using Vector = Eigen::Matrix<double, N, 1>;
 
 private: 
-    Vector _origin;
-    Vector _direction;
-    RGBA _color;
+    Vector origin_;
+    Vector direction_;
+    RGBA color_;
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

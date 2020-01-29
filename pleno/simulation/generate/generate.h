@@ -2,12 +2,12 @@
 
 #include "types.h"
 
-#include "geometry/camera/mfpc.h"
+#include "geometry/camera/plenoptic.h"
 #include "geometry/observation.h"
 
 #include "geometry/object/checkerboard.h"
 
-using CameraModel_t = MultiFocusPlenopticCamera;
+using CameraModel_t = PlenopticCamera;
 
 void generate_poses(
 	CalibrationPoses& poses, /* out */

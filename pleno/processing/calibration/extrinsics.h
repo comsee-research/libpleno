@@ -2,7 +2,7 @@
 
 #include "types.h"
 
-#include "geometry/camera/camera.h" //ThinLensCamera
+#include "geometry/camera/models.h" //ThinLensCamera
 #include "geometry/object/checkerboard.h" //CheckerBoard
 
 #include "geometry/pose.h"
@@ -118,7 +118,7 @@ Pose estimate_pose(
 {
 	//Configure monocular camera 
 	PRINT_DEBUG("Configure monocular camera ");
-	ThinLensCamera monocular(model.main_lens(), model.sensor());
+	const PinholeCamera monocular{model.focal(), model.sensor()};
 	
 	//Compute pose candidates using p3p
 	PRINT_DEBUG("Compute pose candidates using p3p");
@@ -141,10 +141,10 @@ Pose estimate_pose(
     {
 		for (size_t i = 0; i < rays.size(); ++i)
 		{
-		    rays.at(i).origin() = {0., 0., 0.};
+		    //rays.at(i).origin() = {0., 0., 0.};
 		    P2D pixel = P2D{nodes[i][0], nodes[i][1]}; //in UV space
 		    		    
-		    monocular.raytrace(pixel, rays.at(i).direction());
+		    monocular.raytrace(pixel, rays.at(i));
 		}
     }
 
@@ -197,7 +197,7 @@ void init_extrinsics(
 		obs[ob.frame].push_back(ob);
 	
 	//Configure monocular camera
-	const ThinLensCamera monocular(model.main_lens(), model.sensor());
+	const PinholeCamera monocular(model.focal(), model.sensor());
 	
 	//CalibrationPoses poses;
 	poses.clear();

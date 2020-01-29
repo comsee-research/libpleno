@@ -1,5 +1,7 @@
 #include "optimize.h"
 
+#include "geometry/camera/unified.h"
+
 #include "optimization/homography.h"
 
 /**
@@ -12,7 +14,7 @@ Transformation optimize(
     double& final_residual
 )
 {
-    v::UnifiedCameraModel ucm(100,100,50,50,0);
+    UnifiedCamera ucm(100,100,50,50,0);
     Transformation t{AFF, 2, ucm}; //SO=1, SE=3, SIM=4, AFF=6
 
     //running optimisation

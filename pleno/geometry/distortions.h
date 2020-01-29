@@ -5,24 +5,27 @@
 
 class Distortions
 {
-    Eigen::Vector3d _radial; //3 components
-    Eigen::Vector2d _tangential; //2 components
+private:
+    Eigen::Vector3d radial_; //3 components
+    Eigen::Vector2d tangential_; //2 components
     
 #if defined(USE_DEPTH_DISTORTION) && USE_DEPTH_DISTORTION
-    Eigen::Vector3d _depth; //3 components
-    
-	Eigen::Vector3d& depth() { return _depth; }
-	const Eigen::Vector3d& depth() const { return _depth; }
+private:
+    Eigen::Vector3d depth_; //3 components
+
+public: 
+	Eigen::Vector3d& depth() { return depth_; }
+	const Eigen::Vector3d& depth() const { return depth_; }
    
     void apply_depth(P3D& p) const;
     void apply_depth(P3DS& ps) const;
 #endif
 public: 	
-	Eigen::Vector3d& radial() { return _radial; }
-	const Eigen::Vector3d& radial() const { return _radial; }
+	Eigen::Vector3d& radial() { return radial_; }
+	const Eigen::Vector3d& radial() const { return radial_; }
 	
-	Eigen::Vector2d& tangential() { return _tangential; }
-	const Eigen::Vector2d& tangential() const { return _tangential; }
+	Eigen::Vector2d& tangential() { return tangential_; }
+	const Eigen::Vector2d& tangential() const { return tangential_; }
 	
     inline double radius(const P2D& p) const;
     std::vector<double> radius(const P2DS& ps) const;

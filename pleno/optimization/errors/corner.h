@@ -9,15 +9,15 @@
 #include "geometry/sensor.h"
 #include "geometry/pose.h"
 
-#include "geometry/camera/models.h"
-#include "geometry/camera/mfpc.h"
+#include "geometry/camera/plenoptic.h"
 #include "geometry/object/checkerboard.h"
 
-template<typename CameraModel_t>
 struct CornerReprojectionError
 {
 	using ErrorType = Eigen::Matrix<double, 2, 1>; //u, v
+	
 	using MLA_t		= GridMesh3D;
+	using CameraModel_t = PlenopticCamera;	
 	
 	const CameraModel_t& pcm;
 	const CheckerBoard &checkerboard;
@@ -28,7 +28,7 @@ struct CornerReprojectionError
     	const Pose& mla_pose,
 		const MLA_t& mla,
     	const Sensor& sensor,
-    	const ThinLensCameraModel& tcm, 
+    	const ThinLensCamera& tcm, 
     	const Distortions& distortions,
     	ErrorType& error
     ) const;
@@ -37,8 +37,8 @@ struct CornerReprojectionError
 namespace ttt
 {
 	template<> 
-	struct Name<CornerReprojectionError<MultiFocusPlenopticCamera>> 
+	struct Name<CornerReprojectionError> 
 	{ 
-		static std::string name(){ return "CornerReprojectionError<MFPC>"; } 
+		static std::string name(){ return "CornerReprojectionError"; } 
 	};
 } // namespace ttt

@@ -34,6 +34,7 @@
 
 #include "processing/improcess.h"
 #include "processing/tools/stats.h"
+#include "processing/tools/lens.h"
 
 //detection/corner
 #include "caracterize.h"
@@ -233,7 +234,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 	 		Viewer::pop();	
 	 				
 	 		const auto& c = mia.nodeInWorld(k,l); //col,row
-			const int t = MFPC::type(k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
+			const int t = lens_type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
 			const double r = params.radius(t); //radius
 			
 			//crop image aroud the center
@@ -302,7 +303,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 		const int l = cbo.l;
 		
 		const auto& c = mia.nodeInWorld(k,l); //col,row
-		const int t = MFPC::type(k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
+		const int t = lens_type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
 		const double r = params.radius(t); //radius
 		
 		//crop image aroud the center

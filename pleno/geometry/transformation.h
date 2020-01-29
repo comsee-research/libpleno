@@ -13,14 +13,14 @@ struct Transformation
     Mode mode;
     int dimension; // TODO: gerer si on veux optimiser la transformation en 3D
                    // (pour l'instant elle ne fait que tu 2D)
-    v::UnifiedCameraModel ucm;
+    UnifiedCamera ucm;
     Eigen::Matrix<double, 3, 3> total_matrix;
     
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
     Transformation(const Mode m = SO,
                    const int d = 2,
-                   const v::UnifiedCameraModel& u = v::UnifiedCameraModel{},
+                   const UnifiedCamera& u = UnifiedCamera{},
                    const Eigen::Matrix<double, 3, 3>& tm = Eigen::Matrix<double, 3, 3>::Identity())
     : mode(m), dimension(d), ucm(u), total_matrix(tm)
     {};

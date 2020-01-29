@@ -15,18 +15,18 @@
 class ThinLensCamera final : public PinholeCamera
 {
 private:
-    double _aperture; // aperture of the lens
+    double aperture_; // aperture of the lens
     
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 //Ctor/Dtor
-    ThinLensCamera(double f = 1.0, double aperture = 4.0, const Sensor& s = {}) : PinholeCamera{f, s}, _aperture{aperture} {}
+    ThinLensCamera(double f = 1.0, double aperture = 4.0, const Sensor& s = {}) : PinholeCamera{f, s}, aperture_{aperture} {}
     virtual ~ThinLensCamera() override {}
     
 //Accessors	    
-	double aperture() const { return _aperture; }
-    double& aperture() { return _aperture; }   
+	double aperture() const { return aperture_; }
+    double& aperture() { return aperture_; }   
 
 //Computed parameters    
     double diameter() const { return std::fabs(this->focal()) / this->aperture(); }

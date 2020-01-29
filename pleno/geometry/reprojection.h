@@ -10,8 +10,7 @@
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-template<typename CameraModel_t>
-P2D reproject_miccenter(const CameraModel_t& model, const MICObservation& c)
+P2D reproject_miccenter(const PlenopticCamera& model, const MICObservation& c)
 {	
 	//observation indexes in ML space
 	const P3D ml_center = from_coordinate_system_of(
@@ -36,10 +35,12 @@ P2D reproject_miccenter(const CameraModel_t& model, const MICObservation& c)
 //******************************************************************************
 inline 
 P3D reproject_bapfeature(
-	const MultiFocusPlenopticCamera& model, const Pose& pose, 
+	const PlenopticCamera& model, const Pose& pose, 
 	const CheckerBoard& grid, const BAPObservation& observation
 )
 {
+	DEBUG_ASSERT((model.mla().I()>0u), "Can't reproject radius in BAP feature.");
+	
 	//observation indexes in ML space
 	const P3D p3d = grid.nodeInWorld(observation.cluster); // WORLD
 	const P3D p3d_cam = to_coordinate_system_of(pose, p3d); // CAMERA
@@ -54,9 +55,9 @@ P3D reproject_bapfeature(
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-template<typename CameraModel_t, typename Observation_t>
+template<typename Observation_t>
 P2D reproject_corner(
-	const CameraModel_t& model, const Pose& pose, 
+	const PlenopticCamera& model, const Pose& pose, 
 	const CheckerBoard& grid, const Observation_t& observation
 )
 {
@@ -76,10 +77,12 @@ P2D reproject_corner(
 //******************************************************************************
 inline
 double reproject_radius(
-	const MultiFocusPlenopticCamera& model, const Pose& pose, 
+	const PlenopticCamera& model, const Pose& pose, 
 	const CheckerBoard& grid, const BAPObservation& observation
 )
 {
+	DEBUG_ASSERT((model.mla().I()>0u), "Can't reproject radius in BAP feature.");
+	
 	//observation indexes in ML space
 	const P3D p3d = grid.nodeInWorld(observation.cluster); // WORLD
 	const P3D p3d_cam = to_coordinate_system_of(pose, p3d); // CAMERA

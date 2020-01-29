@@ -2,18 +2,21 @@
 
 #include "geometry/reprojection.h"
 
-template<typename CameraModel_t>
-bool RadiusReprojectionError<CameraModel_t>::operator()(
+#include "io/printer.h"
+
+bool RadiusReprojectionError::operator()(
 	const Pose& camera_pose,
 	const Pose& mla_pose,
 	const MLA_t& mla,
 	const FocalLength& f,
 	const Sensor& sensor,
-	const ThinLensCameraModel& tcm, 
+	const ThinLensCamera& tcm, 
 	const Distortions& distortions,
 	ErrorType& error
 ) const
 {    
+	DEBUG_ASSERT((pcm.mla().I()>0u), "Can't reproject radius in BAP feature.");
+	
     error.setZero();
     
     const double prediction = reproject_radius(
@@ -31,16 +34,7 @@ bool RadiusReprojectionError<CameraModel_t>::operator()(
     }
     
     // focal is negatif
-    const double mlf = tcm.f();
-    if (mlf < 0.0)
-    {
-        error[0] += std::expm1(-mlf);
-        error[1] += std::expm1(-mlf);
-    }
-	
-	//error[0] = 0.;
-	
+    if (tcm.focal() < 0.0) { error[0] += std::expm1(-tcm.focal());  }
+		
     return true;
 }
-
-template class RadiusReprojectionError<MultiFocusPlenopticCamera>;

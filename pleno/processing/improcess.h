@@ -17,7 +17,7 @@ Image extract_roi(const Image&img, float& X, float& Y, int roiw, int roih);
 ////////////////////////////////////////////////////////////////////////////////
 void trim(Image& img, float r, float tolerance);
 
-void contrastStrech(const Image& input, Image& output, const int threshold);
+void contrast_strech(const Image& input, Image& output, const int threshold);
 
 void erode(const Image& input, Image& output, const int crossSize);
 void dilate(const Image& input, Image& output, const int crossSize);
@@ -25,9 +25,10 @@ void dilate(const Image& input, Image& output, const int crossSize);
 void devignetting(const Image& raw, const Image& white, Image& unvignetted);
 
 ////////////////////////////////////////////////////////////////////////////////
-std::vector<std::vector<cv::Point>> detectShapes(Image& ioSource);
-void fitPolygons(std::vector<std::vector<cv::Point>>& shape, std::vector<cv::Point2f>& center);
+std::vector<std::vector<cv::Point>> detect_shapes(Image& ioSource);
+void fit_polygons(std::vector<std::vector<cv::Point>>& shape, std::vector<cv::Point2f>& center);
 
+void hist_radiance(const Image& img, Image& histogram);
 ////////////////////////////////////////////////////////////////////////////////
 // compute the x_gradient of an image
 template <typename T>
@@ -79,15 +80,15 @@ void y_gradient(const cv::Mat& input, cv::Mat& output)
 bool warp(const Transformation& t, const Image& input, Image& output);
 
 ////////////////////////////////////////////////////////////////////////////////
-struct GRAYInterpolator{
+struct GrayInterpolator {
     const Image& mask;
 
-    bool is_valid(const std::array<int, 2>& pixel) const;
+    bool is_valid(const P2D& pixel) const;
 
-    double intensity(const Image& image, const std::array<int, 2>& pixel) const;
+    double intensity(const Image& image, const P2D& pixel) const;
 
     // Computing nearest rounded values neighbors of a point
-    std::vector<std::array<int, 2>> neighbors(const std::array<double, 2>& pixel) const;
+    P2DS neighbors(const P2D& pixel) const;
 
-    double operator()(const Image& image, const std::array<double, 2>& pixel) const;
+    double operator()(const Image& image, const P2D& pixel) const;
 };

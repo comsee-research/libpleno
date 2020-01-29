@@ -7,7 +7,7 @@
 
 #include "types.h"
 
-#include "geometry/camera/mfpc.h"
+#include "geometry/camera/plenoptic.h"
 #include "geometry/observation.h"
 
 #include "geometry/object/checkerboard.h"
@@ -21,7 +21,7 @@ inline void display(const CheckerBoard& checkboard)
 	Viewer::update(Viewer::Mode::m3D);
 }
 
-inline void display(const MultiFocusPlenopticCamera& model)
+inline void display(const PlenopticCamera& model)
 {
 	RENDER_DEBUG_3D(
 		Viewer::context(Viewer::Mode::m3D).layer(Viewer::layer(Viewer::Mode::m3D)).name("CameraBody"), 

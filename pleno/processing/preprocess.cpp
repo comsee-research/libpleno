@@ -11,16 +11,22 @@
 #include "processing/estimation.h"
 #include "processing/improcess.h"
 #include "processing/tools/stats.h"
-
-#include "geometry/camera/mfpc.h"
+#include "processing/tools/lens.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 // DISPLAYS - Histograms
 ////////////////////////////////////////////////////////////////////////////////
-void hist_data(const std::vector<double>& data, Image& dst, int binSize, int height, int ref_value)
-{
-	int nbbin = 250;
-	float min=4, max=14;
+void hist_data(const std::vector<double>& data, Image& dst, int binSize, int height, int nbbin)
+{		
+	const auto& [min, max] = [&data]() -> std::pair<double, double> {
+		double min=1e12, max=-1e12;
+		for(double d : data) {
+			if(d < min) min = d;
+			if(d > max) max = d;
+		}
+		return {min, max};
+	}(); 
+	
 	float step = (max - min) / nbbin;
 	std::vector<int> hist(nbbin);
 	for(const auto&d : data)
@@ -74,52 +80,17 @@ void hist_data(const std::vector<double>& data, Image& dst, int binSize, int hei
             cv::Scalar(0,255,0), // BGR Color
             1 // Line Thickness (Optional)
 	); 
-	
-    if (ref_value >= 0)
-    {
-        int h = rows - int(scale * ref_value);
-        cv::line(dst, cv::Point(0, h), cv::Point(cols, h), cv::Scalar(255,0,0));
-    }
-}
-
-
-void hist_radiance(const Image& img)
-{
-	/// Establish the number of bins
-	int histSize = 256;
-
-	/// Set the ranges ( for B,G,R) )
-	float range[] = { 0, 256 } ;
-	const float* histRange = { range };
-
-	bool uniform = true; 
-	bool accumulate = false;
-	
-	Image hist;
-	calcHist( &img, 1, 0, Image(), hist, 1, &histSize, &histRange, uniform, accumulate);
-	
-	// Draw the histograms for R, G and B
-	int hist_w = 512; int hist_h = 400;
-	int bin_w = cvRound( (double) hist_w/histSize );
-
-	Image histImage(hist_h, hist_w, CV_8UC3, cv::Scalar(0,0,0));
-	
-	/// Normalize the result to [ 0, histImage.rows ]
-	cv::normalize(hist, hist, 0, histImage.rows, cv::NORM_MINMAX, -1, Image());
-	
-	for( int i = 1; i < histSize; i++ )
-	{
-	  	cv::line( histImage, cv::Point( bin_w*(i-1), hist_h - cvRound(hist.at<float>(i-1)) ) ,
-		               cv::Point( bin_w*(i), hist_h - cvRound(hist.at<float>(i)) ),
-		               cv::Scalar( 255, 0, 0), 2, 8, 0);
-	}
-	
-    RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()).name("Histogram::hist_radiance"), histImage);  
 }
 
 void hist_radii(const std::vector<MicroImage>& data)
 {
-	std::vector<std::vector<double>> radii(3);
+	const std::size_t I = [&data]{
+		int i=0;
+		for(const auto& mi : data) if(mi.type > i) i = mi.type;
+		return std::size_t(i+1);
+	}();
+	
+	std::vector<std::vector<double>> radii(I);
     for(auto& r : radii) r.reserve(data.size());
     
     for(const auto&mi : data)
@@ -130,16 +101,17 @@ void hist_radii(const std::vector<MicroImage>& data)
     for(auto& r : radii) r.shrink_to_fit();
     
 /////////////////////////////////////Compute histograms///////////////////////////////////////////////////  
-	Image histo; 
-    Image hist[3];
-    
-    hist_data(radii[0], hist[0], 3, 200);
-    hist_data(radii[1], hist[1], 3, 200);
-    hist_data(radii[2], hist[2], 3, 200);
-    
-    vconcat(hist[0], hist[1], histo);
-    vconcat(histo, hist[2], histo);
-    
+    Images hist(I);
+    for(std::size_t i=0; i<I; ++i)
+    { 
+    	hist_data(radii[i], hist[i], 3, 200);
+   	}
+   	
+	Image histo = hist[0];
+	for(std::size_t i=1; i<I; ++i) 
+	{
+    	vconcat(histo, hist[i], histo);
+    }
     RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()).name("radii_histo"), histo); 
 }
 
@@ -217,14 +189,13 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 ////////////////////////////////////////////////////////////////////////////////
 // Processing
 ////////////////////////////////////////////////////////////////////////////////
-void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>& data, bool trimmed, const std::vector<double>& hints)
+void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>& data, std::size_t I)
 {
-	//static constexpr double sqrt2 = std::sqrt(2.);
-	//static constexpr double isqrt2 = 1. / sqrt2 ;
-	//static constexpr double i2sqrt2 = isqrt2 * 0.5;
+	assert(I > 0u);
+	
 	static constexpr double sigma99p = 2.357022604; // 2.575829; //2.33;//  2.575829 sigma ---> 99%
 	
-	static const decltype(v::red) colors[3] = {v::red, v::green, v::blue};
+	static const decltype(v::red) colors[3] = {v::red, v::green, v::blue}; //FIXME: load palette
 
     data.clear();
     data.reserve(centers.size());
@@ -258,15 +229,13 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
 			Viewer::pop();	
 					
 	 		const auto& c = centers.nodeInWorld(k,l); //col,row
-			const int t = MFPC::type(k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
+			const int t = lens_type(I,k,l); //k=col, l=row
 			
 			//crop image aroud the center
 			float X = c[0], Y = c[1]; 
 	 		
 	 		Image roi = extract_roi(blurred, X, Y, roiw, roih); //crop
  			cv::normalize(roi, roi, 0, 255, cv::NORM_MINMAX); //normalize
-			
- 			if(trimmed) { trim(roi, hints[t], 2.); } //TODO: shouldn't the tolerance be dependant of the stddev ?
  			
 			PRINT_DEBUG("------ Processing node ("<< k << ", " << l <<")"
 				"at (" << c.transpose() <<") in image,"
@@ -276,8 +245,7 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
  			//const auto& [meanx, meany, sigma, alpha] = estimation_gaussian_least_squares(roi, {X-x, Y-y, 0., 0.}, true, 200);
  			const auto& [meanx, meany, sigma, alpha] = estimation_gaussian_moments(roi);
 	 		
-	 		const double r = sigma99p * sigma;
-	 		DEBUG_VAR(r);
+	 		const double r = sigma99p * sigma; DEBUG_VAR(r);
 	 		data.emplace_back(MicroImage{k,l,P2D{X+meanx,Y+meany},r,t});
 	 			
  			RENDER_DEBUG_2D(
@@ -337,13 +305,11 @@ InternalParameters
 preprocess(
 	const std::vector<ImageWithInfo>& imgs, 
 	const MIA& grid, 
-	double pxl2metric
+	double pxl2metric,
+	std::size_t I
 )
 {
-	//std::vector<MicroImage> mis;
-	//mis.reserve(grid.size()*imgs.size());
-	
-	std::vector<std::vector<P2D>> data(3);
+	std::vector<std::vector<P2D>> data(I);
 	for(auto& d: data) d.reserve(grid.size()*imgs.size());
 		
 	for(const auto& [img, fnumber] : imgs)
@@ -351,30 +317,8 @@ preprocess(
 		PRINT_INFO("=== Computing radii in image f/" << fnumber);
 		
 		std::vector<MicroImage> microimages;
-		compute_radii(img, grid, microimages);
-		
-#if 0	//TRIM VERSION
-		hist_radii(microimages);
-		Viewer::update();
-		std::getchar();
-		
-		std::vector<std::vector<double>> radii(3);
-		for(auto& r: radii) r.reserve(grid.size());
-		for(const auto&mi: microimages)
-			radii[mi.type].emplace_back(mi.radius);
-		for(auto& r: radii) r.shrink_to_fit();
-		
-		std::vector<double> hints(3);
-		for (unsigned int i = 0; i < 3; ++i)
-		{
-			hints[i] = median(radii[i]);
-			DEBUG_VAR(hints[i]);
-		}
-		std::getchar();
-		compute_radii(white, grid, microimages, true, hints);
-#endif		
-		//mis.insert(std::end(mis), std::begin(microimages), std::end(microimages));
-		
+		compute_radii(img, grid, microimages, I);
+
 		GUI(
 			PRINT_DEBUG("Displaying histograms of radii repartitions");
 			hist_radii(microimages);
@@ -391,8 +335,6 @@ preprocess(
 					- pxl2metric * mi.radius //FIXME: add minus sign
 			);
 		}
-		
-		//
 	}
 	
 	for(auto& d: data) d.shrink_to_fit();
@@ -412,23 +354,22 @@ preprocess(
 		params.kappa 	= pxl2metric * ( (grid.edge_length()[0] + grid.edge_length()[1]) / 2. ); //(eq. 40) //TODO: update eqt n°
 		params.kappa_approx = magicratio * params.kappa; //(eq. 51)
 
-		for (unsigned int i = 0; i < 3; ++i) 
+		params.c.resize(I);
+		params.c_prime.resize(I);
+		for (std::size_t i = 0; i < I; ++i) 
 		{
 			params.c[i] = coefs[i].c ;
 			params.c_prime[i] = coefs[i].c + params.kappa / 2.; //(eq. 46)
 		}
 		
-		PRINT_DEBUG("r(1/4)|0 = " << (params.m / 4. + params.c[0]) / pxl2metric);
-		PRINT_DEBUG("r(1/4)|1 = " << (params.m / 4. + params.c[1]) / pxl2metric);
-		PRINT_DEBUG("r(1/4)|2 = " << (params.m / 4. + params.c[2]) / pxl2metric);
-		PRINT_DEBUG("N|0 = " << std::fabs(params.m) / ( params.kappa - params.c_prime[0] ));
-		PRINT_DEBUG("N|1 = " << std::fabs(params.m) / ( params.kappa - params.c_prime[1] ));
-		PRINT_DEBUG("N|2 = " << std::fabs(params.m) / ( params.kappa - params.c_prime[2] ));
+		for (std::size_t i = 0; i < I; ++i) 
+			PRINT_DEBUG("r(1/4)|"<<i<<" = " << (params.m / 4. + params.c[i]) / pxl2metric);
+		for (std::size_t i = 0; i < I; ++i) 
+			PRINT_DEBUG("N|"<<i<<" = " << std::fabs(params.m) / ( params.kappa - params.c_prime[i] ));
 
-		params.N = (
-			( std::fabs(params.m) / ( params.kappa - params.c_prime[0] ) ) +
-			( std::fabs(params.m) / ( params.kappa - params.c_prime[1] ) ) +
-			( std::fabs(params.m) / ( params.kappa - params.c_prime[2] ) ) ) / 3.;
+		double N = 0.0;
+		for (std::size_t i = 0; i < I; ++i) N += (std::fabs(params.m) / (params.kappa - params.c_prime[i]));
+		params.N = N / double(I);
 	}
 	
 	return params;

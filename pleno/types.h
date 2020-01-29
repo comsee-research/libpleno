@@ -34,6 +34,7 @@ using Real = double;
 using Index = int;
 
 using Image 				= cv::Mat;
+using Images 				= AlignedVector<cv::Mat>;
 struct ImageWithInfo 		{ Image img; Real fnumber; };
 
 struct LineCoefficients 	{ Real m; Real c; };

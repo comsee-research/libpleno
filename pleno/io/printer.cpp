@@ -1,7 +1,7 @@
 #include "printer.h"
 
-bool Printer::_verbose = true;
-std::uint16_t Printer::_level = Printer::Level::ALL;
+bool Printer::verbose_ = true;
+std::uint16_t Printer::level_ = Printer::Level::ALL;
 
-Printer Printer::_self{};
+Printer Printer::self_{};
 

@@ -18,13 +18,13 @@ namespace std {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // SOME TOOLS USED WITH MODEL
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-LineCoefficients line_parameters_from_slope_and_one_point(const double s, const P2D& p)
+LineCoefficients line_parameters_from_slope_and_one_point(double s, const P2D& p)
 {
     return LineCoefficients{ s, std::fma(-s, p.x(), p.y()) };
 }
 
 
-LineCoefficients line_parameters_from_angle_and_one_point(const double a, const P2D& p)
+LineCoefficients line_parameters_from_angle_and_one_point(double a, const P2D& p)
 {
     const double slope = std::tan(a);
     return LineCoefficients{ slope, std::fma(-slope, p.x(), p.y()) };
@@ -71,7 +71,7 @@ PointLinePosition point_line_position(const P2D& p, const LineCoefficients& l)
 // MODEL
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-MicroImageModel::MicroImageModel(const MicroImageType t, const double width, const double height)
+MicroImageModel::MicroImageModel(MicroImageType t, double width, double height)
     : type(t), w_(width), h_(height)
 {
     lines_angles = {0.0, M_PI / 2.0};
@@ -81,21 +81,21 @@ MicroImageModel::MicroImageModel(const MicroImageType t, const double width, con
 
 MicroImageModel::~MicroImageModel(){};
 
-LineCoefficients MicroImageModel::parameters_of_lines(const size_t i) const
+LineCoefficients MicroImageModel::parameters_of_lines(size_t i) const
 {
     // return line_parameters_from_slope_and_one_point(this->lines_slope.at(i), this->center);
     return line_parameters_from_angle_and_one_point(lines_angles.at(i), center);
 }
 
 double& MicroImageModel::width() {return w_;}
-const double& MicroImageModel::width() const {return w_;}
+double MicroImageModel::width() const {return w_;}
 void MicroImageModel::width(double w) {w_ = w;}
 
 double& MicroImageModel::height() {return h_;}
-const double& MicroImageModel::height() const {return h_;}
+double MicroImageModel::height() const {return h_;}
 void MicroImageModel::height(double h) {h_ = h;}
 
-void MicroImageModel::resize(const double sw, const double sh)
+void MicroImageModel::resize(double sw, double sh)
 {
     w_ *= sw; h_ *= sh;
     center[0] *= sw;

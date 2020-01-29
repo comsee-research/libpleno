@@ -111,7 +111,7 @@ estimation_min_enclosing_circle(
 	const std::size_t eroih = img.rows;
 
 	//detect shapes
-	std::vector<std::vector<cv::Point>> contours = detectShapes(img);
+	std::vector<std::vector<cv::Point>> contours = detect_shapes(img);
 	const std::size_t nb_contours = contours.size();
 	std::vector<std::vector<cv::Point>> contours_polygon(nb_contours);
 	
@@ -149,19 +149,21 @@ estimation_lines_with_slope_constraint_least_squares(
 	const std::vector<std::vector<P2D>>& data
 )
 {
+	const std::size_t I = data.size();
+	
 	std::vector<LineCoefficients> coefs;
-	coefs.reserve(3);
+	coefs.reserve(I);
 	
 //LINEAR REGRESSION USING CONSTRAINTS ON SLOPE	
-	using A_t = Eigen::Matrix<float, Eigen::Dynamic, 4>;
+	using A_t = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
 	using B_t = Eigen::Matrix<float, Eigen::Dynamic, 1>;
-	using X_t = Eigen::Matrix<float, 4, 1>;
+	using X_t = Eigen::Matrix<float, Eigen::Dynamic, 1>;
 	
 	//compute size
 	std::size_t size = 0;
 	for(const auto&points : data) size+=points.size();
 	
-	A_t A = A_t::Zero(size,4);
+	A_t A = A_t::Zero(size, I);
 	B_t B = B_t::Zero(size);
 	
 	int i=1,j=0;	
@@ -181,9 +183,8 @@ estimation_lines_with_slope_constraint_least_squares(
     X_t X = A.colPivHouseholderQr().solve(B);
 	DEBUG_VAR(X);  
 	
-	coefs.emplace_back(LineCoefficients{X(0), X(1)});
-	coefs.emplace_back(LineCoefficients{X(0), X(2)});
-	coefs.emplace_back(LineCoefficients{X(0), X(3)});
+	for(std::size_t i = 0; i < I; ++i)
+		coefs.emplace_back(LineCoefficients{X(0), X(i+1)});
 	
 	return coefs;
 }

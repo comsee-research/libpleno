@@ -1,6 +1,6 @@
-#include "extrinsics_bap.h"
+#include "extrinsics_corner.h"
 
-bool ExtrinsicsBlurAwarePlenopticReprojectionError::operator()(
+bool ExtrinsicsCornerReprojectionError::operator()(
 	const Pose& camera_pose,
 	ErrorType& error
 ) const
@@ -10,12 +10,11 @@ bool ExtrinsicsBlurAwarePlenopticReprojectionError::operator()(
     const P3D p3d = checkerboard.nodeInWorld(observation.cluster); // WORLD
     const P3D p3d_cam = to_coordinate_system_of(camera_pose, p3d); // CAMERA
 
-    P3D prediction;
+    P2D prediction;
     const bool is_projected = pcm.project(p3d_cam, observation.k, observation.l, prediction);
 	
 	error[0] = observation.u - prediction[0];
 	error[1] = observation.v - prediction[1];
-	error[2] = observation.rho - prediction[2];
 
     return true;
 }

@@ -2,13 +2,12 @@
 
 #include "geometry/reprojection.h"
 
-template<typename CameraModel_t>
-bool CornerReprojectionError<CameraModel_t>::operator()(
+bool CornerReprojectionError::operator()(
 	const Pose& camera_pose,
 	const Pose& mla_pose,
 	const MLA_t& mla,
 	const Sensor& sensor,
-	const ThinLensCameraModel& tcm, 
+	const ThinLensCamera& tcm, 
 	const Distortions& distortions,
 	ErrorType& error
 ) const
@@ -31,7 +30,7 @@ bool CornerReprojectionError<CameraModel_t>::operator()(
     }
     
     // focal is negatif
-    const double f = tcm.f();
+    const double f = tcm.focal();
     if (f < 0.0)
     {
         error[0] += std::expm1(-f);
@@ -40,5 +39,3 @@ bool CornerReprojectionError<CameraModel_t>::operator()(
 
     return true;
 }
-
-template class CornerReprojectionError<MultiFocusPlenopticCamera>;

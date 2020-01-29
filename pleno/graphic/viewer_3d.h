@@ -8,15 +8,15 @@
 #include "geometry/ray.h"
 #include "geometry/mesh.h"
 
-#include "geometry/camera/mfpc.h"
+#include "geometry/camera/plenoptic.h"
 #include "geometry/object/checkerboard.h"
 
 void viewer_3d(v::ViewerContext& v, const CheckerBoard& gm, double scale = 2.);
 
-void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::CameraBody);
-void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::ThinLens, double scale = 2.);
-void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::MLA, double scale = 2.);
-void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::Sensor, double scale = 2.);
+void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::CameraBody);
+void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::ThinLens, double scale = 2.);
+void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::MLA, double scale = 2.);
+void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::Sensor, double scale = 2.);
 
 // Drawing poses
 void viewer_3d(v::ViewerContext&, const Pose& p, double = 1.0);

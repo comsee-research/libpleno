@@ -12,22 +12,22 @@
 class Camera 
 {	
 protected:
-	Sensor 	_sensor;
-	Pose	_pose;
+	Sensor 	sensor_;
+	Pose	pose_;
 	
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	
 //Ctor/Dtor
-	Camera(const Sensor& s = {}, const Pose& p = {}) : _sensor{s}, _pose{p} {}	
+	Camera(const Sensor& s = {}, const Pose& p = {}) : sensor_{s}, pose_{p} {}	
 	virtual ~Camera() {}
 
 //Accessors	
-	const Sensor& sensor() const { return _sensor; }
-    Sensor& sensor() { return _sensor; }
+	const Sensor& sensor() const { return sensor_; }
+    Sensor& sensor() { return sensor_; }
     
-    Pose& pose() { return _pose; }
-	const Pose& pose() const { return _pose; }
+    Pose& pose() { return pose_; }
+	const Pose& pose() const { return pose_; }
 
 //Project and Raytrace
 	virtual bool project(const P3D& p3d_cam, P2D& pixel) const = 0;
@@ -40,6 +40,6 @@ public:
 protected:
 //Helper functions
 	bool hit_the_sensor(const P2D& p) const {
-		return p[0] >= 0.0 and p[1] >= 0.0 and p[0] < _sensor.width() and p[1] < _sensor.height();
+		return p[0] >= 0.0 and p[1] >= 0.0 and p[0] < sensor_.width() and p[1] < sensor_.height();
 	};
 };

@@ -3,11 +3,11 @@
 #include "types.h"
 #include "io/printer.h"
 
-#include "geometry/camera/mfpc.h"
-
 #include "geometry/mia.h"
 #include "geometry/internals.h"
 #include "geometry/observation.h"
+
+#include "processing/tools/lens.h"
 
 template<typename Observation_t>
 double virtualdepth(const Observation_t& lhs, const Observation_t& rhs, const MIA& mia, double dC, double pixel2metric)
@@ -64,7 +64,7 @@ void update_observations(const InputObservations_t& inobs, BAPObservations& outo
 	std::transform(inobs.begin(), inobs.end(), std::back_inserter(outobs),
 		[&v, &params](const auto& io) -> BAPObservation {
 			const double r = (params.kappa_approx / 2. ) * (1. / v) //Eq (14)
-							+ params.c_prime[MFPC::type(io.k, io.l)] 
+							+ params.c_prime[lens_type(params.I, io.k, io.l)] 
 							- (params.kappa_approx / 2. );
 				
 			return BAPObservation{

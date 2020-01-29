@@ -7,10 +7,10 @@
 
 class Sensor
 {
-    Pose _pose;
-    double _scale; // size of a pixel (mm)
-    size_t _width; // width of the sensor (pixel)
-    size_t _height; // height of the sensor (pixel)
+    Pose pose_;
+    double scale_; // size of a pixel (mm)
+    size_t width_; // width of the sensor (pixel)
+    size_t height_; // height of the sensor (pixel)
 
 public:
     Sensor(size_t w, size_t h, double s);

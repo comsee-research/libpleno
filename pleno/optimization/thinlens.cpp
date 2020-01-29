@@ -3,16 +3,16 @@
 namespace lma 
 {
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-// On ThinLensCameraModel
+// On ThinLensCamera
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-void apply_increment(ThinLensCameraModel& tcm, const double delta[Size<ThinLensCameraModel>::value], const lma::Adl&)
+void apply_increment(ThinLensCamera& tcm, const double delta[Size<ThinLensCamera>::value], const lma::Adl&)
 {
-    tcm.f() += delta[0];
+    tcm.focal() += delta[0];
 }
 
-void apply_small_increment(ThinLensCameraModel& tcm, double h, const v::core::numeric_tag<0>&, const lma::Adl&)
+void apply_small_increment(ThinLensCamera& tcm, double h, const v::core::numeric_tag<0>&, const lma::Adl&)
 { 
-	tcm.f() += h; 
+	tcm.focal() += h; 
 }
 
 }

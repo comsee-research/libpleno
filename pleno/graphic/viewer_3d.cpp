@@ -2,7 +2,7 @@
 
 #include <GL/gl.h>
 
-void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::CameraBody)
+void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::CameraBody)
 {
     v.add_opengl([&mfpc, ref = mfpc.pose()](){
         glLineWidth(2);
@@ -82,9 +82,9 @@ void viewer_3d(v::ViewerContext& v, const CheckerBoard& gm, double scale)
     });
 }
 
-void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::ThinLens, double scale)
+void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::ThinLens, double scale)
 {
-	const ThinLensCameraModel& tcm = mfpc.main_lens();
+	const ThinLensCamera& tcm = mfpc.main_lens();
 	
     v.add_opengl([&tcm, scale, ref = from_coordinate_system_of(mfpc.pose(), tcm.pose())](){
         glLineWidth(2);
@@ -119,8 +119,8 @@ void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::
 		glBegin(GL_POINTS);
         	glColor4f(1.0,1.0,1.0, transparency_value);
 			glPointSize(25.0);
-            glAddPoint(from_coordinate_system_of(ref, P3D{0.,0., tcm.f()}));
-            glAddPoint(from_coordinate_system_of(ref, P3D{0.,0., -tcm.f()}));
+            glAddPoint(from_coordinate_system_of(ref, P3D{0.,0., tcm.focal()}));
+            glAddPoint(from_coordinate_system_of(ref, P3D{0.,0., -tcm.focal()}));
         glEnd();
         
         glBegin(GL_LINES);
@@ -134,7 +134,7 @@ void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::
     });
 }
 
-void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::MLA, double scale)
+void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::MLA, double scale)
 {
 	const MLA& gm = mfpc.mla();
 	
@@ -173,7 +173,7 @@ void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::
     });
 }
 
-void viewer_3d(v::ViewerContext& v, const MultiFocusPlenopticCamera& mfpc, tag::Sensor, double scale)
+void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::Sensor, double scale)
 {
 	const Sensor& s = mfpc.sensor();
 	

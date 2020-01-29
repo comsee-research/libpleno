@@ -9,16 +9,15 @@
 #include "geometry/sensor.h"
 #include "geometry/pose.h"
 
-#include "geometry/camera/models.h"
-#include "geometry/camera/mfpc.h"
+#include "geometry/camera/plenoptic.h"
 
 #include "geometry/object/checkerboard.h"
 
-template<typename CameraModel_t>
 struct RadiusReprojectionError
 {
-	using ErrorType = Eigen::Matrix<double, 1, 1>; //rho
-	using MLA_t		= GridMesh3D;
+	using ErrorType 	= Eigen::Matrix<double, 1, 1>; //rho
+	using MLA_t			= GridMesh3D;
+	using CameraModel_t = PlenopticCamera;
 	
 	const CameraModel_t& pcm;
 	const CheckerBoard &checkerboard;
@@ -30,7 +29,7 @@ struct RadiusReprojectionError
 		const MLA_t& mla,
 		const FocalLength& f,
     	const Sensor& sensor,
-    	const ThinLensCameraModel& tcm, 
+    	const ThinLensCamera& tcm, 
     	const Distortions& distortions,
     	ErrorType& error
     ) const;
@@ -39,8 +38,8 @@ struct RadiusReprojectionError
 namespace ttt
 {
 	template<> 
-	struct Name<RadiusReprojectionError<MultiFocusPlenopticCamera>> 
+	struct Name<RadiusReprojectionError> 
 	{ 
-		static std::string name(){ return "RadiusReprojectionError<MFPC>"; } 
+		static std::string name(){ return "RadiusReprojectionError"; } 
 	};
 } // namespace ttt

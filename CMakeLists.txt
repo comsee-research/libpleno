@@ -195,8 +195,7 @@ set(PLENO_GEOMETRY_SRC
 	pleno/geometry/observation.cpp
 	pleno/geometry/internals.cpp
 	#camera	
-		pleno/geometry/camera/mfpc.cpp
-		pleno/geometry/camera/models.cpp
+		pleno/geometry/camera/plenoptic.cpp
 	#model
 		pleno/geometry/model/microimage.cpp	
 )
@@ -220,6 +219,7 @@ set(PLENO_OPTIMIZATION_SRC
 		pleno/optimization/errors/radius.cpp
 		#extrinsics
 			pleno/optimization/errors/extrinsics/extrinsics_bap.cpp
+			pleno/optimization/errors/extrinsics/extrinsics_corner.cpp
 )
 
 set(PLENO_IO_SRC

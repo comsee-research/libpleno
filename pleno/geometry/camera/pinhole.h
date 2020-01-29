@@ -19,8 +19,8 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 //Ctor/Dtor
-    PinholeCameraModel(double f, const Sensor& s) : Camera{s}, focal_{f} {}
-    virtual ~PinholeCameraModel() override {}
+    PinholeCamera(double f, const Sensor& s) : Camera{s}, focal_{f} {}
+    virtual ~PinholeCamera() override {}
     
 //Accessors	
 	double focal() const { return focal_; }

@@ -60,7 +60,7 @@ void devignetting(const Image& raw, const Image& white, Image& unvignetted)
     }
 }
 
-void contrastStrech(const Image& input, Image& output, const int threshold)
+void contrast_strech(const Image& input, Image& output, const int threshold)
 {
     for (int row = 0; row < output.rows; ++row)
         for (int col = 0; col < output.cols; ++col)
@@ -94,7 +94,7 @@ void dilate(const Image& input, Image& output, const int crossSize)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-std::vector<std::vector<cv::Point>> detectShapes(Image& ioSource)
+std::vector<std::vector<cv::Point>> detect_shapes(Image& ioSource)
 {
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
@@ -107,7 +107,7 @@ std::vector<std::vector<cv::Point>> detectShapes(Image& ioSource)
     return contours;
 }
 
-void fitPolygons(std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Point2f>& center)
+void fit_polygons(std::vector<std::vector<cv::Point>>& contours, std::vector<cv::Point2f>& center)
 {
     std::vector<std::vector<cv::Point>> contours_polygon(contours.size());
     std::vector<cv::Rect> boundRect(contours.size());
@@ -119,6 +119,40 @@ void fitPolygons(std::vector<std::vector<cv::Point>>& contours, std::vector<cv::
         boundRect[c] = boundingRect(cv::Mat(contours_polygon[c]));
         cv::minEnclosingCircle(cv::Mat(contours_polygon[c]), center[c], radius[c]);
     }
+}
+
+void hist_radiance(const Image& img, Image& histogram)
+{
+	/// Establish the number of bins
+	int histSize = 256;
+
+	/// Set the ranges ( for B,G,R) )
+	float range[] = { 0, 256 } ;
+	const float* histRange = { range };
+
+	bool uniform = true; 
+	bool accumulate = false;
+	
+	Image hist;
+	calcHist( &img, 1, 0, Image(), hist, 1, &histSize, &histRange, uniform, accumulate);
+	
+	// Draw the histograms for R, G and B
+	int hist_w = 512; int hist_h = 400;
+	int bin_w = cvRound( (double) hist_w/histSize );
+
+	Image histImage(hist_h, hist_w, CV_8UC3, cv::Scalar(0,0,0));
+	
+	/// Normalize the result to [ 0, histImage.rows ]
+	cv::normalize(hist, hist, 0, histImage.rows, cv::NORM_MINMAX, -1, Image());
+	
+	for( int i = 1; i < histSize; i++ )
+	{
+	  	cv::line( histImage, cv::Point( bin_w*(i-1), hist_h - cvRound(hist.at<float>(i-1)) ) ,
+		               cv::Point( bin_w*(i), hist_h - cvRound(hist.at<float>(i)) ),
+		               cv::Scalar( 255, 0, 0), 2, 8, 0);
+	}
+	
+    histogram = histImage; 
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -133,7 +167,7 @@ bool warp(const Transformation& t, const Image& input, Image& output)
     P3D new_p3d;
 
     const Image empty_mask(input.rows, input.cols, CV_64FC1, 1.0);
-    GRAYInterpolator interpolator{empty_mask};
+    GrayInterpolator interpolator{empty_mask};
 
     output = Image(input.rows, input.cols, CV_64FC1, -1.0);
 
@@ -150,9 +184,7 @@ bool warp(const Transformation& t, const Image& input, Image& output)
             // Normalisation: Put the transformed point on a plane
             pixel = new_p3d.head(2) / new_p3d.z();
 
-            std::array<double, 2> pixel_for_interpolator {{pixel[0], pixel[1]}};
-
-            output.at<double>(row, col) = interpolator(input, pixel_for_interpolator);
+            output.at<double>(row, col) = interpolator(input, pixel);
         }
     }
 
@@ -164,7 +196,7 @@ bool warp(const Transformation& t, const Image& input, Image& output)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 // return true is the pixel is valid
-bool GRAYInterpolator::is_valid(const std::array<int, 2>& pixel) const
+bool GrayInterpolator::is_valid(const P2D& pixel) const
 {
   	// check if the pixel is in the image
   	if ( 	(pixel[0] >= 0) and (pixel[0] < mask.cols - 1)
@@ -179,22 +211,22 @@ bool GRAYInterpolator::is_valid(const std::array<int, 2>& pixel) const
 	}
 }
 
-double GRAYInterpolator::intensity(const cv::Mat& image, const std::array<int, 2>& pixel) const
+double GrayInterpolator::intensity(const cv::Mat& image, const P2D& pixel) const
 {
     return image.at<double>(pixel[1], pixel[0]);
 }
 
 // Computing nearest rounded values neighbors of a point
-std::vector<std::array<int, 2>> GRAYInterpolator::neighbors(const std::array<double, 2>& pixel) const
+P2DS GrayInterpolator::neighbors(const P2D& pixel) const
 {
-    std::vector<std::array<int, 2>> neighbors;
+    P2DS neighbors;
 
-    std::vector<std::array<int, 2>> four_neighbors{{
-        {{ int(std::floor(pixel[0])), int(std::floor(pixel[1])) }}, // (0, 0)
-        {{  int(std::ceil(pixel[0])), int(std::floor(pixel[1])) }}, // (1, 0)
-        {{  int(std::ceil(pixel[0])),  int(std::ceil(pixel[1])) }}, // (1, 1)
-        {{ int(std::floor(pixel[0])),  int(std::ceil(pixel[1])) }}  // (0, 1)
-    }};
+    P2DS four_neighbors = {
+        { int(std::floor(pixel[0])), int(std::floor(pixel[1])) }, // (0, 0)
+        {  int(std::ceil(pixel[0])), int(std::floor(pixel[1])) }, // (1, 0)
+        {  int(std::ceil(pixel[0])),  int(std::ceil(pixel[1])) }, // (1, 1)
+        { int(std::floor(pixel[0])),  int(std::ceil(pixel[1])) }  // (0, 1)
+    };
 
     // filtering neighbors with mask
     for (auto& p : four_neighbors)
@@ -208,7 +240,7 @@ std::vector<std::array<int, 2>> GRAYInterpolator::neighbors(const std::array<dou
     return neighbors;
 }
 
-double GRAYInterpolator::operator()(const cv::Mat& image, const std::array<double, 2>& pixel) const
+double GrayInterpolator::operator()(const cv::Mat& image, const P2D& pixel) const
 {
     // bilinear interpolation (4 neighbors)
     // f(x,y) \approx f(0,0) (1-x) (1-y)
@@ -216,7 +248,7 @@ double GRAYInterpolator::operator()(const cv::Mat& image, const std::array<doubl
                  // + f(0,1) (1-x)     y 
                  // + f(1,1)     x     y
 
-    const std::vector<std::array<int, 2>> n = neighbors(pixel);
+    const P2DS n = neighbors(pixel);
 
     // on  ramene les valeurs entre 0 et 1
     double x = pixel[0] - std::floor(pixel[0]);

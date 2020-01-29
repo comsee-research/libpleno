@@ -17,6 +17,7 @@
 //******************************************************************************
 template<typename Observations_t> Observations_t compute_barycenters(const Observations_t& observations);
 template<typename Observations_t> void get_3_corners(const Observations_t& observations, Observations_t& corners);
+
 //******************************************************************************
 template<typename CameraModel_t, typename Observations_t>
 void link_cluster_to_node_index(

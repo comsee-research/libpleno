@@ -8,6 +8,9 @@
 #include "geometry/pose.h"
 #include "geometry/ray.h"
 
+#include "io/printer.h"
+
+
 
 ////////////////////////////////////////////UnifiedCamera//////////////////////////////////////
 class UnifiedCamera final : public Camera //From libv
@@ -21,11 +24,16 @@ public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
 //Ctor/Dtor
-    UnifiedCamera(double fx,, double fy, double u0, double v0, double xi) : focals_{fx, fy}, center_{u0, v0}, xi_{xi} {}
+    UnifiedCamera(double fx=1.0, double fy=1.0, double u0=0.0, double v0=0.0, double xi=0.0) : focals_{fx, fy}, center_{u0, v0}, xi_{xi} {}
     virtual ~UnifiedCamera() override {}
     
 //Accessors	
-
+	const P2D& focal() const { return focals_; }
+	P2D& focal() { return focals_; }
+	
+	const P2D& center() const { return center_; }
+	P2D& center() { return center_; }
+	
 //Project and Raytrace
     bool project(const P3D& p3d_cam, P2D& pixel) const override 
     {

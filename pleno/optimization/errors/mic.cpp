@@ -2,8 +2,7 @@
 
 #include "geometry/reprojection.h"
 
-template<typename CameraModel_t>
-bool MicroImageCenterReprojectionError<CameraModel_t>::operator()(
+bool MicroImageCenterReprojectionError::operator()(
 	const Pose& mla_pose, const MLA_t& g, const Sensor& sensor, ErrorType& error
 ) const
 {    
@@ -25,6 +24,4 @@ bool MicroImageCenterReprojectionError<CameraModel_t>::operator()(
 
     return true;
 }
-
-template class MicroImageCenterReprojectionError<MultiFocusPlenopticCamera>;
 

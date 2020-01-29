@@ -27,7 +27,7 @@ Pose_<3>::Matrix rotation(const double a, const double b, const double g)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<std::size_t N>
 Pose_<N>::Pose_(const typename Pose_<N>::Matrix& rot, const typename Pose_<N>::Vector& trans)
-: _rotation(rot), _translation(trans)
+: rotation_(rot), translation_(trans)
 {}
 
 template<std::size_t N>
@@ -35,14 +35,14 @@ Pose_<N>::~Pose_()
 {}
 
 template<std::size_t N>
-typename Pose_<N>::Vector & Pose_<N>::translation() { return _translation; }
+typename Pose_<N>::Vector & Pose_<N>::translation() { return translation_; }
 template<std::size_t N>
-const typename Pose_<N>::Vector & Pose_<N>::translation() const { return _translation; }
+const typename Pose_<N>::Vector & Pose_<N>::translation() const { return translation_; }
 
 template<std::size_t N>
-typename Pose_<N>::Matrix & Pose_<N>::rotation() { return _rotation; }
+typename Pose_<N>::Matrix & Pose_<N>::rotation() { return rotation_; }
 template<std::size_t N>
-const typename Pose_<N>::Matrix & Pose_<N>::rotation() const { return _rotation; }
+const typename Pose_<N>::Matrix & Pose_<N>::rotation() const { return rotation_; }
 
 
 
@@ -50,8 +50,8 @@ template<std::size_t N>
 void Pose_<N>::serialize(v::InputArchive &archive)
 {
 	archive
-	("rotation", _rotation)
-	("translation", _translation)
+	("rotation", rotation_)
+	("translation", translation_)
 	;
 	//rotation(rotation_orthogonalize(rotation()));
 }
@@ -59,8 +59,8 @@ template<std::size_t N>
 void Pose_<N>::serialize(v::OutputArchive &archive) const
 {
 	archive
-	("rotation", _rotation)
-	("translation", _translation)
+	("rotation", rotation_)
+	("translation", translation_)
 	;
 }
 

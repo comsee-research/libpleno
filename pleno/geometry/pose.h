@@ -20,8 +20,8 @@ public:
 	using Point  = 	Vector; 
 
 private:
-	Matrix _rotation;
-	Vector _translation;
+	Matrix rotation_;
+	Vector translation_;
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	

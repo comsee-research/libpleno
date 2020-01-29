@@ -30,11 +30,11 @@ public:
 		Node operator*() const;
 	};
 private:
-    Pose_t _pose; // the pose of the grid (from node 0)
-    P2D _edge_length; // the mean distance between two nodes
+    Pose_t pose_; // the pose of the grid (from node 0)
+    P2D edge_length_; // the mean distance between two nodes
     
-    size_t _width, _height; // the size of the grid (number of nodes)
-    Geometry _geometry;
+    size_t width_, height_; // the size of the grid (number of nodes)
+    Geometry geometry_;
     	
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW

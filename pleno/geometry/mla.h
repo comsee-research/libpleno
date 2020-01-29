@@ -10,8 +10,8 @@
 
 struct MicroLensesArray : public GridMesh3D {
 private:
-	std::size_t _I = 3u; //number of micro-lens type
-	FocalLengths _focals;
+	std::size_t I_ = 3u; //number of micro-lens type
+	FocalLengths focals_;
 
 public:
 	MicroLensesArray(const MLAConfig& config = {}) {
@@ -21,35 +21,35 @@ public:
 		this->edge_length() = config.mesh().pitch();
 		this->pose() = config.mesh().pose();
 		
-		init(config.focal_lengths().size())
+		init(config.focal_lengths().size());
 		
 		for(std::size_t i=0; i<I(); ++i) 
-			this->_focals[i].f = config.focal_lengths()[i];
+			this->focals_[i].f = config.focal_lengths()[i];
 	}
 	
-	void init(std::size_t I_) { this->_I = I_; this->_focals.resize(I_); }
+	void init(std::size_t I) { this->I_ = I; this->focals_.resize(I); }
 	
-	std::size_t I() const { return _I; }
+	std::size_t I() const { return I_; }
 	
 	double f(std::size_t i) const { 
 		assert(i<I()); 
-		return _focals[i].f; 
+		return focals_[i].f; 
 	}
 	double& f(std::size_t i) { 
 		assert(i<I()); 
-		return _focals[i].f; 
+		return focals_[i].f; 
 	}
 	
 	FocalLength f(std::size_t k, std::size_t l) const {
 		assert(I()!=0u and k<width() and l<height());
 		const int t = lens_type(I(), k, l);
-		return _focals[t];
+		return focals_[t];
 	}
 	
 	FocalLength& f(std::size_t k, std::size_t l) {
 		assert(I()!=0u and k<width() and l<height());
 		const int t = lens_type(I(), k, l);
-		return _focals[t];
+		return focals_[t];
 	}
 		
 };

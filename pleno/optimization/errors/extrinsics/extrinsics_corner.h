@@ -5,19 +5,16 @@
 #include "types.h"
 
 #include "geometry/observation.h"
-
 #include "geometry/camera/plenoptic.h"
-
 #include "geometry/object/checkerboard.h"
 
-
-struct ExtrinsicsBlurAwarePlenopticReprojectionError
+struct ExtrinsicsCornerReprojectionError
 {
-	using ErrorType = Eigen::Matrix<double, 3, 1>; //u,v,rho
+	using ErrorType = Eigen::Matrix<double, 2, 1>; //u,v
 	
 	const PlenopticCamera& pcm;
 	const CheckerBoard &checkerboard;
-    const BAPObservation& observation;
+    const CBObservation& observation;
 
     bool operator()( 
     	const Pose& camera_pose,
@@ -28,8 +25,8 @@ struct ExtrinsicsBlurAwarePlenopticReprojectionError
 namespace ttt
 {
 	template<> 
-	struct Name<ExtrinsicsBlurAwarePlenopticReprojectionError> 
+	struct Name<ExtrinsicsCornerReprojectionError> 
 	{ 
-		static std::string name(){ return "ExtrinsicsBlurAwarePlenopticReprojectionError"; } 
+		static std::string name(){ return "ExtrinsicsCornerReprojectionError"; } 
 	};
 } // namespace ttt

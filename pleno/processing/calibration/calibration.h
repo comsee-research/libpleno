@@ -2,7 +2,7 @@
 
 #include "types.h"
 
-#include "geometry/camera/mfpc.h"
+#include "geometry/camera/models.h"
 #include "geometry/observation.h"
 
 #include "object/checkerboard.h"
@@ -15,7 +15,7 @@ void calibration_MIA(
 template<bool useCornerOnly = false>
 void calibration_MFPC(                   
 	CalibrationPoses& poses, /* out */                                 
-	MultiFocusPlenopticCamera& model, /* out */
+	PlenopticCamera& model, /* out */
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const MICObservations& centers, /* c_{k,l} */
@@ -24,7 +24,7 @@ void calibration_MFPC(
 
 void calibration_ExtrinsicsMFPC(                        
 	CalibrationPoses& poses, /* out */                   
-	const MultiFocusPlenopticCamera& model, /* in */   
+	const PlenopticCamera& model, /* in */   
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const std::vector<Image>& pictures, /* for GUI only */

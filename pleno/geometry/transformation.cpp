@@ -24,8 +24,8 @@ Eigen::Matrix<double, 3, 3> Transformation::k() const // pinhole mode
     static bool init = false;
     if (!init)
     {
-        m << ucm.focal.x(),           0.0, ucm.center.x(),
-                       0.0, ucm.focal.y(), ucm.center.y(),
+        m << ucm.focal().x(),           0.0, ucm.center().x(),
+                       0.0, ucm.focal().y(), ucm.center().y(),
                        0.0,           0.0,            1.0;
     }
     init = true;

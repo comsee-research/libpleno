@@ -1,67 +1,94 @@
 #pragma once
 
-#include "geometry/sensor.h"
-#include "geometry/camera/models.h"
+#include "types.h"
 
-class ThinLensCamera
+#include "camera.h"
+#include "pinhole.h"
+
+#include "geometry/sensor.h"
+#include "geometry/pose.h"
+#include "geometry/ray.h"
+
+#include "io/printer.h"
+
+////////////////////////////////////////////ThinLensCamera//////////////////////////////////////
+class ThinLensCamera final : public PinholeCamera
 {
+private:
+    double aperture_; // aperture of the lens
+    
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
-    ThinLensCameraModel tcm;
-    Sensor sensor;
+//Ctor/Dtor
+    ThinLensCamera(double f = 1.0, double aperture = 4.0, const Sensor& s = {}) : PinholeCamera{f, s}, aperture_{aperture} {}
+    virtual ~ThinLensCamera() override {}
+    
+//Accessors	    
+	double aperture() const { return aperture_; }
+    double& aperture() { return aperture_; }   
 
-    ThinLensCamera(const ThinLensCameraModel& t, const Sensor& s)
-    : tcm(t), sensor(s)
-    {}
-
-    bool project(const P3D& p3d_cam, P2D& pixel) const
-    {
-		P3D proj;
-		bool is_projected = tcm.project(p3d_cam, proj); // THINLENS
-		proj = from_coordinate_system_of(tcm.pose(), proj); // CAMERA
-
-		// linking proj and mainlens center
-		Ray3D ray;
-		ray.config(tcm.pose().translation(), proj); // CAMERA
-
-		proj = line_plane_intersection(sensor.planeInWorld(), ray); // CAMERA
-		proj = to_coordinate_system_of(sensor.pose(), proj); // SENSOR
-
-		pixel = sensor.metric2pxl(proj).head(2); // IMAGE XY
-  	
-    	xy2uv(pixel); //IMAGE UV
-
-		return is_projected;
-	}
-	
-    bool raytrace(const P2D& pixel, Eigen::Vector3d& direction) const
+//Computed parameters    
+    double diameter() const { return std::fabs(this->focal()) / this->aperture(); }
+    
+//Project and Raytrace
+	bool project(const P3D& p3d_cam, P3D& projection) const
 	{
-//FIXME:TEST_INVERSION    
-		P2D p = pixel; // IMAGE UV
-		uv2xy(p);// IMAGE XY
-		
-		P3D m {p[0], p[1], 0.0}; 
-		m = sensor.pxl2metric(m); // SENSOR
-		m = from_coordinate_system_of(sensor.pose(), m); // CAMERA
+		//the distance according to z axis
+		const double dist2pt = std::fabs(p3d_cam[2]);
 
-		Ray3D r;
-		r.config(m, tcm.pose().translation()); // CAMERA
-		direction = r.direction();
+		if (dist2pt == 0.0)
+		{
+		    PRINT_WARN("ThinLensCamera::project: the point is on the lens plane!");
+		    return false;
+		}
+		if (dist2pt == this->focal())
+		{
+		    PRINT_WARN("ThinLensCamera::project: the point is on the focal plane!");
+		    return false;
+		}
+
+		// projecting the point
+		projection = - this->focal() / (dist2pt - this->focal()) * p3d_cam;
 
 		return true;
 	}
+ 
+    bool raytrace(const Ray3D& ray_in, Ray3D& ray_out) const 
+    {
+		auto is_on_disk = [](const P2D& p, double disk_diameter) {
+			return p.norm() <= disk_diameter / 2.0 ;
+		};
+		
+		// project the origin of the ray_in using the Thin Lens equation  
+		P3D projected_point;
+		if ( this->project(ray_in.origin(), projected_point) )
+		{
+		    // compute the intersection point between the ray and the lens
+		    ray_out.origin() = line_plane_intersection(Eigen::Vector4d{0.0, 0.0, 1.0, 0.0}, ray_in);
 
-	void uv2xy(P2D& puv) const { puv[0] = sensor.width()-1 - puv[0]; puv[1] = sensor.height()-1 - puv[1];}
-	void xy2uv(P2D& pxy) const { pxy[0] = sensor.width()-1 - pxy[0]; pxy[1] = sensor.height()-1 - pxy[1];}
+		    // Testing if the ray hit the lens
+		    if ( is_on_disk(ray_out.origin().head(2), this->diameter()) )
+		    {
+		        ray_out.config(ray_out.origin(), projected_point);
+		        return true;
+		    }
+		    else
+		    {
+		        PRINT_DEBUG("ThinLensCamera::raytrace: the ray does not hit the lens!");
+		        return false;
+		    }
+		}
+
+		return false;
+    }   
 };
 
-inline std::ostream& operator<<(std::ostream& o, const ThinLensCamera& tc)
+inline std::ostream& operator<<(std::ostream& o, const ThinLensCamera& tcm)
 {
-    o 	<< " {" << std::endl
-    	<< "\tTCM = {" << std::endl << tc.tcm << std::endl << "}," << std::endl
-    	<< "\tSensor = {" << std::endl << tc.sensor << std::endl << "}" << std::endl
-    	<< "}";
+    o << "Focal (mm) = " << tcm.focal() << std::endl
+      << "Diameter (mm) = " << tcm.diameter() << std::endl
+      << "Pose = {" << std::endl << tcm.pose() << "}" << std::endl;
 
     return o;
 }

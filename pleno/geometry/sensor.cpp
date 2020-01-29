@@ -3,11 +3,11 @@
 #include <libv/geometry/plane_equation.hpp>
 
 Sensor::Sensor(size_t w, size_t h, double s)
-: _scale(s), _width(w), _height(h)
+: scale_{s}, width_{w}, height_{h}
 {}
 
 Sensor::Sensor(const SensorConfig& config)
-	: _pose{config.pose()}, _scale{config.scale()}, _width{config.width()}, _height{config.height()} 
+	: pose_{config.pose()}, scale_{config.scale()}, width_{config.width()}, height_{config.height()} 
 {
 }
 
@@ -16,65 +16,65 @@ Sensor::~Sensor()
 
 const Pose& Sensor::pose() const
 {
-	return _pose;
+	return pose_;
 }
 Pose& Sensor::pose()
 {
-	return _pose;
+	return pose_;
 }
 
 double Sensor::scale() const
 {
-	return _scale;
+	return scale_;
 }
 double& Sensor::scale()
 {
-	return _scale;
+	return scale_;
 }
 
 size_t Sensor::width() const
 {
-	return _width;
+	return width_;
 }
 size_t& Sensor::width()
 {
-	return _width;
+	return width_;
 }
 
 size_t Sensor::height() const
 {
-	return _height;
+	return height_;
 }
 size_t& Sensor::height()
 {
-	return _height;
+	return height_;
 }
           
 // the plane coefficients
 Eigen::Matrix<double, 4, 1> Sensor::plane() const
 {
     return v::plane_from_3_points(P3D{0.0, 0.0, 0.0},
-                                  P3D{double(_width), 0.0, 0.0},
-                                  P3D{double(_width), double(_height), 0.0});
+                                  P3D{double(width_), 0.0, 0.0},
+                                  P3D{double(width_), double(height_), 0.0});
 };
 
 // the plane coefficients in WORLD coordinate system
 Eigen::Matrix<double, 4, 1> Sensor::planeInWorld() const
 {
-    return v::plane_from_3_points(from_coordinate_system_of(_pose, P3D{0.0, 0.0, 0.0}),
-                                  from_coordinate_system_of(_pose, P3D{double(_width), 0.0, 0.0}),
-                                  from_coordinate_system_of(_pose, P3D{double(_width), double(_height), 0.0}));
+    return v::plane_from_3_points(from_coordinate_system_of(pose_, P3D{0.0, 0.0, 0.0}),
+                                  from_coordinate_system_of(pose_, P3D{double(width_), 0.0, 0.0}),
+                                  from_coordinate_system_of(pose_, P3D{double(width_), double(height_), 0.0}));
 };
 
 template<typename T>
 T Sensor::pxl2metric(const T& p) const
 {
-    return (p * _scale);
+    return (p * scale_);
 };
 template<typename T>
 T Sensor::metric2pxl(const T& p) const
 {
-    return (p / _scale);
+    return (p / scale_);
 };
 
 template double Sensor::pxl2metric(const double&) const;

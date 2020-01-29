@@ -1,7 +1,10 @@
 #include "plenoptic.h"
 
 #include "processing/tools/rotation.h"
+
 #include "io/printer.h"
+#include "io/cfg/camera.h"
+
 
 //******************************************************************************
 //******************************************************************************
@@ -32,6 +35,12 @@ ThinLensCamera& PlenopticCamera::main_lens() { return main_lens_; }
 
 const Distortions& PlenopticCamera::main_lens_distortions() const { return distortions_; }
 Distortions& PlenopticCamera::main_lens_distortions() { return distortions_; }
+
+double PlenopticCamera::focal() const { return main_lens().focal(); }
+double& PlenopticCamera::focal() { return main_lens().focal(); }   
+
+double PlenopticCamera::aperture() const { return main_lens().aperture(); }
+double& PlenopticCamera::aperture() { return main_lens().aperture(); }   
 
 //******************************************************************************
 //******************************************************************************
@@ -151,7 +160,7 @@ void PlenopticCamera::init(
 	mla_.pose().translation()[2] = - D; //set z coordinate
 	
 	//set focal lengths
-	mla_.init(I); for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params().c_prime[i]) * params().kappa_approx * (d / 2.); 
+	mla_.init(I); for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params_.c_prime[i]) * params_.kappa_approx * (d / 2.); 
 	
 	DEBUG_VAR(D);
 	DEBUG_VAR(d);
@@ -194,7 +203,7 @@ bool PlenopticCamera::project_through_micro_lens(const P3D& p, std::size_t k, st
     ray.config(Ckl_cam, p); // CAMERA
 
     // testing if the ray hits the main lens
-    is_projected = is_projected and hitmain_lens_(to_coordinate_system_of(main_lens().pose(), ray));
+    is_projected = is_projected and hit_main_lens(to_coordinate_system_of(main_lens().pose(), ray));
     	
     // computing intersection between sensor and ray
     P3D p_sensor = line_plane_intersection(sensor().planeInWorld(), ray); // CAMERA
@@ -279,7 +288,7 @@ bool PlenopticCamera::project(
     return is_projected_through_main_lens and is_projected_through_micro_lens;
 }
 
-bool MultiFocusPlenopticCamera::project(
+bool PlenopticCamera::project(
 	const P3D& p3d_cam,
     std::size_t k, std::size_t l,
     double& rho
@@ -457,8 +466,8 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 	if(pcm.mla().I() != 0u)
 	{
 		os << ","<< std::endl << "\tf = {"; 
-		int i; for(i=0; i<pcm.mla().I()-1; ++i) os << mfpc.mla().f(i) <<", ";
-		os << mfpc.mla().f(i) << "}" << std::endl;
+		std::size_t i=0; for(; i<pcm.mla().I()-1; ++i) os << pcm.mla().f(i) <<", ";
+		os << pcm.mla().f(i) << "}" << std::endl;
 	}
 		
 	return os;
@@ -491,8 +500,8 @@ void save(std::string path, const PlenopticCamera& pcm)
     config.mla().mesh().pitch() = pcm.mla().edge_length();
     config.mla().mesh().geometry() = pcm.mla().geometry();
     
-    config.mla().focal_lengths().resize(mla().I());
-    for(int i=0; i<mla().I(); ++i) config.mla().focal_lengths()[i] = pcm.mla().f(i);
+    config.mla().focal_lengths().resize(pcm.mla().I());
+    for(std::size_t i=0; i<pcm.mla().I(); ++i) config.mla().focal_lengths()[i] = pcm.mla().f(i);
 
 	// Configuring the Main Lens
     config.main_lens().pose().rotation() = pcm.main_lens().pose().rotation();
