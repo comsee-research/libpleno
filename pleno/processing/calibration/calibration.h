@@ -7,13 +7,18 @@
 
 #include "object/checkerboard.h"
 
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
 void calibration_MIA(
 	MicroImagesArray& grid, /* out */
 	const MICObservations& centers /* c_{k,l} */
 );
 
-template<bool useCornerOnly = false>
-void calibration_MFPC(                   
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+void calibration_MultiFocusPlenopticCamera(                   
 	CalibrationPoses& poses, /* out */                                 
 	PlenopticCamera& model, /* out */
 	const CheckerBoard & grid,
@@ -22,12 +27,30 @@ void calibration_MFPC(
 	const std::vector<Image>& pictures /* for GUI only */
 );
 
-void calibration_ExtrinsicsMFPC(                        
+void calibration_ExtrinsicsMultiFocusPlenopticCamera(                        
 	CalibrationPoses& poses, /* out */                   
 	const PlenopticCamera& model, /* in */   
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
-	const std::vector<Image>& pictures, /* for GUI only */
-	bool useCornerOnly
+	const std::vector<Image>& pictures /* for GUI only */
 );
 
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+void calibration_ExtrinsicsPlenopticCamera(                        
+	CalibrationPoses& poses, /* out */                   
+	const PlenopticCamera& model, /* in */   
+	const CheckerBoard & grid,
+	const BAPObservations& observations, /*  (u,v,rho) */
+	const std::vector<Image>& pictures /* for GUI only */
+);
+
+void calibration_PlenopticCamera(                   
+	CalibrationPoses& poses, /* out */                                 
+	PlenopticCamera& model, /* out */
+	const CheckerBoard & grid,
+	const BAPObservations& observations, /*  (u,v,rho) */
+	const MICObservations& centers, /* c_{k,l} */
+	const std::vector<Image>& pictures /* for GUI only */
+);

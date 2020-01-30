@@ -17,30 +17,30 @@
 
 #include "link.h"
 
-template<typename CameraModel_t, typename Observations_t>
+template<typename CameraModel, typename Observations>
 Pose select_best_pose(
-	const CameraModel_t& camera, 
+	const CameraModel& camera, 
 	const CheckerBoard& grid,
-    const Observations_t& observations, 
+    const Observations& observations, 
     const Poses& poses
 );
 
-template<typename CameraModel_t, typename Observations_t>
+template<typename CameraModel, typename Observations>
 Pose estimate_pose(
-	const CameraModel_t& model, 
+	const CameraModel& model, 
 	const CheckerBoard& grid, 
-	const Observations_t& barycenters
+	const Observations& barycenters
 );
 
-template<typename CameraModel_t, typename Observations_t>
+template<class CameraModel, class Observations>
 void init_extrinsics(
 	//OUT
-	Observations_t& features,
+	Observations& features,
 	CalibrationPoses& poses,
 	//IN
-	const CameraModel_t& model,
+	const CameraModel& model,
 	const CheckerBoard & grid,
-	const Observations_t& observations,
+	const Observations& observations,
 	//GUI
 	const std::vector<Image>& pictures /* for GUI only */
 );
@@ -48,11 +48,11 @@ void init_extrinsics(
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-template<typename CameraModel_t, typename Observations_t>
+template<typename CameraModel, typename Observations>
 Pose select_best_pose(
-	const CameraModel_t& camera, 
+	const CameraModel& camera, 
 	const CheckerBoard& grid,
-    const Observations_t& observations, 
+    const Observations& observations, 
     const Poses& poses
 )
 {
@@ -68,7 +68,7 @@ Pose select_best_pose(
     	PRINT_DEBUG("For pose p = " << p);
         RMSE rmse{0., 0};
         
-        Observations_t obs{observations.begin(), observations.end()};
+        Observations obs{observations.begin(), observations.end()};
         link_cluster_to_node_index(obs, obs, camera, grid, p);        
         
     	PRINT_DEBUG("For each observation, compute rmse");
@@ -109,11 +109,11 @@ Pose select_best_pose(
    	return rmse_poses[0].pose;
 }
 
-template<typename CameraModel_t, typename Observations_t>
+template<typename CameraModel, typename Observations>
 Pose estimate_pose(
-	const CameraModel_t& model, 
+	const CameraModel& model, 
 	const CheckerBoard& grid, 
-	const Observations_t& barycenters
+	const Observations& barycenters
 )
 {
 	//Configure monocular camera 
@@ -122,7 +122,7 @@ Pose estimate_pose(
 	
 	//Compute pose candidates using p3p
 	PRINT_DEBUG("Compute pose candidates using p3p");
-    Observations_t nodes; /* tl - bl - br */
+    Observations nodes; /* tl - bl - br */
     get_3_corners(barycenters, nodes); 
     for(auto& n : nodes) n.frame = barycenters[0].frame; //set the frame from observations
     
@@ -178,21 +178,21 @@ Pose estimate_pose(
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-template< typename Observations_t, typename CameraModel_t>
+template<class CameraModel, class Observations>
 void init_extrinsics(
 	//OUT
-	Observations_t& features,
+	Observations& features,
 	CalibrationPoses& poses,
 	//IN
-	const CameraModel_t& model,
+	const CameraModel& model,
 	const CheckerBoard & grid,
-	const Observations_t& observations,
+	const Observations& observations,
 	//GUI
 	const std::vector<Image>& pictures /* for GUI only */
 )
 {
 	//Split observations according to frame
-	std::unordered_map<int /* frame index */, Observations_t> obs;
+	std::unordered_map<int /* frame index */, Observations> obs;
 	for(const auto& ob : observations)
 		obs[ob.frame].push_back(ob);
 	
@@ -243,7 +243,7 @@ void init_extrinsics(
 
 		//Link cluster to node index
 		PRINT_DEBUG("Link cluster to node index of frame f = " << f);
-		link_cluster_to_node_index(ob, barycenters, monocular, grid, pose, true /* gui */);
+		link_cluster_to_node_index(ob, barycenters, monocular, grid, pose);
 			
 		GUI(	
 			BAPObservations ubarycenters = compute_barycenters(ob);			

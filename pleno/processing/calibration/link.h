@@ -15,15 +15,15 @@
 #include "geometry/observation.h"
 
 //******************************************************************************
-template<typename Observations_t> Observations_t compute_barycenters(const Observations_t& observations);
-template<typename Observations_t> void get_3_corners(const Observations_t& observations, Observations_t& corners);
+template<typename Observations> Observations compute_barycenters(const Observations& observations);
+template<typename Observations> void get_3_corners(const Observations& observations, Observations& corners);
 
 //******************************************************************************
-template<typename CameraModel_t, typename Observations_t>
+template<typename Observations, typename CameraModel>
 void link_cluster_to_node_index(
-    Observations_t& observations, /* in/out */
-    const Observations_t& barycenters,
-	const CameraModel_t& monocular, 
+    Observations& observations, /* in/out */
+    const Observations& barycenters,
+	const CameraModel& monocular, 
 	const CheckerBoard& grid,
     const Pose& pose
 );
@@ -32,17 +32,17 @@ void link_center_to_node_index(MICObservations& centers, const MIA& grid);
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-template<typename Observations_t>
-Observations_t compute_barycenters(const Observations_t& observations) 
+template<typename Observations>
+Observations compute_barycenters(const Observations& observations) 
 {
-	using Observation_t = typename Observations_t::value_type;
+	using Observation = typename Observations::value_type;
 	
 	//Split observations according to cluster
-	std::unordered_map<int /* cluster index */, Observations_t> obs;
+	std::unordered_map<int /* cluster index */, Observations> obs;
 	for(const auto& ob : observations)
 		obs[ob.cluster].push_back(ob);
 		
-	Observations_t barycenters;
+	Observations barycenters;
 	barycenters.reserve(obs.size());
 	
 	struct Accumulator {
@@ -56,12 +56,12 @@ Observations_t compute_barycenters(const Observations_t& observations)
 			ob.begin(),
 			ob.end(), 
 			Accumulator{0.,0.},
-			[](Accumulator acc, const Observation_t& current) {
+			[](Accumulator acc, const Observation& current) {
 				return Accumulator{acc.u + current[0], acc.v + current[1], acc.n+1};
 			}
 		);
 		
-		Observation_t temp; 
+		Observation temp; 
 			temp[0] = acc.u / acc.n; 
 			temp[1] = acc.v / acc.n;
 			temp.cluster = c;
@@ -75,13 +75,13 @@ Observations_t compute_barycenters(const Observations_t& observations)
 	return barycenters;
 }
 
-template<typename Observations_t>
-void get_3_corners(const Observations_t& observations, Observations_t& corners) /* tl - tr - br */
+template<typename Observations>
+void get_3_corners(const Observations& observations, Observations& corners) /* tl - tr - br */
 {
     corners.clear();
     corners.resize(3); /* tl - bl - br */
     
-    Observations_t obs{observations.begin(), observations.end()};
+    Observations obs{observations.begin(), observations.end()};
 	auto accessor = [](const auto& c) { return P2D{c[0], c[1]}; };
 
 	//---bottom-right
@@ -110,11 +110,11 @@ void get_3_corners(const Observations_t& observations, Observations_t& corners) 
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-template<typename CameraModel_t, typename Observations_t>
+template<typename Observations, typename CameraModel>
 void link_cluster_to_node_index(
-    Observations_t& observations, /* in/out */
-    const Observations_t& barycenters,
-	const CameraModel_t& monocular, 
+    Observations& observations, /* in/out */
+    const Observations& barycenters,
+	const CameraModel& monocular, 
 	const CheckerBoard& grid,
     const Pose& pose
 )

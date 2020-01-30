@@ -31,10 +31,9 @@
 #include "graphic/gui.h"
 #include "graphic/display.h"
 
+//calibration
 #include "link.h"
-#include "extrinsics.h"
-
-
+#include "init.h"
 
 template<bool useCornerOnly>
 void optimize(
@@ -156,273 +155,7 @@ void optimize(
     solver.solve(lma::DENSE, lma::enable_verbose_output());
 }
 
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
 #if 0
-//TOOLS
-BAPObservations compute_barycenters(const BAPObservations& observations) 
-{
-	//Split observations according to cluster
-	std::unordered_map<int /* cluster index */, BAPObservations> obs;
-	for(const auto& ob : observations)
-		obs[ob.cluster].push_back(ob);
-		
-	BAPObservations barycenters;
-	barycenters.reserve(obs.size());
-	
-	struct Accumulator {
-		double u, v;
-		double n = 0;
-	};
-		
-	for(const auto & [c, ob] : obs)
-	{		
-		Accumulator acc = std::accumulate(
-			ob.begin(),
-			ob.end(), 
-			Accumulator{0.,0.},
-			[](Accumulator acc, const BAPObservation& current) {
-				return Accumulator{acc.u + current.u, acc.v + current.v, acc.n+1};
-			}
-		);
-		
-		barycenters.emplace_back(
-			BAPObservation{
-				-1, -1, /* k,l */
-				acc.u / acc.n, acc.v / acc.n, -1., /* u,v,rho */
-				c, ob[0].frame
-			}
-		);
-	}
-	
-	return barycenters;
-}
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-template<typename CameraModel_t>
-void link_cluster_to_node_index(
-    BAPObservations& observations, /* in/out */
-    const BAPObservations& barycenters,
-	const CameraModel_t& monocular, 
-	const CheckerBoard& grid,
-    const Pose& pose,
-    bool enable_gui = false
-)
-{
-	std::unordered_map<int /* old id */, int /* new id */> id_mapping;
-		
-	//Find mean dist inter-reprojected node
-	P2D p00, p01, p10;
-	monocular.project(to_coordinate_system_of(pose, grid.nodeInWorld(0,0)), p00);
-	monocular.project(to_coordinate_system_of(pose, grid.nodeInWorld(grid.width()-1, 0)), p01);
-	monocular.project(to_coordinate_system_of(pose, grid.nodeInWorld(0, grid.height()-1)), p10);
-	const double interdist = ( 
-								std::hypot(p00[0] - p01[0], p00[1] - p01[1]) / static_cast<double>(grid.width()-1)
-							 + 	std::hypot(p00[0] - p10[0], p00[1] - p10[1])  / static_cast<double>(grid.height()-1)
-							 ) / 2. ;
-	constexpr double tolerance = 0.6;
-	
-	//For each checkerboard node
-	for(std::size_t k = 0; k < grid.width(); ++k) //iterate through columns //x-axis
-    {
-    	for(std::size_t l = 0; l < grid.height(); ++l) //iterate through lines //y-axis
-		{
-			const int id = l * grid.width() + k; //node id
-			
-			//Project node in image
-			const P3D p3d_cam = to_coordinate_system_of(pose, grid.nodeInWorld(k,l));		
-			P2D projection; // a projected checkerboard node in IMAGE UV
-        	bool projected = monocular.project(p3d_cam, projection);
-        	       	
-        	if(not projected) 
-        	{ 
-        		PRINT_ERR("CheckerBoard Node ("<<k<<", "<<l<<") not reprojected in image"); 
-        		continue; 
-        	}	
-        	
-        	//Find nearest cluster
-        	int cluster = -1;
-        	double dist = 1e20;
-        	for(const auto &ob : barycenters)
-        	{
-        		const double new_dist = std::hypot(ob.u - projection[0], ob.v - projection[1]);
-        		if( new_dist < dist and new_dist < interdist * tolerance) 
-        		{
-        			dist = new_dist;
-        			cluster = ob.cluster;
-        		}
-        	}
-			
-			if(enable_gui)		
-			{
-				GUI(
-					RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer())
-						.point_style(v::Cross).pen_color(v::cyan).pen_width(5)
-						.add_text(projection[0], projection[1] + 5, "("+std::to_string(k)+", "+std::to_string(l)+")")
-						.name("Projected nodes"),
-						projection
-					);
-				);
-			}
-			
-			if(cluster != -1 and id_mapping.count(cluster) == 0) 
-				id_mapping[cluster] = id;
-		}
-	}
-	
-	if(enable_gui)	
-	{
-		GUI(
-			Viewer::context().point_style(v::Pixel); //restore point style
-			Viewer::update();
-		);
-	}
-	//Assign new cluster id
-	for (auto& o : observations)
-	{
-		if(id_mapping.count(o.cluster) > 0) 
-			o.cluster = id_mapping[o.cluster];
-		else
-		{
-			o.cluster = -1;
-			o.isValid = false;		
-		}
-	}
-}
-#endif
-#if 0
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-template<typename CameraModel_t, typename Observations_t>
-Pose select_best_pose(
-	const CameraModel_t& camera, 
-	const CheckerBoard& grid,
-    const Observations_t& observations, 
-    const Poses& poses
-)
-{
-    struct PoseWithError { Pose pose; RMSE rmse; };
-    using PosesWithError = AlignedVector<PoseWithError>;
-       
-    PosesWithError rmse_poses;
-    rmse_poses.reserve(poses.size());
-
-    // for each camera pose
-    for (const auto& p : poses)
-    {
-    	PRINT_DEBUG("For pose p = " << p);
-        RMSE rmse{0., 0};
-        
-        Observations_t obs{observations.begin(), observations.end()};
-        link_cluster_to_node_index(obs, obs, camera, grid, p);        
-        
-    	PRINT_DEBUG("For each observation, compute rmse");
-        for (const auto& o : obs)
-        {
-            if(o.cluster == -1) { rmse.add(1e10); continue; }
-            
-            const P3D p3d_cam = to_coordinate_system_of(p, grid.nodeInWorld(o.cluster));
-            
-            P2D prediction; // a projected chessboard node projected in IMAGE UV
-            if (camera.project(p3d_cam, prediction))
-            {
-                rmse.add( P2D{P2D{o[0], o[1]} - prediction} );
-            }
-            else //projected outside the checkboard
-            {
-            	//PRINT_ERR("Node projected outside of sensor");
-                rmse.add(1e10); // penalty
-                break;
-            }
-        }
-        
-        if(p.translation().z() > 0.) rmse.add(1e20); // penalty if pose is on the otherside
-
-        rmse_poses.emplace_back(PoseWithError{p, rmse});
-    }
-	
-	PRINT_DEBUG("Find the best pose with the lowest rmse");
-    // then sort the tuple according to rms
-    std::sort(
-    	rmse_poses.begin(), rmse_poses.end(),
-		[](const auto& a, const auto& b) { 
-              return a.rmse.get() < b.rmse.get(); 
-        }
-    );
-	
-	PRINT_DEBUG("Best pose is p = " << rmse_poses[0].pose);
-   	return rmse_poses[0].pose;
-}
-
-template<typename CameraModel_t, typename Observations_t>
-Pose estimate_pose(
-	const CameraModel_t& model, 
-	const CheckerBoard& grid, 
-	const Observations_t& barycenters
-)
-{
-	//Configure monocular camera 
-	PRINT_DEBUG("Configure monocular camera ");
-	ThinLensCamera monocular(model.main_lens(), model.sensor());
-	
-	//Compute pose candidates using p3p
-	PRINT_DEBUG("Compute pose candidates using p3p");
-    Observations_t nodes; /* tl - tr - br */
-    get_3_corners(barycenters, nodes); 
-    for(auto& n : nodes) n.frame = barycenters[0].frame; //set the frame from observations
-    
-    GUI(
-    	for(const auto& n : nodes)
-			RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer())
-				.point_style(v::Cross).pen_color(v::pink).pen_width(5)
-				.name("Nodes for p3p"),
-				P2D{n[0], n[1]}
-			);
-		Viewer::context().point_style(v::Pixel); //restore point style
-		Viewer::update();
-	);
-    
-    std::array<Ray3D, 3> rays; // computing rays corresponding to each nodes
-    {
-		for (size_t i = 0; i < rays.size(); ++i)
-		{
-		    rays.at(i).origin() = {0., 0., 0.};
-		    P2D pixel = P2D{nodes[i][0], nodes[i][1]}; //in UV space
-		    		    
-		    monocular.raytrace(pixel, rays.at(i).direction());
-		}
-    }
-
-    // computing p3p
-    Poses candidates(4);
-	/** 
-	 * IN UV SPACE :
-	 *  - the top-left 		(tl) corner is the (0,0) 	node
- 	 *	- the top-right 	(tr) corner is the (K, 0) 	node
-	 *	- the bottom-right 	(br) corner is the (K,L) 	node
-	 **/ 
-    bool p3p_ok = solve_p3p(
-    	grid.nodeInWorld(0), //tl
-    	grid.nodeInWorld(grid.width() - 1), //tr
-		grid.nodeInWorld(grid.nodeNbr() -1), //br
-		rays.at(0).direction(), 
-		rays.at(1).direction(),
-		rays.at(2).direction(),
-		candidates
-	);
-
-	DEBUG_VAR(p3p_ok);
-	
-	//Select best using RANSAC
-	PRINT_DEBUG("Select best using RANSAC");
-	Pose extrinsics = select_best_pose(monocular, grid, barycenters, candidates);
-			
-	return extrinsics;
-}
-#endif
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -506,7 +239,6 @@ GUI(
 	}
 ); //END GUI
 }
-
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -597,93 +329,11 @@ void evaluate_rmse(
 	
 	ofs << oss.str();
 }
-
-#if 0
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-void init_extrinsics(
-	//OUT
-	BAPObservations& features,
-	CalibrationPoses& poses,
-	//IN
-	const MultiFocusPlenopticCamera& model,
-	const CheckerBoard & grid,
-	const BAPObservations& observations,
-	//GUI
-	const std::vector<Image>& pictures /* for GUI only */
-)
-{
-	//Split observations according to frame
-	std::unordered_map<int /* frame index */, BAPObservations> obs;
-	for(const auto& ob : observations)
-		obs[ob.frame].push_back(ob);
-	
-	//Configure monocular camera
-	const ThinLensCamera monocular(model.main_lens(), model.sensor());
-	
-	//CalibrationPoses poses;
-	poses.clear();
-	poses.reserve(pictures.size());	
-	
-	//For each frame 
-	for(auto & [f, ob] : obs)
-	{
-		Viewer::stash();
-		//Estimate barycenters
-		PRINT_DEBUG("Estimate barycenters of frame f = " << f);
-		BAPObservations barycenters = compute_barycenters(ob); //IMAGE UV
-		
-		GUI(
-			PRINT_DEBUG("[GUI] Display information of frame f = " << f);
-		#if 0		
-			RENDER_DEBUG_2D(
-				Viewer::context().layer(Viewer::layer()++).name("Frame f = "+std::to_string(f)), 
-				pictures[f]
-			);	
-		#endif	
-			display(f, ob);
-			display(f, barycenters, tag::Barycenters{});	
-		);
-				
-		//Estimate Pose
-		PRINT_DEBUG("Estimate Pose of frame f = " << f);
-		Pose pose = estimate_pose(model, grid, barycenters);
-		
-		PRINT_DEBUG("Sanity check of pose frame f = " << f);
-		if( pose.translation()[2] > 0. 
-			or not(((pose.translation().array() == pose.translation().array())).all()) //check is_nan
-			or not(((pose.rotation().array() == pose.rotation().array())).all()) //check is_nan
-		) 
-		{
-			PRINT_ERR("Wrong hypothesis. Can't fix it. Remove pose and observations of frame f = " << f <<".");
-			DEBUG_VAR(pose);
-			Viewer::pop();
-			continue;
-		}
-		
-		DEBUG_VAR(pose);
-
-		//Link cluster to node index
-		PRINT_DEBUG("Link cluster to node index of frame f = " << f);
-		link_cluster_to_node_index(ob, barycenters, monocular, grid, pose);
-			
-		GUI(	
-			BAPObservations ubarycenters = compute_barycenters(ob);			
-			display(f, ob);
-			display(f, ubarycenters, tag::Barycenters{});
-				
-			Viewer::pop();
-			std::getchar();	
-		);
-		//Viewer::enable(false);
-		
-		poses.emplace_back( CalibrationPose{ pose, f } );
-		features.insert(features.end(), ob.begin(), ob.end());	
-	}
-}
-
 #endif
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+
 
 //******************************************************************************
 //******************************************************************************
@@ -710,7 +360,6 @@ void calibration_MFPC(
 		model, grid, observations,
 		pictures
 	);
-
 //2) Sanitize Observations
 	PRINT_INFO("=== Sanitize Observations");
 	
@@ -766,7 +415,6 @@ void calibration_MFPC(
 	
 	PRINT_DEBUG("Optimized model:");
 	{
-		
 		DEBUG_VAR(model);
 		
 		save("model-intrinsics-"+std::to_string(getpid())+".js", model);
@@ -820,7 +468,7 @@ void calibration_ExtrinsicsMFPC(
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const std::vector<Image>& pictures, /* for GUI only */
-	bool useCornerOnly = false
+	bool useCornerOnly
 )
 {
 	BAPObservations features;
@@ -833,7 +481,7 @@ void calibration_ExtrinsicsMFPC(
 		model, grid, observations,
 		pictures
 	);
-	
+
 //2) Sanitize Observations
 	PRINT_INFO("=== Sanitize Observations");	
 	PRINT_DEBUG("Remove not affected features");

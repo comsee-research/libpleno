@@ -132,8 +132,8 @@ inline void display(int f /* frame */, const BAPObservations& obs)
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-template<typename Observations_t>
-inline void display(int f /* frame */, const Observations_t& barycenters, tag::Barycenters)
+template<typename Observations>
+inline void display(int f /* frame */, const Observations& barycenters, tag::Barycenters)
 {
 	v::Palette<int> palette;
 	
@@ -143,7 +143,7 @@ inline void display(int f /* frame */, const Observations_t& barycenters, tag::B
   			Viewer::context().layer(Viewer::layer())
   				.name("Barycenters ("+std::to_string(f)+")")
   				.pen_color(palette[b.cluster]).pen_width(3)
-				.add_text(b[0], b[1] - 5, std::to_string(b.cluster)),
+				.addext(b[0], b[1] - 5, std::to_string(b.cluster)),
   			Disk{b[0], b[1], 50} //FIXME: 50 is arbitrary
 		);	
 	}
@@ -153,11 +153,96 @@ inline void display(int f /* frame */, const Observations_t& barycenters, tag::B
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
-template<typename Observations_t>
-inline void display(int f /* frame */, const MICObservations& centers, const Observations_t& obs, const Observations_t& barycenters)
+template<typename Observations>
+inline void display(int f /* frame */, const MICObservations& centers, const Observations& obs, const Observations& barycenters)
 {
 	display(f, centers);
 	display(f, obs);
 	display(f, barycenters, tag::Barycenters{});
 }
 
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+template<typename Observations>
+inline void display(
+	const PlenopticCamera& mfpc,
+	const CalibrationPoses& poses,
+	const CheckerBoard & grid,
+	const Observations& observations,
+	const MICObservations& centers,
+	const std::vector<Image>& pictures
+)
+{
+	//Split observations according to frame
+	std::unordered_map<int /* frame index */, BAPObservations> obs;
+	for(const auto& ob : observations)
+		obs[ob.frame].push_back(ob);
+		
+	auto model = mfpc;
+	
+	display(grid); display(poses);
+	
+	v::Palette<int> palette;
+
+	const Viewer::Layer center_layer = 100;
+	for(const auto& c : centers)
+	{	
+		RENDER_DEBUG_2D(
+  			Viewer::context().layer(center_layer)
+  				.name("Center")
+  				.pen_color(v::purple).pen_width(1),
+  			P2D{c[0], c[1]}
+		);
+		const auto p = reproject_miccenter(model, c);
+		RENDER_DEBUG_2D(
+  			Viewer::context().layer(center_layer+1)
+  				.name("Reprojected Center")
+  				.pen_color(v::cyan).pen_width(1),
+  			p
+		);		
+	}
+	Viewer::update();
+	Viewer::update();
+
+//For each frame 
+	for(auto & [f, ob] : obs)
+	{
+		PRINT_DEBUG("Display information of frame f = " << f);
+		
+		for(const auto& [p,f] : poses) if(f == ob[0].frame) model.pose() = p;
+		display(model);
+#if 1		
+		RENDER_DEBUG_2D(
+			Viewer::context().layer(Viewer::layer()++).name("Frame f = "+std::to_string(f)), 
+			pictures[f]
+		);
+#endif	
+		for(const auto& o : ob)
+		{				
+			RENDER_DEBUG_2D(
+	  			Viewer::context().layer(Viewer::layer()++)
+	  				.name("BAP ("+std::to_string(f)+")")
+	  				.point_style(v::Pixel)
+	  				.pen_color(palette[o.cluster]).pen_width(2),
+	  			Disk{o[0], o[1], (std::is_save_v<Observations, BAPObservations>?o[2]:0.0)}
+			);
+			
+			const P2D corner = reproject_corner(model, model.pose(), grid, o);
+			const double radius = (std::is_save_v<Observations, BAPObservations>) ? reproject_radius(model, model.pose(), grid, o) : 0.0;
+
+			RENDER_DEBUG_2D(
+	  			Viewer::context().layer(Viewer::layer()--)
+	  				.name("Reprojected BAP ("+std::to_string(f)+")")
+					.point_style(v::Cross)
+	  				.pen_color(palette[o.cluster+1]).pen_width(2),
+	  			Disk{corner, radius}
+			);
+		}
+
+		Viewer::context().point_style(v::Pixel); //restore point style
+		Viewer::update();
+		Viewer::update();
+		std::getchar();	
+	}
+}

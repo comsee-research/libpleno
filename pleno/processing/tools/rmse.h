@@ -1,9 +1,12 @@
 #pragma once
+
+#include "types.h"
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // https://en.wikipedia.org/wiki/Root-mean-square_deviation
 struct RMSE
 {
-    double value;
+    double value = 0.0;
     int size = 0;
     
     void add(double d) { size+=1; value += d * d; }
@@ -16,4 +19,10 @@ struct RMSE
     double sum() const {
     	return value; // / 2; //FIXME: /2 to be homogeneous with LMA, find why ?
     }
+    
+    RMSE& operator+=(const RMSE& rhs){
+		  this->value += rhs.value;
+		  this->size += rhs.size;
+		  return *this;
+	}
 };

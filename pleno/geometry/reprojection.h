@@ -10,7 +10,7 @@
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-P2D reproject_miccenter(const PlenopticCamera& model, const MICObservation& c)
+inline P2D reproject_miccenter(const PlenopticCamera& model, const MICObservation& c)
 {	
 	//observation indexes in ML space
 	const P3D ml_center = from_coordinate_system_of(
