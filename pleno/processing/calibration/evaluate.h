@@ -43,7 +43,7 @@ RMSE compute_rmse_corner(
 	RMSE rmse;
 	for(const auto& o : ob)
 	{	
-		const auto p = reproject_corner(model, model.pose(), grid, o)
+		const auto p = reproject_corner(model, model.pose(), grid, o);
 		const P2D residual{P2D{o[0], o[1]} - p};
 		
 		rmse.add(residual);
@@ -59,10 +59,10 @@ RMSE compute_rmse_radius(
 )
 {
 	RMSE rmse;
-	if constexpr (std::is_save_v<Observations, BAPObservations) {
+	if constexpr (std::is_same_v<Observations, BAPObservations>) {
 		for(const auto& o : ob)
 		{	
-			const double p = reproject_radius(model, model.pose(), grid, o)
+			const double p = reproject_radius(model, model.pose(), grid, o);
 			const double residual = o[2] - p;
 			
 			rmse.add(residual);
@@ -109,17 +109,17 @@ void evaluate_rmse(
 	
 //For each frame 
 	RMSE rmse_bap_all{0., 0}, rmse_corner_all{0., 0}, rmse_radius_all{0., 0};	
-	for(auto & [f, ob] : obs)
+	for(auto & [f, o] : obs)
 	{
-		for(const auto& [p,f] : poses) if(f == ob[0].frame) model.pose() = p;
+		for(const auto& [p,f] : poses) if(f == o[0].frame) model.pose() = p;
 		
 		PRINT_DEBUG("Frame = " << f);
 		
-		RMSE rmse_corner = compute_rmse_corner(model, model.pose(), grid, o);
+		RMSE rmse_corner = compute_rmse_corner(model, grid, o);
 		PRINT_DEBUG("uv\t"<< (rmse_corner.sum()) << "\t\t" << rmse_corner.get());
-		rmse_corner_all += rmse_corner
+		rmse_corner_all += rmse_corner;
 		
-		RMSE rmse_radius = compute_rmse_radius(model, model.pose(), grid, o);
+		RMSE rmse_radius = compute_rmse_radius(model, grid, o);
 		PRINT_DEBUG("rho\t"<< (rmse_radius.sum()) << "\t\t" << rmse_radius.get());
 		rmse_radius_all += rmse_radius;
 			
@@ -133,9 +133,9 @@ void evaluate_rmse(
 		{	
 			std::ostringstream oss;	
 			oss << f 					<< ","
-				<< rmse_corner.get() 	<< ",";
+				<< rmse_corner.get() 	<< ","
 				<< rmse_radius.get() 	<< ","
-				<< rmse_bap.get()		<< ",";
+				<< rmse_bap.get()		<< ","
 				<< 0. 					<< "\n"; 
 			ofs << oss.str();
 		}

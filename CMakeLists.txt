@@ -240,7 +240,7 @@ set(PLENO_PROCESSING_SRC
 	pleno/processing/preprocess.cpp
 #--Calibration
 	pleno/processing/calibration/mia.cpp	
-	pleno/processing/calibration/mfpc.cpp	
+	pleno/processing/calibration/plenoptic.cpp	
 #--Detection
 	pleno/processing/detection/mic.cpp
 	pleno/processing/detection/corners/corners.cpp

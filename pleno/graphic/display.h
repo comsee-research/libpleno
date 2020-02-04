@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include "graphic/gui.h"
 
 #include "graphic/viewer_3d.h"
@@ -9,6 +11,7 @@
 
 #include "geometry/camera/plenoptic.h"
 #include "geometry/observation.h"
+#include "geometry/reprojection.h"
 
 #include "geometry/object/checkerboard.h"
 
@@ -143,7 +146,7 @@ inline void display(int f /* frame */, const Observations& barycenters, tag::Bar
   			Viewer::context().layer(Viewer::layer())
   				.name("Barycenters ("+std::to_string(f)+")")
   				.pen_color(palette[b.cluster]).pen_width(3)
-				.addext(b[0], b[1] - 5, std::to_string(b.cluster)),
+				.add_text(b[0], b[1] - 5, std::to_string(b.cluster)),
   			Disk{b[0], b[1], 50} //FIXME: 50 is arbitrary
 		);	
 	}
@@ -175,7 +178,7 @@ inline void display(
 )
 {
 	//Split observations according to frame
-	std::unordered_map<int /* frame index */, BAPObservations> obs;
+	std::unordered_map<int /* frame index */, Observations> obs;
 	for(const auto& ob : observations)
 		obs[ob.frame].push_back(ob);
 		
@@ -225,11 +228,11 @@ inline void display(
 	  				.name("BAP ("+std::to_string(f)+")")
 	  				.point_style(v::Pixel)
 	  				.pen_color(palette[o.cluster]).pen_width(2),
-	  			Disk{o[0], o[1], (std::is_save_v<Observations, BAPObservations>?o[2]:0.0)}
+	  			Disk{o[0], o[1], (std::is_same_v<Observations, BAPObservations>?o[2]:0.0)}
 			);
 			
 			const P2D corner = reproject_corner(model, model.pose(), grid, o);
-			const double radius = (std::is_save_v<Observations, BAPObservations>) ? reproject_radius(model, model.pose(), grid, o) : 0.0;
+			const double radius = (std::is_same_v<Observations, BAPObservations>) ? reproject_radius(model, model.pose(), grid, o) : 0.0;
 
 			RENDER_DEBUG_2D(
 	  			Viewer::context().layer(Viewer::layer()--)

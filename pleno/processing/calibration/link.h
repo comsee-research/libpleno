@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "processing/algorithms/neighbour_search.h"
+#include "processing/algorithms/p3p.h"
 
 #include "geometry/object/checkerboard.h"
 #include "geometry/camera/camera.h"
@@ -13,6 +14,9 @@
 #include "geometry/pose.h"
 #include "geometry/mia.h"
 #include "geometry/observation.h"
+
+#include "processing/tools/matrix.h"
+
 
 //******************************************************************************
 template<typename Observations> Observations compute_barycenters(const Observations& observations);

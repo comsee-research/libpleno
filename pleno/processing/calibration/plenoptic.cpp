@@ -1,7 +1,5 @@
 #include "calibration.h"
 
-#include <omp.h>
-
 #include <type_traits> // std::remove_reference_t
 
 //optimization
@@ -9,17 +7,8 @@
 #include "optimization/errors/mic.h" //MICReprojectionError
 #include "optimization/errors/corner.h" //CornerReprojectionError
 #include "optimization/errors/radius.h" //RadiusReprojectionError
-#include "optimization/errors/extrinsics/extrinsics_bap.h" //ExtrinsicsBAPReprojectionError
-
-#include "geometry/reprojection.h" //bap reprojection + mic reprojection
-
-//processing
-#include "processing/tools/rmse.h"		
-#include "processing/tools/vector.h" // random_n_unique
-#include "processing/tools/matrix.h" // index_to_colRow
-
-#include "processing/algorithms/neighbour_search.h"
-#include "processing/algorithms/p3p.h"
+#include "optimization/errors/extrinsics/extrinsics_corner.h" //ExtrinsicsCornerReprojectionError
+#include "optimization/errors/extrinsics/extrinsics_bap.h" //ExtrinsicsBlurAwarePlenopticReprojectionError
 
 //io
 #include "io/cfg/observations.h" // save and load
@@ -32,28 +21,36 @@
 #include "graphic/display.h"
 
 //calibration
-#include "link.h"
 #include "init.h"
+#include "link.h"
+#include "evaluate.h"
 
-template<bool useCornerOnly>
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+template<bool useCornerOnly, typename Observations>
 void optimize(
 	//OUT
 	CalibrationPoses& poses, /* extrinsics */
 	PlenopticCamera& model, /* intrinsics */
 	//IN
 	const CheckerBoard & checkboard,
-	const BAPObservations& observations, /*  (u,v,rho) */
+	const Observations& observations, /*  (u,v,rho?) */
 	const MICObservations& centers /* c_{k,l} */
 )
 {	
+	constexpr bool useRadius = not(std::is_same_v<Observations, CBObservations>) and not(useCornerOnly); 
+	
 	using Solver_t = typename
-		std::conditional<useCornerOnly,
-			lma::Solver<CornerReprojectionError, MicroImageCenterReprojectionError>,
-			lma::Solver<CornerReprojectionError, RadiusReprojectionError, MicroImageCenterReprojectionError>
-		>::type;
+		std::conditional<useRadius,
+			lma::Solver<CornerReprojectionError, RadiusReprojectionError, MicroImageCenterReprojectionError>,
+			lma::Solver<CornerReprojectionError, MicroImageCenterReprojectionError>
+		>::type;	
+		
+	//using Solver_t = lma::Solver<CornerReprojectionError, MicroImageCenterReprojectionError>;
 
-	Solver_t solver{1e-4, 20, 1.0 - 1e-6};//std::numeric_limits<double>::epsilon()};
-
+	Solver_t solver{1e-4, 25, 1.0 - 1e-6};//std::numeric_limits<double>::epsilon()};
+	
 	auto extract_f = [&model](std::size_t k, size_t l) -> FocalLength& {
 		P2D pkl{k,l}; //ML
 		model.ml2mi(pkl); //MI
@@ -62,7 +59,7 @@ void optimize(
 	}; 
 	
 	//split observations according to frame index
-	std::unordered_map<Index /* frame index */, BAPObservations> obs;
+	std::unordered_map<Index /* frame index */, Observations> obs;
 	for(const auto& ob : observations)
 		obs[ob.frame].push_back(ob);		
 
@@ -82,7 +79,7 @@ void optimize(
 				&model.main_lens()//, 
 				, &model.main_lens_distortions()
 			);
-			if constexpr (not useCornerOnly)
+			if constexpr (useRadius)
 			{		
 				//ADD RADIUS OBSERVATIONS
 				solver.add(
@@ -114,67 +111,17 @@ void optimize(
     solver.solve(lma::DENSE, lma::enable_verbose_output());
 }
 
-template void optimize<true>(
-	CalibrationPoses&, PlenopticCamera&, const CheckerBoard&,const BAPObservations&, const MICObservations&);
-template void optimize<false>(
-	CalibrationPoses&, PlenopticCamera&, const CheckerBoard&,const BAPObservations&, const MICObservations&);
-	
-	
-void optimize(
-	//OUT
-	CalibrationPoses& poses, /* extrinsics */
-	//IN
-	const PlenopticCamera& model, /* intrinsics */
-	const CheckerBoard & checkboard,
-	const BAPObservations& observations /*  (u,v,rho) */
-)
-{
-	using ExtrinsicsBAPReprojectionError = ExtrinsicsBlurAwarePlenopticReprojectionError;
-	using Solver_t = lma::Solver<ExtrinsicsBAPReprojectionError>;
-
-	Solver_t solver{1e-4, 1000, 1.0 - 1e-8};//std::numeric_limits<double>::epsilon()};
-
-	//split observations according to frame index
-	std::unordered_map<Index /* frame index */, BAPObservations> obs;
-	for(const auto& ob : observations)
-		obs[ob.frame].push_back(ob);		
-
-	for (auto & [p, frame] : poses) //for each frame with its pose
-	{
-		for (const auto& o : obs[frame]) //for each observation of this frame
-		{
-			solver.add(
-				ExtrinsicsBAPReprojectionError{
-					model, checkboard, o
-				},
-				&p
-			);
-		}
-	}
-
-    solver.solve(lma::DENSE, lma::enable_verbose_output());
-}
-
-
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-
-
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-template<bool useCornerOnly>
-void calibration_MFPC(                 
+template<bool useCornerOnly, typename Observations>
+void calibration(                 
 	CalibrationPoses& poses, /* out */                                   
 	PlenopticCamera& model, /* out */
 	const CheckerBoard & grid,
-	const BAPObservations& observations, /*  (u,v,rho) */
+	const Observations& observations, /*  (u,v,rho) */
 	const MICObservations& micenters, /* c_{k,l} */
 	const std::vector<Image>& pictures /* for GUI only */
 )
 {
-	BAPObservations features;
+	Observations features;
 	features.reserve(observations.size());
 	
 	MICObservations centers{micenters.begin(), micenters.end()};
@@ -225,6 +172,7 @@ void calibration_MFPC(
 	optimize<useCornerOnly>(poses, model, grid, features, centers);
 	
 	PRINT_INFO("=== Optimization finished! Results:");
+#if 0
 	if constexpr (useCornerOnly)
 	{
 		auto update_focal_lengths = [&model]() -> void { 
@@ -238,7 +186,7 @@ void calibration_MFPC(
 		};	
 		update_focal_lengths();
 	}
-	
+#endif	
 	PRINT_DEBUG("Optimized model:");
 	{
 		DEBUG_VAR(model);
@@ -273,31 +221,103 @@ Viewer::enable(true);
 	PRINT_INFO("=== Computing individual RMSE");
 	evaluate_rmse(model, poses, grid, features, centers);
 	PRINT_INFO("=== Graphically checking the parameters");
-	visualize(model, poses, grid, features, centers, pictures);
+	display(model, poses, grid, features, centers, pictures);
 	
 	std::getchar();		
 }
 
-template void calibration_MFPC<true>(                 
-	CalibrationPoses&, PlenopticCamera&, const CheckerBoard&, 
-	const BAPObservations&, const MICObservations&, const std::vector<Image>&);
-template void calibration_MFPC<false>(                 
-	CalibrationPoses&, PlenopticCamera&, const CheckerBoard&, 
-	const BAPObservations&, const MICObservations&, const std::vector<Image>&);
 
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-void calibration_ExtrinsicsMFPC(                        
+template<typename Observations>
+void calibration_PlenopticCamera(                   
+	CalibrationPoses& poses, /* out */                                 
+	PlenopticCamera& model, /* out */
+	const CheckerBoard & grid,
+	const Observations& observations, /*  (u,v,rho?) */
+	const MICObservations& centers, /* c_{k,l} */
+	const std::vector<Image>& pictures /* for GUI only */
+)
+{
+	constexpr bool cornerOnly = true;
+	calibration<cornerOnly>(poses, model, grid, observations, centers, pictures);
+}
+
+template<> void calibration_PlenopticCamera<BAPObservations>(
+	CalibrationPoses&,PlenopticCamera&,const CheckerBoard&,const BAPObservations&,const MICObservations&,const std::vector<Image>&);
+template<> void calibration_PlenopticCamera<CBObservations>(
+	CalibrationPoses&,PlenopticCamera&,const CheckerBoard&,const CBObservations&,const MICObservations&,const std::vector<Image>&);
+
+
+void calibration_MultiFocusPlenopticCamera(                   
+	CalibrationPoses& poses, /* out */                                 
+	PlenopticCamera& model, /* out */
+	const CheckerBoard & grid,
+	const BAPObservations& observations, /*  (u,v,rho) */
+	const MICObservations& centers, /* c_{k,l} */
+	const std::vector<Image>& pictures /* for GUI only */
+)
+{
+	constexpr bool cornerOnly = false;
+	calibration<cornerOnly>(poses, model, grid, observations, centers, pictures);
+}
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+template<bool useCornerOnly, typename Observations>
+void optimize(
+	//OUT
+	CalibrationPoses& poses, /* extrinsics */
+	//IN
+	const PlenopticCamera& model, /* intrinsics */
+	const CheckerBoard & checkboard,
+	const Observations& observations /*  (u,v,rho) */
+)
+{
+	constexpr bool useRadius = not(std::is_same_v<Observations, CBObservations>) and not(useCornerOnly); 
+	using Error_t = typename
+		std::conditional<useRadius,
+			ExtrinsicsCornerReprojectionError,
+			ExtrinsicsBlurAwarePlenopticReprojectionError
+		>::type;
+		
+	using Solver_t = typename lma::Solver<Error_t>;	
+
+	Solver_t solver{1e-4, 1000, 1.0 - 1e-8};//std::numeric_limits<double>::epsilon()};
+
+	//split observations according to frame index
+	std::unordered_map<Index /* frame index */, Observations> obs;
+	for(const auto& ob : observations)
+		obs[ob.frame].push_back(ob);		
+
+	for (auto & [p, frame] : poses) //for each frame with its pose
+	{
+		for (const auto& o : obs[frame]) //for each observation of this frame
+		{
+			solver.add(
+				Error_t{
+					model, checkboard, o
+				},
+				&p
+			);
+		}
+	}
+
+    solver.solve(lma::DENSE, lma::enable_verbose_output());
+}
+
+template<bool useCornerOnly, typename Observations>
+void calibration(                        
 	CalibrationPoses& poses, /* out */                   
 	const PlenopticCamera& model, /* in */   
 	const CheckerBoard & grid,
-	const BAPObservations& observations, /*  (u,v,rho) */
-	const std::vector<Image>& pictures, /* for GUI only */
-	bool useCornerOnly
+	const Observations& observations, /*  (u,v,rho?) */
+	const std::vector<Image>& pictures /* for GUI only */
 )
 {
-	BAPObservations features;
+	Observations features;
 	features.reserve(observations.size());
 	
 //1) Init Extrinsics
@@ -329,7 +349,7 @@ void calibration_ExtrinsicsMFPC(
 	PRINT_INFO("=== Run optimization");
 	display(grid); display(poses);
 	
-	optimize(poses, model, grid, features);
+	optimize<useCornerOnly>(poses, model, grid, features);
 
 	PRINT_DEBUG("Optimized poses:");
 	{
@@ -355,7 +375,35 @@ Viewer::enable(true);
 	PRINT_INFO("=== Computing individual RMSE");
 	evaluate_rmse(model, poses, grid, features, {});
 	PRINT_INFO("=== Graphically checking the parameters");
-	visualize(model, poses, grid, features, {}, pictures);
+	display(model, poses, grid, features, {}, pictures);
 	
 	std::getchar();	
+}
+
+template<typename Observations>
+void calibration_ExtrinsicsPlenopticCamera(                        
+	CalibrationPoses& poses, /* out */                   
+	const PlenopticCamera& model, /* in */   
+	const CheckerBoard & grid,
+	const Observations& observations, /*  (u,v,rho?) */
+	const std::vector<Image>& pictures /* for GUI only */
+)
+{
+	constexpr bool cornerOnly = true;
+	calibration<cornerOnly>(poses, model, grid, observations, pictures);	
+}
+
+template<> void calibration_ExtrinsicsPlenopticCamera<BAPObservations>(CalibrationPoses&,const PlenopticCamera&,const CheckerBoard&,const BAPObservations&,const std::vector<Image>&);
+template<> void calibration_ExtrinsicsPlenopticCamera<CBObservations>(CalibrationPoses&,const PlenopticCamera&,const CheckerBoard&,const CBObservations&,const std::vector<Image>&);
+
+void calibration_ExtrinsicsMultiFocusPlenopticCamera(                        
+	CalibrationPoses& poses, /* out */                   
+	const PlenopticCamera& model, /* in */   
+	const CheckerBoard & grid,
+	const BAPObservations& observations, /*  (u,v,rho?) */
+	const std::vector<Image>& pictures /* for GUI only */
+)
+{
+	constexpr bool cornerOnly = false;
+	calibration<cornerOnly>(poses, model, grid, observations, pictures);	
 }
