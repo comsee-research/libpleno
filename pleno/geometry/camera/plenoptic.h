@@ -47,7 +47,7 @@ public:
 		const Sensor& sensor, 
 		const MicroImagesArray& mia, 
 		const InternalParameters& params, 
-		double F, double aperture, double h=1e8, std::size_t I = 0u,
+		double F, double aperture, double h=1e8,
 		Mode mode = Galilean
 	);
 	
@@ -81,6 +81,8 @@ public:
  
     PrincipalPoint pp() const;
 	PrincipalPoint mlpp(std::size_t k, std::size_t l) const;
+	
+	std::size_t I() const;
     	
 //Project and Raytrace	
 	bool project(const P3D& p3d_cam, P2D& pixel) const override final

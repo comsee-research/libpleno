@@ -69,7 +69,7 @@ Pose select_best_pose(
         RMSE rmse{0., 0};
         
         Observations obs{observations.begin(), observations.end()};
-        link_cluster_to_node_index(obs, obs, camera, grid, p);        
+        link_cluster_to_node_index(obs, obs, camera, grid, p, false);        
         
     	PRINT_DEBUG("For each observation, compute rmse");
         for (const auto& o : obs)
@@ -122,7 +122,7 @@ Pose estimate_pose(
 	
 	//Compute pose candidates using p3p
 	PRINT_DEBUG("Compute pose candidates using p3p");
-    Observations nodes; /* tl - bl - br */
+    Observations nodes; /* tl - tr - br */
     get_3_corners(barycenters, nodes); 
     for(auto& n : nodes) n.frame = barycenters[0].frame; //set the frame from observations
     
@@ -150,15 +150,15 @@ Pose estimate_pose(
 
     // computing p3p
     Poses candidates(4);
-	/** 
+	/** tl - tr - br 
 	 * IN UV SPACE :
 	 *  - the top-left 		(tl) corner is the (0,0) 	node
-	 *	- the bottom-left 	(bl) corner is the (0, L) 	node
+	 *	- the top-right 	(tr) corner is the (K, 0) 	node
 	 *	- the bottom-right 	(br) corner is the (K,L) 	node
 	 **/ 
     bool p3p_ok = solve_p3p(
     	grid.nodeInWorld(0), //tl
-    	grid.nodeInWorld((grid.height() - 1) * grid.width()), //bl
+    	grid.nodeInWorld(grid.width()-1), //bl
 		grid.nodeInWorld(grid.nodeNbr() -1), //br
 		rays.at(0).direction(), 
 		rays.at(1).direction(),
@@ -209,7 +209,7 @@ void init_extrinsics(
 		Viewer::stash();
 		//Estimate barycenters
 		PRINT_DEBUG("Estimate barycenters of frame f = " << f);
-		BAPObservations barycenters = compute_barycenters(ob); //IMAGE UV
+		Observations barycenters = compute_barycenters(ob); //IMAGE UV
 		
 		GUI(
 			PRINT_DEBUG("[GUI] Display information of frame f = " << f);
@@ -243,10 +243,10 @@ void init_extrinsics(
 
 		//Link cluster to node index
 		PRINT_DEBUG("Link cluster to node index of frame f = " << f);
-		link_cluster_to_node_index(ob, barycenters, monocular, grid, pose);
+		link_cluster_to_node_index(ob, barycenters, monocular, grid, pose, true);
 			
 		GUI(	
-			BAPObservations ubarycenters = compute_barycenters(ob);			
+			Observations ubarycenters = compute_barycenters(ob);			
 			display(f, ob);
 			display(f, ubarycenters, tag::Barycenters{});
 				

@@ -120,7 +120,8 @@ void link_cluster_to_node_index(
     const Observations& barycenters,
 	const CameraModel& monocular, 
 	const CheckerBoard& grid,
-    const Pose& pose
+    const Pose& pose,
+    bool verbose = true
 )
 {
 	std::unordered_map<int /* old id */, int /* new id */> id_mapping;
@@ -147,9 +148,9 @@ void link_cluster_to_node_index(
 			P2D projection; // a projected checkerboard node in IMAGE UV
         	bool projected = monocular.project(p3d_cam, projection);
         	       	
-        	if(not projected) 
+        	if ((not projected)) 
         	{ 
-        		PRINT_ERR("CheckerBoard Node ("<<k<<", "<<l<<") not reprojected in image"); 
+        		if(verbose) PRINT_ERR("CheckerBoard Node ("<<k<<", "<<l<<") not reprojected in image"); 
         		continue; 
         	}	
         	
@@ -191,6 +192,7 @@ void link_cluster_to_node_index(
 		if(id_mapping.count(o.cluster) > 0) 
 		{
 			o.cluster = id_mapping[o.cluster];
+			o.isValid = true;	
 		}
 		else
 		{

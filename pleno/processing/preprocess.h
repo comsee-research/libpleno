@@ -6,7 +6,7 @@
 #include "geometry/internals.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-void hist_data(const std::vector<double>& data, Image& dst, int binSize = 3, int height = 0, int nbbin = 250);
+void hist_data(const std::vector<double>& data, Image& dst, double min, double max, int binSize = 3, int height = 0, int nbbin = 250);
 void hist_radii(const std::vector<MicroImage>& data);
 
 ////////////////////////////////////////////////////////////////////////////////

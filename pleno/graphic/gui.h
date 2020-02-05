@@ -10,6 +10,8 @@
 
 #include "draw.h"
 
+#include "io/printer.h"
+
 namespace tag {
 	struct CameraBody {};
 	struct ThinLens {};
@@ -59,3 +61,16 @@ public:
 #define RENDER_DEBUG_2D(...) do { if(Viewer::enable()) { viewer_2d(__VA_ARGS__); } } while(0)
 #define RENDER_DEBUG_3D(...) do { if(Viewer::enable()) { viewer_3d(__VA_ARGS__); } } while(0)
 #define GUI(...) do { if(Viewer::enable()) { __VA_ARGS__ } } while(0)
+
+const auto FORCE_GUI = [](bool enable) -> void { 
+	static bool gui_state = Viewer::enable();
+	
+	if(enable and not(gui_state)) {
+		PRINT_INFO("Enabling GUI...");
+		gui_state = Viewer::enable();
+		Viewer::enable(true);
+	}
+	
+	if(not enable) Viewer::enable(gui_state);
+};
+

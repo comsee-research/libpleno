@@ -145,7 +145,7 @@ CBObservations clusterize(const CBObservations& obs, double eps, std::size_t min
 				filtered.emplace_back(o);		
 			}
 		}
-		
+			
 		GUI(
 			v::Palette<int> palette;
 			for (const auto& o : filtered)

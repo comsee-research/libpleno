@@ -163,7 +163,7 @@ estimation_lines_with_slope_constraint_least_squares(
 	std::size_t size = 0;
 	for(const auto&points : data) size+=points.size();
 	
-	A_t A = A_t::Zero(size, I);
+	A_t A = A_t::Zero(size, I+1);
 	B_t B = B_t::Zero(size);
 	
 	int i=1,j=0;	

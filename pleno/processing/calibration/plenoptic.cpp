@@ -28,18 +28,18 @@
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-template<bool useCornerOnly, typename Observations>
+template<bool useCornerOnly>
 void optimize(
 	//OUT
 	CalibrationPoses& poses, /* extrinsics */
 	PlenopticCamera& model, /* intrinsics */
 	//IN
 	const CheckerBoard & checkboard,
-	const Observations& observations, /*  (u,v,rho?) */
+	const BAPObservations& observations, /*  (u,v,rho?) */
 	const MICObservations& centers /* c_{k,l} */
 )
 {	
-	constexpr bool useRadius = not(std::is_same_v<Observations, CBObservations>) and not(useCornerOnly); 
+	constexpr bool useRadius = not(useCornerOnly); 
 	
 	using Solver_t = typename
 		std::conditional<useRadius,
@@ -59,7 +59,7 @@ void optimize(
 	}; 
 	
 	//split observations according to frame index
-	std::unordered_map<Index /* frame index */, Observations> obs;
+	std::unordered_map<Index /* frame index */, BAPObservations> obs;
 	for(const auto& ob : observations)
 		obs[ob.frame].push_back(ob);		
 
@@ -169,7 +169,9 @@ void calibration(
 	PRINT_INFO("=== Run optimization");
 	auto initial_model = model;
 	auto initial_poses = poses;
-	optimize<useCornerOnly>(poses, model, grid, features, centers);
+	BAPObservations obs; convert(features, obs);
+	
+	optimize<useCornerOnly>(poses, model, grid, obs, centers);
 	
 	PRINT_INFO("=== Optimization finished! Results:");
 #if 0
@@ -244,9 +246,9 @@ void calibration_PlenopticCamera(
 	calibration<cornerOnly>(poses, model, grid, observations, centers, pictures);
 }
 
-template<> void calibration_PlenopticCamera<BAPObservations>(
+template void calibration_PlenopticCamera<BAPObservations>(
 	CalibrationPoses&,PlenopticCamera&,const CheckerBoard&,const BAPObservations&,const MICObservations&,const std::vector<Image>&);
-template<> void calibration_PlenopticCamera<CBObservations>(
+template void calibration_PlenopticCamera<CBObservations>(
 	CalibrationPoses&,PlenopticCamera&,const CheckerBoard&,const CBObservations&,const MICObservations&,const std::vector<Image>&);
 
 
@@ -263,6 +265,11 @@ void calibration_MultiFocusPlenopticCamera(
 	calibration<cornerOnly>(poses, model, grid, observations, centers, pictures);
 }
 
+
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -393,8 +400,8 @@ void calibration_ExtrinsicsPlenopticCamera(
 	calibration<cornerOnly>(poses, model, grid, observations, pictures);	
 }
 
-template<> void calibration_ExtrinsicsPlenopticCamera<BAPObservations>(CalibrationPoses&,const PlenopticCamera&,const CheckerBoard&,const BAPObservations&,const std::vector<Image>&);
-template<> void calibration_ExtrinsicsPlenopticCamera<CBObservations>(CalibrationPoses&,const PlenopticCamera&,const CheckerBoard&,const CBObservations&,const std::vector<Image>&);
+template void calibration_ExtrinsicsPlenopticCamera<BAPObservations>(CalibrationPoses&,const PlenopticCamera&,const CheckerBoard&,const BAPObservations&,const std::vector<Image>&);
+template void calibration_ExtrinsicsPlenopticCamera<CBObservations>(CalibrationPoses&,const PlenopticCamera&,const CheckerBoard&,const CBObservations&,const std::vector<Image>&);
 
 void calibration_ExtrinsicsMultiFocusPlenopticCamera(                        
 	CalibrationPoses& poses, /* out */                   

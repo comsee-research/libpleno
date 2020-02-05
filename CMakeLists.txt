@@ -223,7 +223,6 @@ set(PLENO_OPTIMIZATION_SRC
 )
 
 set(PLENO_IO_SRC
-	#pleno/io/congig.cpp
 	pleno/io/printer.cpp
 )
 

@@ -13,9 +13,11 @@ detection_bapfeatures(const Image& raw, const MIA& mia, const InternalParameters
 {
 	PRINT_INFO("=== Detecting corners in image");
 	CBObservations cbos = detection_corners(raw /* img */, mia, params);
+	DEBUG_VAR(cbos.size());
 	
 	PRINT_INFO("=== Computing BAP Features in image");
 	BAPObservations bapobs = compute_bapfeatures(cbos, mia, params);
+	DEBUG_VAR(bapobs.size());
 	
 	GUI(
 		v::Palette<int> palette;
@@ -30,7 +32,7 @@ detection_bapfeatures(const Image& raw, const MIA& mia, const InternalParameters
 		}
 		Viewer::update();
 	);
-	
+
 	bapobs.shrink_to_fit();
 	return bapobs;
 }

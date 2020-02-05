@@ -69,6 +69,10 @@ std::ostream& operator<<(std::ostream& os, const CheckerBoardObservation& ob)
 	return os;
 }
 
+CheckerBoardObservation::operator BlurAwarePlenopticObservation() const 
+{ 
+	return BlurAwarePlenopticObservation{k,l,u,v,-1.0,cluster,frame,isValid}; 
+}
 
 //******************************************************************************
 //******************************************************************************
@@ -108,4 +112,7 @@ std::ostream& operator<<(std::ostream& os, const BlurAwarePlenopticObservation& 
 	return os;
 }
 
-
+BlurAwarePlenopticObservation::operator CheckerBoardObservation() const 
+{ 
+	return CheckerBoardObservation{k,l,u,v,cluster,frame,isValid}; 
+}

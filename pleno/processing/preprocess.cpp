@@ -16,17 +16,8 @@
 ////////////////////////////////////////////////////////////////////////////////
 // DISPLAYS - Histograms
 ////////////////////////////////////////////////////////////////////////////////
-void hist_data(const std::vector<double>& data, Image& dst, int binSize, int height, int nbbin)
+void hist_data(const std::vector<double>& data, Image& dst, double min, double max, int binSize, int height, int nbbin)
 {		
-	const auto& [min, max] = [&data]() -> std::pair<double, double> {
-		double min=1e12, max=-1e12;
-		for(double d : data) {
-			if(d < min) min = d;
-			if(d > max) max = d;
-		}
-		return {min, max};
-	}(); 
-	
 	float step = (max - min) / nbbin;
 	std::vector<int> hist(nbbin);
 	for(const auto&d : data)
@@ -89,10 +80,11 @@ void hist_radii(const std::vector<MicroImage>& data)
 		for(const auto& mi : data) if(mi.type > i) i = mi.type;
 		return std::size_t(i+1);
 	}();
+	DEBUG_VAR(I);
 	
 	std::vector<std::vector<double>> radii(I);
     for(auto& r : radii) r.reserve(data.size());
-    
+	
     for(const auto&mi : data)
     {
     	radii[mi.type].emplace_back(mi.radius);
@@ -100,11 +92,21 @@ void hist_radii(const std::vector<MicroImage>& data)
     
     for(auto& r : radii) r.shrink_to_fit();
     
-/////////////////////////////////////Compute histograms///////////////////////////////////////////////////  
+/////////////////////////////////////Compute histograms///////////////////////////////////////////////////   
+    const auto& [min, max] = [&data]() -> std::pair<double, double> {
+		double min=1e12, max=-1e12;
+		for(const auto&mi : data) {
+			const double d = mi.radius;
+			if(d < min) min = d;
+			if(d > max) max = d;
+		}
+		return {std::floor(min), std::ceil(max)};
+	}(); 
+	
     Images hist(I);
     for(std::size_t i=0; i<I; ++i)
     { 
-    	hist_data(radii[i], hist[i], 3, 200);
+    	hist_data(radii[i], hist[i], min, max, 3, 200);
    	}
    	
 	Image histo = hist[0];
@@ -365,11 +367,13 @@ preprocess(
 		for (std::size_t i = 0; i < I; ++i) 
 			PRINT_DEBUG("r(1/4)|"<<i<<" = " << (params.m / 4. + params.c[i]) / pxl2metric);
 		for (std::size_t i = 0; i < I; ++i) 
-			PRINT_DEBUG("N|"<<i<<" = " << std::fabs(params.m) / ( params.kappa - params.c_prime[i] ));
+			PRINT_DEBUG("N|"<<i<<" = " << std::fabs(params.m) / ( params.kappa / 2.0 - std::fabs(params.c[i])));
 
 		double N = 0.0;
-		for (std::size_t i = 0; i < I; ++i) N += (std::fabs(params.m) / (params.kappa - params.c_prime[i]));
+		for (std::size_t i = 0; i < I; ++i) N += (std::fabs(params.m) / ( params.kappa / 2.0 - std::fabs(params.c[i])));
 		params.N = N / double(I);
+		
+		params.I = I;
 	}
 	
 	return params;

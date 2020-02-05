@@ -42,6 +42,8 @@ double& PlenopticCamera::focal() { return main_lens().focal(); }
 double PlenopticCamera::aperture() const { return main_lens().aperture(); }
 double& PlenopticCamera::aperture() { return main_lens().aperture(); }   
 
+std::size_t PlenopticCamera::I() const { return mla().I(); }
+
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -79,12 +81,15 @@ void PlenopticCamera::init(
 	const Sensor& sensor, 
 	const MicroImagesArray& mia, 
 	const InternalParameters& params, 
-	double F, double aperture, double h, std::size_t I,
+	double F, double aperture, double h,
 	PlenopticCamera::Mode mode 
 )
 {		
 	mia_ 	= mia; //already calibrated
 	params_ = params; //already computed
+	
+	//I
+	const std::size_t I = params.I;
 	
 	//DISTANCE FOCUS
 	dist_focus_ = h;
@@ -107,7 +112,7 @@ void PlenopticCamera::init(
 	switch(mode)
 	{
 		case Unfocused:
-			d = params_.m * 2.; D = F;
+			d = m * 2.; D = F;
 		break;
 		case Keplerian: 
 		{
@@ -132,15 +137,15 @@ void PlenopticCamera::init(
 	}
 
 	const double theta_z 	= get_rotation_angle(mia_.pose().rotation()); //std::atan2( mia_.pose().rotation()(1, 0), mia_.pose().rotation()(0, 0) );
-	const double t_x		= sensor_.pxl2metric(mia_.pose().translation()[0]);
-	const double t_y		= sensor_.pxl2metric(mia_.pose().translation()[1]);
+	const double t_x		= sensor.pxl2metric(mia_.pose().translation()[0]);
+	const double t_y		= sensor.pxl2metric(mia_.pose().translation()[1]);
 	const double kappa_approx = params_.kappa * (D / (D + d)) ;
 	
 	//re-set kappa_approx
 	params_.kappa_approx = kappa_approx;
 	
 	//SENSOR
-	sensor_ = sensor_;
+	sensor_ = sensor;
 	sensor_.pose().translation()[0] = sensor_.pxl2metric(- (sensor_.width()  / 2.)); //set x coordinate
 	sensor_.pose().translation()[1] = sensor_.pxl2metric(- (sensor_.height() / 2.)); //set y coordinate
 	sensor_.pose().translation()[2] = - (D + d); //set z coordinate

@@ -47,9 +47,7 @@ std::array<P2D, 4> extract_checkerboard_view(
 {
 	PRINT_WARN("Extracting coordinates of checkerboard in image...");
 	
-	bool gui_state = Viewer::enable();
-	if(!gui_state) PRINT_INFO("Enabling GUI...");
-	Viewer::enable(true);
+FORCE_GUI(true);
 	
 	const double ratio = double(gray.rows) / double(gray.cols);
 	const int base_size = 800;
@@ -182,9 +180,9 @@ std::array<P2D, 4> extract_checkerboard_view(
 	);
 	
 	Viewer::context().on_click([](float,float){});	
-	Viewer::enable(gui_state);
 	Viewer::update();
-	
+
+FORCE_GUI(false);
 	return view;
 }
 
@@ -197,7 +195,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 //  constexpr int kernel_size = 3;
 //  constexpr double ratio = 3.; //Canny recommended a upper:lower ratio between 2:1 and 3:1.
     
-    const double radius = (params.m / params.N + params.c[0]) / params.scale ;
+    const double radius = std::fabs(params.radius(0));
     
     static const decltype(v::red) colors[4] = {v::red, v::green, v::blue, v::yellow};
         
@@ -235,14 +233,12 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 	 				
 	 		const auto& c = mia.nodeInWorld(k,l); //col,row
 			const int t = lens_type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
-			const double r = params.radius(t); //radius
-			
+			const double r = std::fabs(params.radius(t)); //radius
 			//crop image aroud the center
 			float X = c[0], Y = c[1]; 
  	
 	//1.1) EXTRACT ROI			
     		Image roi = extract_roi(img, X, Y, roiw, roih).clone(); //crop
-	 	
  			cv::threshold(roi, roi, 100, 255, cv::THRESH_BINARY); //cv::THRESH_TOZERO); //
  			trim(roi, r, -2. );
  			
@@ -304,7 +300,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 		
 		const auto& c = mia.nodeInWorld(k,l); //col,row
 		const int t = lens_type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
-		const double r = params.radius(t); //radius
+		const double r = std::fabs(params.radius(t)); //radius
 		
 		//crop image aroud the center
 		float X = c[0], Y = c[1]; 
@@ -359,6 +355,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
         {
         	cbo[0] = X+corner[0];
         	cbo[1] = Y+corner[1]; 
+        	cbo.isValid = true;
         }
       	else
     	{
@@ -367,14 +364,18 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
     	}
 	}
 	
+	DEBUG_VAR(obs.size());
 	obs.erase(
 		std::remove_if(obs.begin(), obs.end(), [](CheckerBoardObservation& cbo){return (not cbo.isValid);}),
 		obs.end()
 	);
+	DEBUG_VAR(obs.size());
 	
-//3) Clusterize micro-image, and remove outlier
+//3) Clusterize micro-image, and remove outlier	
 	PRINT_INFO("=== Clusterizing observations and removing outliers");
+FORCE_GUI(true);
 	CBObservations filtered = clusterize(obs, radius*2.2, 2u, true);
+FORCE_GUI(false);
 
 	return filtered;
 };

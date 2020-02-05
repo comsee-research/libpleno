@@ -3,7 +3,6 @@
 #include <iostream>
 #include <cassert>
 
-
 class Printer : std::iostream, std::streambuf
 {
 public:
@@ -31,7 +30,14 @@ public:
 #define PRINT_INFO(...) (Printer::info() << "\033[32mINFO:\033[0m " << __VA_ARGS__ << std::endl) /* colored in green */
 #define PRINT_DEBUG(...) (Printer::debug() << "\033[34mDEBUG:\033[0m " << __VA_ARGS__ << std::endl) /* colored in blue */
 
-#define DEBUG_ASSERT(Condition, ...) do { if((not (Condition))) { Printer::verbose(true); Printer::level(Printer::Level::ALL); (PRINT_ERR(__VA_ARGS__)); assert((Condition)); abort(); } } while (0)
+#define DEBUG_ASSERT(Condition, ...) do { \
+		if ( (not (Condition)) ) { \
+			Printer::verbose(true); \
+			Printer::level(Printer::Level::ALL); \
+			PRINT_ERR(__VA_ARGS__); \
+			assert((Condition)); abort(); \
+		} \
+	}while(false)
 
-#define	DEBUG_TO_STR(VAR) #VAR
-#define DEBUG_VAR(VAR)	PRINT_DEBUG(DEBUG_TO_STR(VAR) <<"= " << VAR)
+#define	DEBUG_TO_STR(VAR) (#VAR)
+#define DEBUG_VAR(VAR)	(PRINT_DEBUG(DEBUG_TO_STR((VAR)) <<"= " << (VAR)))

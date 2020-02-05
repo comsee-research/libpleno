@@ -30,7 +30,7 @@ public:
     bool project(const P3D& p3d_cam, P2D& pixel) const override 
     {
 		Ray3D ray;
-		ray.config(P3D::Zero(), p3d_cam); // CAMERA
+		ray.config(pose().translation(), p3d_cam); // CAMERA
 
 		P3D p3d = line_plane_intersection(sensor().planeInWorld(), ray); // CAMERA
 		p3d = to_coordinate_system_of(sensor().pose(), p3d); // SENSOR
@@ -48,10 +48,11 @@ public:
 		P2D pix = pixel; //IMAGE UV
 		uv2xy(pix); //IMAGE XY		
 		
-		P3D p_metric = sensor().pxl2metric(P3D{pix[0], pix[1], 0.0}); // SENSOR
+		P3D p_metric {pix[0], pix[1], 0.0};
+		p_metric = sensor().pxl2metric(p_metric); // SENSOR
 		p_metric = from_coordinate_system_of(sensor().pose(), p_metric); // CAMERA
 
-		ray.config(p_metric, P3D::Zero());
+		ray.config(p_metric, pose().translation());
 
 		return is_projected;
     }
