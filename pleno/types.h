@@ -7,6 +7,10 @@
 
 #include "geometry/pose.h"
 
+//helper type
+template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
+template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+
 // Custom types
 template<class T>
 using AlignedVector = std::vector<T, Eigen::aligned_allocator<T>>;

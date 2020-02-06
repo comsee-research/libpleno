@@ -401,8 +401,8 @@ void PlenopticCamera::ml2mi(double& index) const
 	mi2ml(index);
 }
 
-template<typename Observations_t>
-void PlenopticCamera::mi2ml(Observations_t& obs) const 
+template<typename Observations>
+void PlenopticCamera::mi2ml(Observations& obs) const 
 {
 	std::for_each(
 		obs.begin(), obs.end(),
@@ -460,6 +460,7 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 	os 	<< "Plenoptic Camera:" << std::endl
 		<< "\tmode = " << pcm.mode() << "," << std::endl
 		<< "\th = " << pcm.distance_focus() << "," << std::endl
+		<< "\tI = " << pcm.I() << "," << std::endl
 		<< "\tpose = {" << std::endl << pcm.pose() << "}," << std::endl
 		<< "\tsensor = {" << std::endl << pcm.sensor() << "}," << std::endl
 		<< "\tmia = {" << std::endl << pcm.mia() << "}," << std::endl

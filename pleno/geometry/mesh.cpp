@@ -94,7 +94,7 @@ GridMesh_<Dim>::node(size_t col, size_t row) const
 {        
     static constexpr double sin60 = std::sin(60.0 / 180.0 * M_PI);
    
-	DEBUG_ASSERT(col < width() and row < height(), "GridMesh::node: wrong indexes");
+	DEBUG_ASSERT(col < width() and row < height(), "GridMesh::node: wrong indexes ("<<col<<", "<<row<<")");
 	
     typename GridMesh_<Dim>::Node node;
     

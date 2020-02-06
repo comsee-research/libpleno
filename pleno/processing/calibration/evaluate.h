@@ -59,7 +59,7 @@ RMSE compute_rmse_radius(
 )
 {
 	RMSE rmse;
-	if constexpr (std::is_same_v<Observations, BAPObservations>) {
+	if (model.I()>0u and std::is_same_v<Observations, BAPObservations>) {
 		for(const auto& o : ob)
 		{	
 			const double p = reproject_radius(model, model.pose(), grid, o);

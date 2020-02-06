@@ -39,7 +39,7 @@ P3D reproject_bapfeature(
 	const CheckerBoard& grid, const BAPObservation& observation
 )
 {
-	DEBUG_ASSERT((model.mla().I()>0u), "Can't reproject radius in BAP feature.");
+	DEBUG_ASSERT((model.I()>0u), "Can't reproject radius in BAP feature.");
 	
 	//observation indexes in ML space
 	const P3D p3d = grid.nodeInWorld(observation.cluster); // WORLD
@@ -55,10 +55,10 @@ P3D reproject_bapfeature(
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-template<typename Observation_t>
+template<typename Observation>
 P2D reproject_corner(
 	const PlenopticCamera& model, const Pose& pose, 
-	const CheckerBoard& grid, const Observation_t& observation
+	const CheckerBoard& grid, const Observation& observation
 )
 {
 	//observation indexes in ML space
@@ -81,7 +81,7 @@ double reproject_radius(
 	const CheckerBoard& grid, const BAPObservation& observation
 )
 {
-	DEBUG_ASSERT((model.mla().I()>0u), "Can't reproject radius in BAP feature.");
+	DEBUG_ASSERT((model.I()>0u), "Can't reproject radius in BAP feature.");
 	
 	//observation indexes in ML space
 	const P3D p3d = grid.nodeInWorld(observation.cluster); // WORLD

@@ -18,41 +18,19 @@ void calibration_MIA(
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-void calibration_MultiFocusPlenopticCamera(                   
-	CalibrationPoses& poses, /* out */                                 
-	PlenopticCamera& model, /* out */
-	const CheckerBoard & grid,
-	const BAPObservations& observations, /*  (u,v,rho) */
-	const MICObservations& centers, /* c_{k,l} */
-	const std::vector<Image>& pictures /* for GUI only */
-);
-
-void calibration_ExtrinsicsMultiFocusPlenopticCamera(                        
-	CalibrationPoses& poses, /* out */                   
-	const PlenopticCamera& model, /* in */   
-	const CheckerBoard & grid,
-	const BAPObservations& observations, /*  (u,v,rho) */
-	const std::vector<Image>& pictures /* for GUI only */
-);
-
-//******************************************************************************
-//******************************************************************************
-//******************************************************************************
-template<typename Observations>
 void calibration_PlenopticCamera(                   
 	CalibrationPoses& poses, /* out */                                 
 	PlenopticCamera& model, /* out */
 	const CheckerBoard & grid,
-	const Observations& observations, /*  (u,v,rho?) */
+	const BAPObservations& observations, /*  (u,v,rho) */
 	const MICObservations& centers, /* c_{k,l} */
 	const std::vector<Image>& pictures /* for GUI only */
 );
 
-template<typename Observations>
 void calibration_ExtrinsicsPlenopticCamera(                        
 	CalibrationPoses& poses, /* out */                   
 	const PlenopticCamera& model, /* in */   
 	const CheckerBoard & grid,
-	const Observations& observations, /*  (u,v,rho?) */
+	const BAPObservations& observations, /*  (u,v,rho) */
 	const std::vector<Image>& pictures /* for GUI only */
 );

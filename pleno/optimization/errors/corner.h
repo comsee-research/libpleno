@@ -21,7 +21,7 @@ struct CornerReprojectionError
 	
 	const CameraModel_t& pcm;
 	const CheckerBoard &checkerboard;
-    const CBObservation& observation;
+    const CBObservation observation;
 
     bool operator()( 
     	const Pose& camera_pose,
