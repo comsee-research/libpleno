@@ -43,16 +43,18 @@ void calibration_MIA(MicroImagesArray& grid, const MICObservations& centers)
 { 	
     // attach four corners of all bunch
     MICObservations corners;
-    get_3_corners(centers, corners); //tl - tr - br
+    get_4_corners(centers, corners); //tl - tr - br - bl
 
     //setting the micro image index
-    corners[0].k = 0; corners[0].l = 0; //tl
-    corners[1].k = grid.width() - 1; corners[1].l = 0; //tr
-    corners[2].k = grid.width() - 1; corners[2].l = grid.height() - 1; //br
+    corners[Corner::TL].k = 0; corners[Corner::TL].l = 0; //tl
+    corners[Corner::TR].k = grid.width() - 1; corners[Corner::TR].l = 0; //tr
+    corners[Corner::BR].k = grid.width() - 1; corners[Corner::BR].l = grid.height() - 1; //br
     
-    DEBUG_VAR(corners[0]);
-    DEBUG_VAR(corners[1]);
-    DEBUG_VAR(corners[2]);
+    DEBUG_VAR(corners[Corner::TL]);
+    DEBUG_VAR(corners[Corner::TR]);
+    DEBUG_VAR(corners[Corner::BR]);
+    
+    corners.pop_back(); //remove BL
     
 //////////////////////////////////////////////Initialization////////////////////////////////////////
     PRINT_INFO("Corners initialization");

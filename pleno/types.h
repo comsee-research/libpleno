@@ -34,6 +34,15 @@ using Quad   = std::array<P3D, 4>;
 using Quad3D = std::array<P3D, 4>;
 using Quad2D = std::array<P2D, 4>;
 
+struct Corner {
+	enum : std::size_t {
+		TL = 0u, 
+		TR = 1u,
+		BR = 2u,
+		BL = 3u
+	};
+};
+
 using Real = double;
 using Index = int;
 
@@ -50,6 +59,11 @@ using Peaks 				= AlignedVector<Peak>;
 
 struct CalibrationPose 		{ Pose pose; Index frame; };
 using CalibrationPoses 		= AlignedVector<CalibrationPose>;
+
+#include "processing/tools/rmse.h"
+
+struct PoseWithError 		{ Pose pose; RMSE rmse; };
+using PosesWithError 		= AlignedVector<PoseWithError>;
 
 struct FocalLength 			{ Real f; };
 using FocalLengths 			= AlignedVector<FocalLength>;

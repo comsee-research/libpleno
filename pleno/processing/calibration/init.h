@@ -55,10 +55,7 @@ Pose select_best_pose(
     const Observations& observations, 
     const Poses& poses
 )
-{
-    struct PoseWithError { Pose pose; RMSE rmse; };
-    using PosesWithError = AlignedVector<PoseWithError>;
-       
+{       
     PosesWithError rmse_poses;
     rmse_poses.reserve(poses.size());
 
@@ -104,8 +101,9 @@ Pose select_best_pose(
               return a.rmse.get() < b.rmse.get(); 
         }
     );
+    for(const auto&p : rmse_poses) PRINT_DEBUG("RMSE = " << p.rmse.get());
 	
-	PRINT_DEBUG("Best pose is p = " << rmse_poses[0].pose);
+	PRINT_DEBUG("Best pose is p = " << rmse_poses[0].pose << "with rmse = " << rmse_poses[0].rmse.get());
    	return rmse_poses[0].pose;
 }
 
@@ -122,44 +120,56 @@ Pose estimate_pose(
 	
 	//Compute pose candidates using p3p
 	PRINT_DEBUG("Compute pose candidates using p3p");
-    Observations nodes; /* tl - tr - br */
-    get_3_corners(barycenters, nodes); 
-    for(auto& n : nodes) n.frame = barycenters[0].frame; //set the frame from observations
-    
-    GUI(
-    	for(const auto& n : nodes)
-			RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer())
-				.point_style(v::Cross).pen_color(v::pink).pen_width(5)
-				.name("Nodes for p3p"),
-				P2D{n[0], n[1]}
-			);
-		Viewer::context().point_style(v::Pixel); //restore point style
-		Viewer::update();
-	);
+    Observations nodes; /* tl - tr - br - bl */
+    get_4_corners(barycenters, nodes); 
+    {
+		//setting indexes and frame
+		const int frame = barycenters[0].frame;
+		const int K = grid.width() - 1;
+		const int L = grid.height() - 1;
+		nodes[Corner::TL].k = 0; nodes[Corner::TL].l = 0; nodes[Corner::TL].frame = frame; //tl
+		nodes[Corner::TR].k = K; nodes[Corner::TR].l = 0; nodes[Corner::TR].frame = frame; //tr
+		nodes[Corner::BR].k = K; nodes[Corner::BR].l = L; nodes[Corner::BR].frame = frame; //br
+		nodes[Corner::BL].k = 0; nodes[Corner::BL].l = L; nodes[Corner::BL].frame = frame; //bl
+		    
+		GUI(
+			for(const auto& n : nodes)
+				RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer())
+					.point_style(v::Cross).pen_color(v::pink).pen_width(5)
+					.name("Nodes for p3p"),
+					P2D{n[0], n[1]}
+				);
+			Viewer::context().point_style(v::Pixel); //restore point style
+			Viewer::update();
+		);
+	}
+
     
     std::array<Ray3D, 3> rays; // computing rays corresponding to each nodes
-    {
-		for (size_t i = 0; i < rays.size(); ++i)
-		{
-		    //rays.at(i).origin() = {0., 0., 0.};
-		    P2D pixel = P2D{nodes[i][0], nodes[i][1]}; //in UV space
-		    		    
-		    monocular.raytrace(pixel, rays.at(i));
-		}
-    }
-
+    {//TL
+		P2D pixel = P2D{nodes[Corner::TL][0], nodes[Corner::TL][1]}; //in UV space	    
+		monocular.raytrace(pixel, rays.at(0));
+	}
+	{//BL
+		P2D pixel = P2D{nodes[Corner::BL][0], nodes[Corner::BL][1]}; //in UV space	    
+		monocular.raytrace(pixel, rays.at(1));
+	}	
+	{//BR
+		P2D pixel = P2D{nodes[Corner::BR][0], nodes[Corner::BR][1]}; //in UV space	    
+		monocular.raytrace(pixel, rays.at(2));
+	}	
     // computing p3p
     Poses candidates(4);
-	/** tl - tr - br 
+	/** 
 	 * IN UV SPACE :
 	 *  - the top-left 		(tl) corner is the (0,0) 	node
-	 *	- the top-right 	(tr) corner is the (K, 0) 	node
+	 *	- the bottom-left 	(bl) corner is the (0, L) 	node
 	 *	- the bottom-right 	(br) corner is the (K,L) 	node
 	 **/ 
     bool p3p_ok = solve_p3p(
-    	grid.nodeInWorld(0), //tl
-    	grid.nodeInWorld(grid.width()-1), //bl
-		grid.nodeInWorld(grid.nodeNbr() -1), //br
+    	grid.nodeInWorld(nodes[Corner::TL].k, nodes[Corner::TL].l), //tl
+    	grid.nodeInWorld(nodes[Corner::BL].k, nodes[Corner::BL].l), //bl
+		grid.nodeInWorld(nodes[Corner::BR].k, nodes[Corner::BR].l), //br
 		rays.at(0).direction(), 
 		rays.at(1).direction(),
 		rays.at(2).direction(),
@@ -167,6 +177,24 @@ Pose estimate_pose(
 	);
 
 	DEBUG_VAR(p3p_ok);
+	
+	for (const auto &pose : candidates)
+	{
+		if ( not(((pose.translation().array() == pose.translation().array())).all()) //check is_nan
+			or not(((pose.rotation().array() == pose.rotation().array())).all()) //check is_nan
+		)
+		{
+			PRINT_ERR("Pose contains NaN");
+			DEBUG_VAR(pose);
+			DEBUG_VAR(nodes[Corner::TL]);
+			//DEBUG_VAR(nodes[Corner::TR]);
+			DEBUG_VAR(nodes[Corner::BR]);
+			DEBUG_VAR(nodes[Corner::BL]);
+			DEBUG_VAR(rays.at(0));
+			DEBUG_VAR(rays.at(1));
+			DEBUG_VAR(rays.at(2));
+		}
+	}
 	
 	//Select best using RANSAC
 	PRINT_DEBUG("Select best using RANSAC");
@@ -236,6 +264,7 @@ void init_extrinsics(
 			PRINT_ERR("Wrong hypothesis. Can't fix it. Remove pose and observations of frame f = " << f <<".");
 			DEBUG_VAR(pose);
 			Viewer::pop();
+			std::getchar();
 			continue;
 		}
 		

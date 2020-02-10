@@ -36,7 +36,7 @@ inline P2D reproject_miccenter(const PlenopticCamera& model, const MICObservatio
 inline 
 P3D reproject_bapfeature(
 	const PlenopticCamera& model, const Pose& pose, 
-	const CheckerBoard& grid, const BAPObservation& observation
+	const CheckerBoard& grid, const BAPObservation& observation, bool check = false
 )
 {
 	DEBUG_ASSERT((model.I()>0u), "Can't reproject radius in BAP feature.");
@@ -46,10 +46,15 @@ P3D reproject_bapfeature(
 	const P3D p3d_cam = to_coordinate_system_of(pose, p3d); // CAMERA
 
 	P3D prediction; //IMAGE UV
-	if (model.project(p3d_cam, observation.k, observation.l, prediction))
+	if (model.project(p3d_cam, observation.k, observation.l, prediction) or not check)
+	{
 		return prediction;
+	}
 	else 
-		return P3D{-1.0, -1.0, -1.0};
+	{
+		PRINT_WARN("Observation not reprojected ("<<prediction<<")");
+		return prediction; //P3D{-1.0, -1.0, -1.0};
+	}
 }
 
 //******************************************************************************
@@ -58,7 +63,7 @@ P3D reproject_bapfeature(
 template<typename Observation>
 P2D reproject_corner(
 	const PlenopticCamera& model, const Pose& pose, 
-	const CheckerBoard& grid, const Observation& observation
+	const CheckerBoard& grid, const Observation& observation, bool check = false
 )
 {
 	//observation indexes in ML space
@@ -66,10 +71,15 @@ P2D reproject_corner(
 	const P3D p3d_cam = to_coordinate_system_of(pose, p3d); // CAMERA
 
 	P2D prediction; //IMAGE UV
-	if (model.project(p3d_cam, observation.k, observation.l, prediction))
+	if (model.project(p3d_cam, observation.k, observation.l, prediction) or not check)
+	{
 		return prediction;
+	}
 	else 
+	{
+		PRINT_WARN("Observation not reprojected ("<<prediction<<")");
 		return P2D{-1.0, -1.0};
+	}
 }
 
 //******************************************************************************
@@ -89,8 +99,12 @@ double reproject_radius(
 
 	double prediction; //IMAGE UV
 	if (model.project(p3d_cam, observation.k, observation.l, prediction))
+	{
 		return prediction;
+	}
 	else 
-		return -1.0;
+	{
+		return 0.0;
+	}
 }
 

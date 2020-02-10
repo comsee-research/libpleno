@@ -97,6 +97,7 @@ GridMesh_<Dim>::node(size_t col, size_t row) const
 	DEBUG_ASSERT(col < width() and row < height(), "GridMesh::node: wrong indexes ("<<col<<", "<<row<<")");
 	
     typename GridMesh_<Dim>::Node node;
+    node.setZero();
     
     const double colOffset = ((this->geometry_ == HexagonalRowsAligned and row%2 == 0) ? 0.5 : 0.0) ;
     const double rowOffset = ((this->geometry_ == HexagonalColsAligned and col%2 == 0) ? 0.5 : 0.0) ;

@@ -1,5 +1,7 @@
 #include "ray.h"
 
+#include "io/printer.h"
+
 // Constructor
 template<std::size_t N>
 Ray_<N>::Ray_(
@@ -36,6 +38,7 @@ void Ray_<N>::config(const typename Ray_<N>::Vector& p1,
                    const typename Ray_<N>::Vector& p2,
                    const RGBA& c)
 {
+    DEBUG_ASSERT((p1 != p2),"Ray::config: p1 == p2, no direction can be computed");
     origin_ = p1;
     direction_ = (p2 - p1).normalized();
     color_ = c;
@@ -54,12 +57,17 @@ template class Ray_<3ul>;
 //------------------------------------------------------------------------------
 // Determine the t coefficient of a parametric line equation where its cross a plane
 double compute_t_coef(const Eigen::Matrix<double, 4, 1>& plane, const Ray3D& line)
-{
+{                
+	DEBUG_ASSERT(
+		(line.direction()(0) != 0.0 and line.direction()(1) != 0.0 and line.direction()(2) != 0),
+		"In compute_t_coef: Direction is null (division by 0)"	
+	);
+	
     double t = -( plane(0) * line.origin()(0)
                 + plane(1) * line.origin()(1)
                 + plane(2) * line.origin()(2)
                 + plane(3) );
-
+	
     return t / (plane(0) * line.direction()(0)
               + plane(1) * line.direction()(1)
               + plane(2) * line.direction()(2));

@@ -6,6 +6,8 @@ bool MicroImageCenterReprojectionError::operator()(
 	const Pose& mla_pose, const MLA_t& g, const Sensor& sensor, ErrorType& error
 ) const
 {    
+	error.setZero();
+	
 	const P2D center = reproject_miccenter(
 		pcm, observation
 	);

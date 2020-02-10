@@ -20,7 +20,7 @@
 
 //******************************************************************************
 template<typename Observations> Observations compute_barycenters(const Observations& observations);
-template<typename Observations> void get_3_corners(const Observations& observations, Observations& corners);
+template<typename Observations> void get_4_corners(const Observations& observations, Observations& corners); /* tl - tr - br - bl */
 
 //******************************************************************************
 template<typename Observations, typename CameraModel>
@@ -80,35 +80,41 @@ Observations compute_barycenters(const Observations& observations)
 }
 
 template<typename Observations>
-void get_3_corners(const Observations& observations, Observations& corners) /* tl - tr - br */
+void get_4_corners(const Observations& observations, Observations& corners) /* tl - tr - br - bl */
 {
     corners.clear();
-    corners.resize(3); /* tl - bl - br */
+    corners.resize(4); /* tl - tr - br - bl */
     
     Observations obs{observations.begin(), observations.end()};
 	auto accessor = [](const auto& c) { return P2D{c[0], c[1]}; };
+	
+	const auto& [maxx, maxy] = [&](const Observations& obs) -> std::pair<double, double> {
+		double maxx=-1e12, maxy=-1e12;
+		for(const auto&ob : obs) {
+			const double x = ob[0];
+			const double y = ob[1];
+			if(x > maxx) maxx = x;
+			if(y > maxy) maxy = y;
+		}
+		return {std::ceil(maxx), std::ceil(maxy)};
+	}(obs); 
 
 	//---bottom-right
-	P2D br = FNS::find(obs, P2D{0.,0.}, accessor);
-	corners[2][0] = br[0]; corners[2][1] = br[1];
-				
+	P2D br = FNS::find(obs, P2D{0.0, 0.0}, accessor);
+	corners[Corner::BR][0] = br[0]; corners[Corner::BR][1] = br[1];
+	
 	//---top-left
-	P2D tl = FNS::find(obs, br, accessor);
-	corners[0][0] = tl[0]; corners[0][1] = tl[1];
-
-#if 0	
-    //---bottom-left
-    P2D tr = P2D{br[0], tl[1]};
-    
-    P2D bl = FNS::find(obs, tr, accessor);
-	corners[1][0] = bl[0]; corners[1][1] = bl[1];
-#else
-	//---top-right
-    P2D bl = P2D{tl[0], br[1]};
-    
-    P2D tr = FNS::find(obs, bl, accessor);
-	corners[1][0] = tr[0]; corners[1][1] = tr[1];
-#endif
+	P2D tl = FNS::find(obs, P2D{maxx, maxy}, accessor);
+	corners[Corner::TL][0] = tl[0]; corners[Corner::TL][1] = tl[1];
+	
+	//---top-right    
+    P2D tr = FNS::find(obs, P2D{tl[0], br[1]}, accessor);
+	corners[Corner::TR][0] = tr[0]; corners[Corner::TR][1] = tr[1];
+	
+	//---bottom-left    
+    P2D bl = FNS::find(obs, P2D{br[0], tl[1]}, accessor);
+	corners[Corner::BL][0] = bl[0]; corners[Corner::BL][1] = bl[1];
+				
 }
 
 //******************************************************************************
@@ -144,13 +150,13 @@ void link_cluster_to_node_index(
 			const int id = l * grid.width() + k; //node id
 			
 			//Project node in image
-			const P3D p3d_cam = to_coordinate_system_of(pose, grid.nodeInWorld(k,l));		
+			const P3D p3d_cam = to_coordinate_system_of(pose, grid.nodeInWorld(k,l));	
 			P2D projection; // a projected checkerboard node in IMAGE UV
         	bool projected = monocular.project(p3d_cam, projection);
         	       	
         	if ((not projected)) 
         	{ 
-        		if(verbose) PRINT_ERR("CheckerBoard Node ("<<k<<", "<<l<<") not reprojected in image"); 
+        		if(verbose) PRINT_ERR("CheckerBoard Node ("<<k<<", "<<l<<") not reprojected in image : "<<projection); 
         		continue; 
         	}	
         	
@@ -167,15 +173,18 @@ void link_cluster_to_node_index(
         		}
         	}
         	
-			GUI(
-				RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer())
-					.point_style(v::Cross).pen_color(v::cyan).pen_width(5)
-					.add_text(projection[0], projection[1] + 5, "("+std::to_string(k)+", "+std::to_string(l)+")")
-					.name("Projected nodes"),
-					projection
+        	if(verbose) 
+        	{
+				GUI(
+					RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer())
+						.point_style(v::Cross).pen_color(v::cyan).pen_width(5)
+						.add_text(projection[0], projection[1] + 5, "("+std::to_string(k)+", "+std::to_string(l)+")")
+						.name("Projected nodes"),
+						projection
+					);
 				);
-			);
-				
+			}
+			
 			if(cluster != -1 and id_mapping.count(cluster) == 0) 
 				id_mapping[cluster] = id;
 		}

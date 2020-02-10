@@ -17,9 +17,8 @@ struct RadiusReprojectionError
 {
 	using ErrorType 	= Eigen::Matrix<double, 1, 1>; //rho
 	using MLA_t			= GridMesh3D;
-	using CameraModel_t = PlenopticCamera;
 	
-	const CameraModel_t& pcm;
+	const PlenopticCamera& pcm;
 	const CheckerBoard &checkerboard;
     const BAPObservation& observation;
 

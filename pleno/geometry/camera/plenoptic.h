@@ -109,14 +109,16 @@ public:
 	void ml2mi(P2D& pkl) const;
 	void mi2ml(double& index) const;
 	void ml2mi(double& index) const;	
+	P2D mi2ml(std::size_t k, std::size_t l) const;
+	P2D ml2mi(std::size_t k, std::size_t l) const;	
 	
-	template<typename Observations_t> void mi2ml(Observations_t& obs) const;
-	template<typename Observations_t> void ml2mi(Observations_t& obs) const;
+	template<typename Observations> void mi2ml(Observations& obs) const;
+	template<typename Observations> void ml2mi(Observations& obs) const;
 
 protected:
 //Helper functions
 	bool is_on_disk(const P2D& p, double disk_diameter) const {
-    	return p.norm() <= disk_diameter / 2.0 ;
+    	return p.norm() <= (disk_diameter / 2.0) ; //FIXME
     }
     
     bool hit_main_lens(const Ray3D& ray) const {

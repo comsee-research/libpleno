@@ -55,8 +55,7 @@ void optimize(
 		obs[ob.frame].push_back(ob);	
 
 	auto extract_f = [&model](std::size_t k, size_t l) -> FocalLength& {
-		P2D pkl{k,l}; //ML 
-		model.ml2mi(pkl); //MI
+		P2D pkl = model.ml2mi(k,l); //ML->MI
 		return model.mla().f(pkl[0], pkl[1]);
 	};
 
@@ -127,8 +126,7 @@ void calibration_PlenopticCamera(
 	features.reserve(observations.size());
 	
 	MICObservations centers{micenters.begin(), micenters.end()};
-
-FORCE_GUI(true);	
+	
 //1) Init Extrinsics
 	PRINT_INFO("=== Init Extrinsics Parameters");	
 	init_extrinsics(
@@ -163,18 +161,11 @@ FORCE_GUI(true);
 	features.shrink_to_fit();
 
 	PRINT_DEBUG("Change indexes' space from MI to ML");
-	model.mi2ml(features);
 	model.mi2ml(centers);
+	model.mi2ml(features);
 
 	display(grid); display(poses);
-FORCE_GUI(false);
-	
-	evaluate_rmse(model, poses, grid, features, centers);
-	display(model, poses, grid, features, centers, pictures);
-		
-	std::getchar();	
-	
-	 
+		 
 //3) Run optimization
 	PRINT_INFO("=== Run optimization");
 	auto initial_model = model;

@@ -232,7 +232,7 @@ inline void display(
 			);
 			
 			const P2D corner = reproject_corner(model, model.pose(), grid, o);
-			const double radius = (std::is_same_v<Observations, BAPObservations>) ? reproject_radius(model, model.pose(), grid, o) : 0.0;
+			const double radius = (mfpc.I() > 0u and std::is_same_v<Observations, BAPObservations>) ? reproject_radius(model, model.pose(), grid, o) : 0.0;
 
 			RENDER_DEBUG_2D(
 	  			Viewer::context().layer(Viewer::layer()--)

@@ -16,9 +16,8 @@ struct MicroImageCenterReprojectionError
 	using ErrorType = Eigen::Matrix<double, 2, 1>;
 	
 	using MLA_t = GridMesh3D;
-	using CameraModel_t = PlenopticCamera;
 	
-	const CameraModel_t& pcm;
+	const PlenopticCamera& pcm;
     const MICObservation& observation;
     
     bool operator()(const Pose& p, const MLA_t& g, const Sensor& sensor, ErrorType& error) const;

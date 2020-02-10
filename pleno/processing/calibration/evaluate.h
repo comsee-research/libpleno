@@ -43,7 +43,7 @@ RMSE compute_rmse_corner(
 	RMSE rmse;
 	for(const auto& o : ob)
 	{	
-		const auto p = reproject_corner(model, model.pose(), grid, o);
+		const auto p = reproject_corner(model, model.pose(), grid, o, false);
 		const P2D residual{P2D{o[0], o[1]} - p};
 		
 		rmse.add(residual);
@@ -123,7 +123,7 @@ void evaluate_rmse(
 		PRINT_DEBUG("rho\t"<< (rmse_radius.sum()) << "\t\t" << rmse_radius.get());
 		rmse_radius_all += rmse_radius;
 			
-		RMSE rmse_bap = rmse_radius; rmse_bap.value += rmse_corner.value;	
+		RMSE rmse_bap = rmse_corner; rmse_bap.value += rmse_bap.value;	
 		PRINT_DEBUG("bap\t"<< (rmse_bap.sum()) << "\t\t" << rmse_bap.get());
 		rmse_bap_all += rmse_bap;	
 		

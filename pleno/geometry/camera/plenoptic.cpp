@@ -165,7 +165,8 @@ void PlenopticCamera::init(
 	mla_.pose().translation()[2] = - D; //set z coordinate
 	
 	//set focal lengths
-	mla_.init(I); for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params_.c_prime[i]) * params_.kappa_approx * (d / 2.); 
+	mla_.init(I); 
+	for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params_.c_prime[i]) * params_.kappa_approx * (d / 2.); 
 	
 	DEBUG_VAR(D);
 	DEBUG_VAR(d);
@@ -208,7 +209,7 @@ bool PlenopticCamera::project_through_micro_lens(const P3D& p, std::size_t k, st
     ray.config(Ckl_cam, p); // CAMERA
 
     // testing if the ray hits the main lens
-    is_projected = is_projected and hit_main_lens(to_coordinate_system_of(main_lens().pose(), ray));
+    is_projected = hit_main_lens(to_coordinate_system_of(main_lens().pose(), ray));
     	
     // computing intersection between sensor and ray
     P3D p_sensor = line_plane_intersection(sensor().planeInWorld(), ray); // CAMERA
@@ -231,16 +232,16 @@ bool PlenopticCamera::project_radius_through_micro_lens(
 	}
 	
     // computing radius
-    P3D Cklmla_ = mla().node(k,l);
-    P3D pmla_ = to_coordinate_system_of(mla().pose(), p); // MLA
-    P3D p_klmla_ = (pmla_ - Cklmla_); // NODE(K,L)
+    P3D Ckl_mla = mla().node(k,l);
+    P3D p_mla = to_coordinate_system_of(mla().pose(), p); // MLA
+    P3D p_kl_mla = (p_mla - Ckl_mla); // NODE(K,L)
     
-    const double a = (p_klmla_[2]);
+    const double a = (p_kl_mla[2]);
 	const double d = std::fabs(mla().pose().translation()[2] - sensor().pose().translation()[2]);
 	const double D = std::fabs(mla().pose().translation()[2]);
 
-	P2D mi_index{k,l}; ml2mi(mi_index);
-	const double f = mla().f(mi_index[0], mi_index[1]).f;
+	P2D mi_idx = ml2mi(k,l);
+	const double f = mla().f(mi_idx[0], mi_idx[1]).f;
  
     const double r = params().kappa * (D / (D + d)) * (d / 2.) * ((1. / f) - (1. / a) - (1. / d));
     
@@ -264,13 +265,15 @@ bool PlenopticCamera::project(
 		return false;
 	}
 	
-	P3D p;
+	bap.setZero();
+	
+	P3D p; p.setZero();
     bool is_projected_through_main_lens = project_through_main_lens(p3d_cam, p);
     
-    double radius;
+    double radius = 0.0;
     bool is_radius_projected = project_radius_through_micro_lens(p, k, l, radius);
 
-    P2D pixel;
+    P2D pixel; pixel.setZero();
 	bool is_projected_through_micro_lens = project_through_micro_lens(p, k, l, pixel);	
 
 	bap.head(2) = pixel;
@@ -285,7 +288,9 @@ bool PlenopticCamera::project(
     P2D& pixel
 ) const
 {
-	P3D p;
+	pixel.setZero();
+	
+	P3D p; p.setZero();
 	bool is_projected_through_main_lens = project_through_main_lens(p3d_cam, p);
 	bool is_projected_through_micro_lens = project_through_micro_lens(p, k, l, pixel);		
 	   
@@ -305,7 +310,9 @@ bool PlenopticCamera::project(
 		return false;
 	}
 	
-	P3D p;
+	rho = 0.0;
+	
+	P3D p; p.setZero();
     bool is_projected_through_main_lens = project_through_main_lens(p3d_cam, p);
     bool is_radius_projected = project_radius_through_micro_lens(p, k, l, rho);
 	
@@ -326,7 +333,7 @@ bool PlenopticCamera::project(
     {
     	for(std::size_t l = 0 ; l < mla().height() ; ++l) //iterate through lines //y-axis
 		{
-			P2D corner;
+			P2D corner; corner.setZero();
 			if(project(p3d_cam, k, l, corner))
 			{
 				observations.emplace_back(
@@ -362,7 +369,7 @@ bool PlenopticCamera::project(
     {
     	for(std::size_t l = 0 ; l < mla().height() ; ++l) //iterate through lines //y-axis
 		{
-			P3D bap;
+			P3D bap; bap.setZero();
 			if(project(p3d_cam, k, l, bap))
 			{
 				observations.emplace_back(
@@ -401,6 +408,18 @@ void PlenopticCamera::ml2mi(double& index) const
 	mi2ml(index);
 }
 
+P2D PlenopticCamera::mi2ml(std::size_t k, std::size_t l) const
+{
+	P2D pij{k, l}; //MI
+	mi2ml(pij); //ML
+	return pij;
+}
+
+P2D PlenopticCamera::ml2mi(std::size_t k, std::size_t l) const
+{
+	return mi2ml(k,l);
+}
+
 template<typename Observations>
 void PlenopticCamera::mi2ml(Observations& obs) const 
 {
@@ -408,8 +427,7 @@ void PlenopticCamera::mi2ml(Observations& obs) const
 		obs.begin(), obs.end(),
 		[*this](auto& ob) { 
 			//MI to ML
-			P2D pij{ob.k, ob.l}; //MI
-			this->mi2ml(pij); //ML
+			P2D pij = mi2ml(ob.k, ob.l);
 			
 			ob.k = pij[0];
 			ob.l = pij[1];
@@ -421,15 +439,14 @@ template void PlenopticCamera::mi2ml(MICObservations& obs) const ;
 template void PlenopticCamera::mi2ml(CBObservations& obs) const ;
 template void PlenopticCamera::mi2ml(BAPObservations& obs) const ;
 
-template<typename Observations_t>
-void PlenopticCamera::ml2mi(Observations_t& obs) const 
+template<typename Observations>
+void PlenopticCamera::ml2mi(Observations& obs) const 
 {
 	std::for_each(
 		obs.begin(), obs.end(),
 		[*this](auto& ob) { 
-			//MI to ML
-			P2D pkl{ob.k, ob.l}; //ML
-			this->ml2mi(pkl); //MI
+			//ML to MI
+			P2D pkl = ml2mi(ob.k, ob.l);
 			
 			ob.k = pkl[0];
 			ob.l = pkl[1];
