@@ -23,7 +23,7 @@ inline double mean(const std::vector<double>& v)
     return std::accumulate(begin(v), end(v), 0.0) / (double(size(v)) + 1e-3);
 }
 
-inline double mean(const std::array<double, 0>& a)
+inline double mean(const std::array<double, 0>& /*a*/)
 {
     return 0.0;
 }
@@ -55,7 +55,7 @@ inline double median(std::vector<double> v)
 }
 
 
-inline double median(std::array<double, 0> a)
+inline double median(std::array<double, 0> /*a*/)
 {
     return 0.0;
 }

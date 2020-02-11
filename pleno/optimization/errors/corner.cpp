@@ -5,10 +5,10 @@
 bool CornerReprojectionError::operator()(
 	const Pose& camera_pose,
 	const Pose& mla_pose,
-	const MLA_t& mla,
+	const MLA_t& /*mla*/,
 	const Sensor& sensor,
 	const ThinLensCamera& tcm, 
-	const Distortions& distortions,
+	const Distortions& /*distortions*/,
 	ErrorType& error
 ) const
 {    

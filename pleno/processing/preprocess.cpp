@@ -13,6 +13,8 @@
 #include "processing/tools/stats.h"
 #include "processing/tools/lens.h"
 
+#include "unused.h"
+
 ////////////////////////////////////////////////////////////////////////////////
 // DISPLAYS - Histograms
 ////////////////////////////////////////////////////////////////////////////////
@@ -193,7 +195,7 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 ////////////////////////////////////////////////////////////////////////////////
 void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>& data, std::size_t I)
 {
-	assert(I > 0u);
+	DEBUG_ASSERT((I > 0u), "Can't compute radii when I=0");
 	
 	static constexpr double sigma99p = 2.357022604; // 2.575829; //2.33;//  2.575829 sigma ---> 99%
 	
@@ -245,7 +247,7 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
 			);
  			
  			//const auto& [meanx, meany, sigma, alpha] = estimation_gaussian_least_squares(roi, {X-x, Y-y, 0., 0.}, true, 200);
- 			const auto& [meanx, meany, sigma, alpha] = estimation_gaussian_moments(roi);
+ 			const auto& [meanx, meany, sigma, alpha] = estimation_gaussian_moments(roi); UNUSED(alpha);
 	 		
 	 		const double r = sigma99p * sigma; DEBUG_VAR(r);
 	 		data.emplace_back(MicroImage{k,l,P2D{X+meanx,Y+meany},r,t});
@@ -308,9 +310,11 @@ preprocess(
 	const std::vector<ImageWithInfo>& imgs, 
 	const MIA& grid, 
 	double pxl2metric,
-	std::size_t I
+	std::size_t I_
 )
 {
+	std::size_t I = (I_ == 0) ? 1 : I_;
+	
 	std::vector<std::vector<P2D>> data(I);
 	for(auto& d: data) d.reserve(grid.size()*imgs.size());
 		
@@ -373,7 +377,7 @@ preprocess(
 		for (std::size_t i = 0; i < I; ++i) N += (std::fabs(params.m) / ( params.kappa / 2.0 - std::fabs(params.c[i])));
 		params.N = N / double(I);
 		
-		params.I = I;
+		params.I = I_;
 	}
 	
 	return params;

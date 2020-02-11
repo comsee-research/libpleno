@@ -4,6 +4,8 @@
 
 #include "optimization/homography.h"
 
+#include "unused.h"
+
 /**
  *  @Brief fit_template_on
  */
@@ -19,7 +21,7 @@ Transformation optimize(
 
     //running optimisation
     GenericLevenbergMarquardt<Image> glm{1e3, 1e-10, observation, model, mask};
-    auto [ nbit, residual ] = glm.run(t, 1e-3, false);
+    auto [ nbit, residual ] = glm.run(t, 1e-3, false); UNUSED(nbit);
     
     final_residual = residual;
 

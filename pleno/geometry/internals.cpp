@@ -9,10 +9,12 @@ std::ostream& operator<<(std::ostream& os, const InternalParameters& params)
 		<< "\tm = " << params.m << std::endl
 		<< "\tscale = " << params.scale << std::endl;
 		
-	for(std::size_t i=0; i<params.I; ++i)
-		os << "\tc["<<i<<"] = " << params.c[i] << std::endl;
-	for(std::size_t i=0; i<params.I; ++i)	
-		os << "\tc'["<<i<<"] = " << params.c_prime[i] << std::endl;
+	std::size_t i=0;	
+	for(const auto& ci : params.c)
+		os << "\tc["<<i++<<"] = " << ci << std::endl;
+	i=0;
+	for(const auto& cpi : params.c_prime)	
+		os << "\tc'["<<i++<<"] = " << cpi << std::endl;
 		
 	os	<< "\tkappa = " << params.kappa << std::endl
 		<< "\tkappa_approx = " << params.kappa_approx << std::endl

@@ -85,13 +85,13 @@ public:
 	std::size_t I() const;
     	
 //Project and Raytrace	
-	bool project(const P3D& p3d_cam, P2D& pixel) const override final
+	bool project(const P3D& /*p3d_cam*/, P2D& /*pixel*/) const override final
     {
 		PRINT_WARN("PlenopticCamera::project: No micro-lens' index specified.");
 		return false;
     }
     
-    bool raytrace(const P2D& pixel, Ray3D& ray) const override final
+    bool raytrace(const P2D& /*pixel*/, Ray3D& /*ray*/) const override final
     {
 		PRINT_WARN("PlenopticCamera::raytrace: No micro-lens' index specified.");
 		return false;

@@ -5,11 +5,11 @@
 bool BlurAwarePlenopticReprojectionError::operator()(
 	const Pose& camera_pose,
 	const Pose& mla_pose,
-	const MLA_t& mla,
-	const FocalLength& f,
+	const MLA_t& /*mla*/,
+	const FocalLength& /*f*/,
 	const Sensor& sensor,
 	const ThinLensCamera& tcm, 
-	const Distortions& distortions,
+	const Distortions& /*distortions*/,
 	ErrorType& error
 ) const
 {    
@@ -33,6 +33,13 @@ bool BlurAwarePlenopticReprojectionError::operator()(
         error[1] += std::expm1(-dist_sensor_mla);
         error[2] += std::expm1(-dist_sensor_mla);
     }
-
+	// focal is negatif
+    if (tcm.focal() < 0.0) 
+    { 
+    	error[0] += std::expm1(-tcm.focal());  
+    	error[1] += std::expm1(-tcm.focal());
+    	error[2] += std::expm1(-tcm.focal());
+    }
+    
     return true;
 }

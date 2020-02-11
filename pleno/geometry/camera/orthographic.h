@@ -20,7 +20,7 @@ public:
     virtual ~OrthographicCamera() override {}
     
 //Project and Raytrace
-    bool project(const P3D& p3d_cam, P2D& pixel) const override 
+    bool project(const P3D& /*p3d_cam*/, P2D& /*pixel*/) const override 
     {
 		PRINT_ERR("OrthographicCamera::project not implemented yet.");
     	return false;

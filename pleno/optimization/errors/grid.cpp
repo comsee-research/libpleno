@@ -1,6 +1,6 @@
 #include "grid.h"
 
-bool GridReconstructionError::operator()(const MIA& g, const Pose2D& p, ErrorType& error) const
+bool GridReconstructionError::operator()(const MIA& g, const Pose2D& /*p*/, ErrorType& error) const
 {
 	const P2D c = g.nodeInWorld(observation.k, observation.l);
 

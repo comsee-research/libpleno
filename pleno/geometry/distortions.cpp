@@ -121,7 +121,7 @@ void Distortions::apply(P3DS& ps) const
 /*
  * @Brief apply_distortions apply distortions to a point expressed in CAMERA
 **/
-void Distortions::unapply(P3D& p) const
+void Distortions::unapply(P3D& /*p*/) const
 {
     PRINT_WARN("Distortions::unapply not implemented yet");
 }

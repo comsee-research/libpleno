@@ -308,7 +308,7 @@ target_include_directories(pleno PRIVATE ${CMAKE_SOURCE_DIR}/pleno/processing)
 target_include_directories(pleno PRIVATE ${CMAKE_SOURCE_DIR}/pleno/simulation)
 
 # link all libraries to libpleno
-add_definitions(-Wall)
+add_definitions(-Wall -Wextra -Werror)
 target_link_libraries(pleno ${EXTERNAL_LIBS} pthread)
 
 if(EXTRA_DEPS)

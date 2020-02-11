@@ -20,6 +20,8 @@
  	 
 #include "estimation.h"
 
+#include "unused.h"
+
 #include "graphic/gui.h"
 #include "io/printer.h"
 #include "processing/improcess.h"
@@ -64,7 +66,7 @@ estimation_gaussian_least_squares(
 	using B_t = Eigen::Matrix<float, Eigen::Dynamic, 1>;
 	using X_t = Eigen::Matrix<float, 2, 1>;
 	
-	const auto& [meanx, meany, s, a] = init;
+	const auto& [meanx, meany, s, a] = init; UNUSED(a); UNUSED(s);
 	const std::size_t eroiw = img.cols;
 	const std::size_t eroih = img.rows;
 	
