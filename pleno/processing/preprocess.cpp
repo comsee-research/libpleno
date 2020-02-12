@@ -155,10 +155,10 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 	const std::size_t rows = 500;
 	const std::size_t cols = 800;
 	
-	const float xmax = 0.3;
+	const float xmax = 0.5;
 	const float xmin = 0.0;
-	const float ymin = 0.02;
-	const float ymax = 0.08;
+	const float ymin = -0.08;
+	const float ymax = 0.02;
 	
 	out = Image::zeros(rows, cols, CV_8UC3);
 	
