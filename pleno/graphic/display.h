@@ -177,6 +177,8 @@ inline void display(
 	const std::vector<Image>& pictures
 )
 {
+	const bool usePictures = (pictures.size() > 0u);
+	
 	//Split observations according to frame
 	std::unordered_map<int /* frame index */, Observations> obs;
 	for(const auto& ob : observations)
@@ -215,12 +217,15 @@ inline void display(
 		
 		for(const auto& [p,f] : poses) if(f == ob[0].frame) model.pose() = p;
 		display(model);
-#if 1		
-		RENDER_DEBUG_2D(
-			Viewer::context().layer(Viewer::layer()++).name("Frame f = "+std::to_string(f)), 
-			pictures[f]
-		);
-#endif	
+		
+		if (usePictures)
+		{
+			RENDER_DEBUG_2D(
+				Viewer::context().layer(Viewer::layer()++).name("Frame f = "+std::to_string(f)), 
+				pictures[f]
+			);
+		}
+		
 		for(const auto& o : ob)
 		{				
 			RENDER_DEBUG_2D(

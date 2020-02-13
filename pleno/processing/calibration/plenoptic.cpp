@@ -132,7 +132,7 @@ void calibration_PlenopticCamera(
 	init_extrinsics(
 		features, poses,
 		model, grid, observations,
-		pictures
+		/*pictures*/ {}
 	);
 //2) Sanitize Observations
 	PRINT_INFO("=== Sanitize Observations");

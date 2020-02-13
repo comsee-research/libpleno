@@ -219,6 +219,8 @@ void init_extrinsics(
 	const std::vector<Image>& pictures /* for GUI only */
 )
 {
+	const bool usePictures = (pictures.size() > 0u);
+	
 	//Split observations according to frame
 	std::unordered_map<int /* frame index */, Observations> obs;
 	for(const auto& ob : observations)
@@ -241,12 +243,13 @@ void init_extrinsics(
 		
 		GUI(
 			PRINT_DEBUG("[GUI] Display information of frame f = " << f);
-		#if 0		
-			RENDER_DEBUG_2D(
-				Viewer::context().layer(Viewer::layer()++).name("Frame f = "+std::to_string(f)), 
-				pictures[f]
-			);	
-		#endif	
+			if (usePictures)
+			{	
+				RENDER_DEBUG_2D(
+					Viewer::context().layer(Viewer::layer()++).name("Frame f = "+std::to_string(f)), 
+					pictures[f]
+				);	
+			}
 			display(f, ob);
 			display(f, barycenters, tag::Barycenters{});	
 		);
