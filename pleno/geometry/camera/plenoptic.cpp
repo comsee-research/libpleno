@@ -117,21 +117,17 @@ void PlenopticCamera::init(
 		case Keplerian: 
 		{
 			//d = (2. * params_.m * F) / (F - 2. * params_.m); D = F + d; 
-			const double H = (h / 2.) * (1. - sqrt(1. - 4. * (F / h))); DEBUG_VAR(H);
-			d = (2. * m * H) / (F + 4. * m);
-			D = H - 2. * d;
-			//D = H;
-			//d = 2. * D * params_.m / F;
+			const double H = (h / 2.) * (1. - sqrt(1. - 4. * (F / h))); DEBUG_VAR(H); // eq.(18)
+			d = (2. * m * H) / (F + 4. * m); // eq.(17)
+			D = H - 2. * d; // eq.(17)
 		}
 		break;
 		case Galilean:
 		{
 			//d = (2. * F * params_.m) / (2. * params_.m + F); D = F - d;
-			const double H = std::fabs((h / 2.) * (1. - sqrt(1. + 4. * (F / h)))); DEBUG_VAR(H);
-			d = (2. * m * H) / (F + 4. * m);
-			D = H - 2. * d;
-			//D = H;
-			//d = 2. * D * params_.m / F;
+			const double H = std::fabs((h / 2.) * (1. - sqrt(1. + 4. * (F / h)))); DEBUG_VAR(H); // eq.(18)
+			d = (2. * m * H) / (F + 4. * m); // eq.(17)
+			D = H - 2. * d; // eq.(17)
 		}
 		break;
 	}
@@ -139,7 +135,7 @@ void PlenopticCamera::init(
 	const double theta_z 	= get_rotation_angle(mia_.pose().rotation()); //std::atan2( mia_.pose().rotation()(1, 0), mia_.pose().rotation()(0, 0) );
 	const double t_x		= sensor.pxl2metric(mia_.pose().translation()[0]);
 	const double t_y		= sensor.pxl2metric(mia_.pose().translation()[1]);
-	const double kappa_approx = params_.kappa * (D / (D + d)) ;
+	const double kappa_approx = params_.kappa * (D / (D + d)) ; // eq.(2)
 	
 	//re-set kappa_approx
 	params_.kappa_approx = kappa_approx;
@@ -166,7 +162,7 @@ void PlenopticCamera::init(
 	
 	//set focal lengths
 	mla_.init(I); 
-	for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params_.c_prime[i]) * params_.kappa_approx * (d / 2.); 
+	for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params_.c_prime[i]) * params_.kappa_approx * (d / 2.);  // eq.(19)
 	
 	DEBUG_VAR(D);
 	DEBUG_VAR(d);
@@ -243,7 +239,7 @@ bool PlenopticCamera::project_radius_through_micro_lens(
 	P2D mi_idx = ml2mi(k,l);
 	const double f = mla().f(mi_idx[0], mi_idx[1]).f;
  
-    const double r = params().kappa * (D / (D + d)) * (d / 2.) * ((1. / f) - (1. / a) - (1. / d));
+    const double r = params().kappa * (D / (D + d)) * (d / 2.) * ((1. / f) - (1. / a) - (1. / d)); // eq.(12)
     
     radius = sensor().metric2pxl(r);
     
@@ -465,9 +461,9 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera::Mode& mode)
 {
 	switch(mode)
 	{
-		case PlenopticCamera::Mode::Unfocused: os << "Unfocused (F = D)"; break;
-		case PlenopticCamera::Mode::Keplerian: os << "Keplerian (F < D)"; break;
-		case PlenopticCamera::Mode::Galilean: os << "Galilean (F > D)"; break;
+		case PlenopticCamera::Mode::Unfocused: os << "Unfocused (F = D and f = d)"; break;
+		case PlenopticCamera::Mode::Keplerian: os << "Keplerian (F < D and f < d)"; break;
+		case PlenopticCamera::Mode::Galilean: os << "Galilean (F > D and f > d)"; break;
 	}
 	return os;
 }
@@ -539,6 +535,9 @@ void save(std::string path, const PlenopticCamera& pcm)
     
     // Configuring the Focus distance
     config.dist_focus() = pcm.distance_focus();
+    
+    // Configuring the Mode
+    config.mode() = pcm.mode();
 
 	v::save(path, config);
 }

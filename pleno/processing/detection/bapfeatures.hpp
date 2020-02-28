@@ -23,7 +23,7 @@ double virtualdepth(const Observation_t& lhs, const Observation_t& rhs, const MI
 									
 	const double di = (plhs - prhs).norm() * pixel2metric; 					
 		
-	return ndC / (ndC - di) ;	
+	return ndC / (ndC - di) ; // Eq.(15)
 
 }
 
@@ -63,7 +63,7 @@ void update_observations(const InputObservations_t& inobs, BAPObservations& outo
 {	
 	std::transform(inobs.begin(), inobs.end(), std::back_inserter(outobs),
 		[&v, &params](const auto& io) -> BAPObservation {
-			const double r = (params.kappa_approx / 2. ) * (1. / v) //Eq (14)
+			const double r = (params.kappa_approx / 2. ) * (1. / v) // Eq.(14)
 							+ params.c_prime[lens_type(params.I, io.k, io.l)] 
 							- (params.kappa_approx / 2. );
 				

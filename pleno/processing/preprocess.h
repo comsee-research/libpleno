@@ -4,6 +4,7 @@
 
 #include "geometry/mia.h"
 #include "geometry/internals.h"
+#include "geometry/camera/plenoptic.h"
 
 ////////////////////////////////////////////////////////////////////////////////
 void hist_data(const std::vector<double>& data, Image& dst, double min, double max, int binSize = 3, int height = 0, int nbbin = 250);
@@ -22,5 +23,6 @@ preprocess(
 	const std::vector<ImageWithInfo>& imgs, 
 	const MIA& grid, 
 	double pxl2metric = 0.0055,
-	std::size_t I = 3u
+	std::size_t I = 3u,
+	int mode = PlenopticCamera::Mode::Galilean
 );

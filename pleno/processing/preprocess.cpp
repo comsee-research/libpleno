@@ -150,19 +150,23 @@ void display_data(const std::vector<P2D>& pts, const LineCoefficients& coefs, Im
 	cv::line(out, cv::Point(0, cscaled), cv::Point(cols, endscaled), cv::Scalar(255,0,0));
 }
 
+//FIXME: bug in the display 
 void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vector<LineCoefficients>& coefs, Image& out)
 {
 	const std::size_t rows = 500;
 	const std::size_t cols = 800;
 	
-	const float xmax = 0.5;
+	const float xmax = 0.3;
 	const float xmin = 0.0;
 	const float ymin = -0.08;
 	const float ymax = 0.02;
 	
 	out = Image::zeros(rows, cols, CV_8UC3);
 	
-	cv::Scalar colors_pts[] = {cv::Scalar(255, 0, 0), cv::Scalar(0, 255, 0), cv::Scalar(0, 0, 255)};
+	cv::Scalar colors_pts[] = {
+		cv::Scalar(255, 0, 0), cv::Scalar(0, 255, 0), cv::Scalar(0, 0, 255), 
+		cv::Scalar(127, 0, 0), cv::Scalar(0, 127, 0), cv::Scalar(0, 0, 127)
+	};
 	int i=0;
 	for(const auto& pts : data)
 	{	
@@ -177,12 +181,15 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 		i++;
 	}
 #if 1	
-	cv::Scalar colors_lines[] = {cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 255), cv::Scalar(255, 0, 255)};
+	cv::Scalar colors_lines[] = {
+		cv::Scalar(255, 255, 0), cv::Scalar(0, 255, 255), cv::Scalar(255, 0, 255), 
+		cv::Scalar(127, 127, 0), cv::Scalar(0, 127, 127), cv::Scalar(127, 0, 127)
+	};
 	i=0;
 	for(const auto & [m,c] : coefs)
 	{		
-		const float cscaled = rows * (1.f - (c - ymin) / (ymax - ymin) + ymin ); 
-		const float endscaled = rows * (1.f - ((m * xmax + c) - ymin) / (ymax - ymin) + ymin);
+		const float cscaled = rows * (1.f - ((c - ymin) / (ymax - ymin) + ymin) ); 
+		const float endscaled = rows * (1.f - (((m * xmax + c) - ymin) / (ymax - ymin) + ymin));
 		DEBUG_VAR(endscaled);
 	
 		cv::line(out, cv::Point(0, cscaled), cv::Point(cols, endscaled), colors_lines[i++]);
@@ -199,7 +206,9 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
 	
 	static constexpr double sigma99p = 2.357022604; // 2.575829; //2.33;//  2.575829 sigma ---> 99%
 	
-	static const decltype(v::red) colors[3] = {v::red, v::green, v::blue}; //FIXME: load palette
+	static const decltype(v::red) colors[] = {
+		v::red, v::green, v::blue, v::purple, v::yellow, v::orange
+	}; //FIXME: load palette
 
     data.clear();
     data.reserve(centers.size());
@@ -310,10 +319,12 @@ preprocess(
 	const std::vector<ImageWithInfo>& imgs, 
 	const MIA& grid, 
 	double pxl2metric,
-	std::size_t I_
+	std::size_t I_,
+	int mode
 )
 {
-	std::size_t I = (I_ == 0) ? 1 : I_;
+	const std::size_t I = (I_ == 0) ? 1 : I_;
+	const double sgn = (mode == PlenopticCamera::Mode::Galilean) ? -1.0 : 1.0;
 	
 	std::vector<std::vector<P2D>> data(I);
 	for(auto& d: data) d.reserve(grid.size()*imgs.size());
@@ -338,7 +349,7 @@ preprocess(
 		{
 			data[mi.type].emplace_back(
 					1.f/fnumber, 
-					- pxl2metric * mi.radius //FIXME: add minus sign
+					sgn * pxl2metric * mi.radius //see note in subsection (6.2)
 			);
 		}
 	}
@@ -355,17 +366,17 @@ preprocess(
 	{
 		constexpr double magicratio = 0.9931;
 		
-		params.m 		= coefs[0].m ;
+		params.m 		= coefs[0].m ; // Eq.(10)
 		params.scale	= pxl2metric;
-		params.kappa 	= pxl2metric * ( (grid.edge_length()[0] + grid.edge_length()[1]) / 2. ); //(eq. 40) //TODO: update eqt n°
-		params.kappa_approx = magicratio * params.kappa; //(eq. 51)
+		params.kappa 	= pxl2metric * ( (grid.edge_length()[0] + grid.edge_length()[1]) / 2. );
+		params.kappa_approx = magicratio * params.kappa; // Eq.(3)
 
 		params.c.resize(I);
 		params.c_prime.resize(I);
 		for (std::size_t i = 0; i < I; ++i) 
 		{
-			params.c[i] = coefs[i].c ;
-			params.c_prime[i] = coefs[i].c + params.kappa / 2.; //(eq. 46)
+			params.c[i] = coefs[i].c ; // Eq.(10)
+			params.c_prime[i] = coefs[i].c + params.kappa / 2.; // Eq.(10)
 		}
 		
 		for (std::size_t i = 0; i < I; ++i) 
