@@ -34,8 +34,13 @@ Applications
 
 
 Currently available applications using the libpleno:
- * [COMPOTE](http://gitlab.ip.uca.fr/mla-dev/compote) (Calibration Of Multi-focus PlenOpTic camEra), a collection of tools to pre-calibrate and calibrate a multifocus plenoptic camera.
+ * [COMPOTE](https://github.com/comsee-research/compote) (Calibration Of Multi-focus PlenOpTic camEra), a set of tools to pre-calibrate and calibrate a multifocus plenoptic camera.
  * ...
+ 
+Datasets
+========
+
+Datasets R12-A, R12-B and R12-C can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
 
 Citing
 ======
@@ -44,7 +49,7 @@ If you use libpleno in an academic context, please cite the following publicatio
 
 	@inproceedings{Labussiere2020,
 		author = {Labussi{\`{e}}re, Mathieu and Teuli{\`{e}}re, C{\'{e}}line and Bernardin, Fr{\'{e}}d{\'{e}}ric and Ait-Aider, Omar},
-		booktitle = {Proceedings of the IEEE Computer Society Conference on Computer Vision and Pattern Recognition},
+		booktitle = {2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
 		title = {{Blur Aware Calibration of Multi-Focus Plenoptic Camera}},
 		year = {2020}
 	}
