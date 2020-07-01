@@ -12,3 +12,4 @@
 #include "distortions.h"
 #include "sensor.h"
 #include "thinlens.h"
+#include "kappa.h"

@@ -70,11 +70,4 @@ using FocalLengths 			= AlignedVector<FocalLength>;
 
 struct RGBA					{ Real r,g,b,a; };
 
-
-//----------------------------------
-template<int I>
-struct CharlInt{
-    static const int value = I;
-};
-
-static const CharlInt<0> _0;
+struct BlurProportionalityCoefficient { Real kappa; };

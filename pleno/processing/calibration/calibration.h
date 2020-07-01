@@ -3,7 +3,9 @@
 #include "types.h"
 
 #include "geometry/camera/models.h"
+
 #include "geometry/observation.h"
+#include "geometry/internals.h"
 
 #include "object/checkerboard.h"
 
@@ -33,4 +35,13 @@ void calibration_ExtrinsicsPlenopticCamera(
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const std::vector<Image>& pictures /* for GUI only */
+);
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+void calibration_relativeBlur(
+	InternalParameters& internals,     /* out */ 
+	const BAPObservations& observations, /*  (u,v,rho) */
+	const std::vector<Image>& images
 );

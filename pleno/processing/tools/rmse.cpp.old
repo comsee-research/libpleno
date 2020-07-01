@@ -1,0 +1,19 @@
+#include "rmse.h"
+
+void RMSE::add(double d) { size+=1; value += d * d; }
+void RMSE::add(const P2D& p) { value += p.squaredNorm(); size+=1; }
+void RMSE::add(const P3D& p) { value += p.squaredNorm(); size+=1; }
+
+double RMSE::get() const { 
+	return size == 0 ? 0. : std::sqrt(sum() / static_cast<double>(size));
+}
+double RMSE::sum() const {
+	return value; // / 2; //FIXME: /2 to be homogeneous with LMA, find why ?
+}
+
+RMSE& RMSE::operator+=(const RMSE& rhs){
+	  this->value += rhs.value;
+	  this->size += rhs.size;
+	  return *this;
+}
+

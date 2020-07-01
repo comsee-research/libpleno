@@ -211,12 +211,14 @@ set(PLENO_OPTIMIZATION_SRC
 	pleno/optimization/thinlens.cpp
 	pleno/optimization/sensor.cpp
 	pleno/optimization/homography.cpp
+	pleno/optimization/kappa.cpp
 	#errors
 		pleno/optimization/errors/grid.cpp
 		pleno/optimization/errors/mic.cpp
 		pleno/optimization/errors/bap.cpp
 		pleno/optimization/errors/corner.cpp
 		pleno/optimization/errors/radius.cpp
+		pleno/optimization/errors/blur.cpp
 		#extrinsics
 			pleno/optimization/errors/extrinsics/extrinsics_bap.cpp
 			pleno/optimization/errors/extrinsics/extrinsics_corner.cpp
@@ -240,6 +242,7 @@ set(PLENO_PROCESSING_SRC
 #--Calibration
 	pleno/processing/calibration/mia.cpp	
 	pleno/processing/calibration/plenoptic.cpp	
+	pleno/processing/calibration/blur.cpp	
 #--Detection
 	pleno/processing/detection/mic.cpp
 	pleno/processing/detection/corners/corners.cpp
