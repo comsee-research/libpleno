@@ -364,28 +364,29 @@ preprocess(
 	PRINT_INFO("=== Computing internal parameters");
 	InternalParameters params;
 	{
-		constexpr double magicratio = 0.9931;
+		constexpr double lambda = 0.9931;
 		
 		params.m 		= coefs[0].m ; // Eq.(10)
 		params.scale	= pxl2metric;
-		params.kappa 	= pxl2metric * ( (grid.edge_length()[0] + grid.edge_length()[1]) / 2. );
-		params.kappa_approx = magicratio * params.kappa; // Eq.(3)
+		params.dc 		= pxl2metric * ( (grid.edge_length()[0] + grid.edge_length()[1]) / 2. );
+		params.dC 		= lambda * params.dc; // Eq.(3)
+		params.lambda	= lambda;
 
-		params.c.resize(I);
-		params.c_prime.resize(I);
+		params.q.resize(I);
+		params.q_prime.resize(I);
 		for (std::size_t i = 0; i < I; ++i) 
 		{
-			params.c[i] = coefs[i].c ; // Eq.(10)
-			params.c_prime[i] = coefs[i].c + params.kappa / 2.; // Eq.(10)
+			params.q[i] = coefs[i].c ; // Eq.(10)
+			params.q_prime[i] = coefs[i].c + params.dc / 2.; // Eq.(10)
 		}
 		
 		for (std::size_t i = 0; i < I; ++i) 
-			PRINT_DEBUG("r(1/4)|"<<i<<" = " << (params.m / 4. + params.c[i]) / pxl2metric);
+			PRINT_DEBUG("r(1/4)|"<<i<<" = " << (params.m / 4. + params.q[i]) / pxl2metric);
 		for (std::size_t i = 0; i < I; ++i) 
-			PRINT_DEBUG("N|"<<i<<" = " << std::fabs(params.m) / ( params.kappa / 2.0 - std::fabs(params.c[i])));
+			PRINT_DEBUG("N|"<<i<<" = " << std::fabs(params.m) / ( params.dc / 2.0 - std::fabs(params.q[i])));
 
 		double N = 0.0;
-		for (std::size_t i = 0; i < I; ++i) N += (std::fabs(params.m) / ( params.kappa / 2.0 - std::fabs(params.c[i])));
+		for (std::size_t i = 0; i < I; ++i) N += (std::fabs(params.m) / ( params.dc / 2.0 - std::fabs(params.q[i])));
 		params.N = N / double(I);
 		
 		params.I = I_;

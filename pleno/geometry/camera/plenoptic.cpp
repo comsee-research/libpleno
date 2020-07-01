@@ -135,10 +135,12 @@ void PlenopticCamera::init(
 	const double theta_z 	= get_rotation_angle(mia_.pose().rotation()); //std::atan2( mia_.pose().rotation()(1, 0), mia_.pose().rotation()(0, 0) );
 	const double t_x		= sensor.pxl2metric(mia_.pose().translation()[0]);
 	const double t_y		= sensor.pxl2metric(mia_.pose().translation()[1]);
-	const double kappa_approx = params_.kappa * (D / (D + d)) ; // eq.(2)
+	const double lambda		= (D / (D + d)); // eq.(3)
+	const double dC 		= params_.dc * lambda ; // eq.(3)
 	
-	//re-set kappa_approx
-	params_.kappa_approx = kappa_approx;
+	//re-set internals
+	params_.lambda = lambda;
+	params_.dC = dC;
 	
 	//SENSOR
 	sensor_ = sensor;
@@ -150,7 +152,7 @@ void PlenopticCamera::init(
 	mla_.geometry() 	= mia_.geometry();
 	mla_.width() 		= mia_.width();
 	mla_.height() 		= mia_.height();
-	mla_.edge_length() 	= P2D{kappa_approx, kappa_approx};
+	mla_.edge_length() 	= P2D{dC, dC};
 	
 	mla_.pose().rotation() << 	std::cos(theta_z),	std::sin(theta_z),		0.,
 								-std::sin(theta_z),	std::cos(theta_z),		0.,
@@ -162,11 +164,12 @@ void PlenopticCamera::init(
 	
 	//set focal lengths
 	mla_.init(I); 
-	for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params_.c_prime[i]) * params_.kappa_approx * (d / 2.);  // eq.(19)
+	for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params_.q_prime[i]) * params_.dC * (d / 2.);  // eq.(19)
 	
 	DEBUG_VAR(D);
 	DEBUG_VAR(d);
-	DEBUG_VAR(kappa_approx);
+	DEBUG_VAR(lambda);
+	DEBUG_VAR(dC);
 	PRINT_DEBUG("theta_z=" << std::setprecision(15) << theta_z << std::setprecision(6));
 	DEBUG_VAR(t_x);
 	DEBUG_VAR(t_y);
@@ -239,7 +242,7 @@ bool PlenopticCamera::project_radius_through_micro_lens(
 	P2D mi_idx = ml2mi(k,l);
 	const double f = mla().f(mi_idx[0], mi_idx[1]).f;
  
-    const double r = params().kappa * (D / (D + d)) * (d / 2.) * ((1. / f) - (1. / a) - (1. / d)); // eq.(12)
+    const double r = params().dc * (D / (D + d)) * (d / 2.) * ((1. / f) - (1. / a) - (1. / d)); // eq.(12)
     
     radius = sensor().metric2pxl(r);
     

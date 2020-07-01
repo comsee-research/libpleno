@@ -39,7 +39,7 @@ double compute_virtualdepth(const Observations_t&obs, const MIA& mia, const Inte
 		auto current = obs.begin()+i;
 		
 		std::transform(current+1, obs.end(), std::back_inserter(vdepths),
-			[lhs = *current, pixel2metric =  params.scale, dC = params.kappa_approx, &mia]
+			[lhs = *current, pixel2metric =  params.scale, dC = params.dC, &mia]
 				(const auto& rhs) -> double {
 					return 	virtualdepth(lhs, rhs, mia, dC, pixel2metric);		
 			}
@@ -63,9 +63,9 @@ void update_observations(const InputObservations_t& inobs, BAPObservations& outo
 {	
 	std::transform(inobs.begin(), inobs.end(), std::back_inserter(outobs),
 		[&v, &params](const auto& io) -> BAPObservation {
-			const double r = (params.kappa_approx / 2. ) * (1. / v) // Eq.(14)
-							+ params.c_prime[lens_type(params.I, io.k, io.l)] 
-							- (params.kappa_approx / 2. );
+			const double r = (params.dC / 2. ) * (1. / v) 
+							+ params.q_prime[lens_type(params.I, io.k, io.l)] 
+							- (params.dC / 2. ); // Eq.(14)
 				
 			return BAPObservation{
 				io.k, io.l,  //k,l

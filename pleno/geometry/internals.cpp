@@ -10,16 +10,18 @@ std::ostream& operator<<(std::ostream& os, const InternalParameters& params)
 		<< "\tscale = " << params.scale << std::endl;
 		
 	std::size_t i=0;	
-	for(const auto& ci : params.c)
-		os << "\tc["<<i++<<"] = " << ci << std::endl;
+	for(const auto& qi : params.q)
+		os << "\tq["<<i++<<"] = " << qi << std::endl;
 	i=0;
-	for(const auto& cpi : params.c_prime)	
-		os << "\tc'["<<i++<<"] = " << cpi << std::endl;
+	for(const auto& qpi : params.q_prime)	
+		os << "\tq'["<<i++<<"] = " << qpi << std::endl;
 		
-	os	<< "\tkappa = " << params.kappa << std::endl
-		<< "\tkappa_approx = " << params.kappa_approx << std::endl
+	os	<< "\tdc = " << params.dc << std::endl
+		<< "\tlambda = " << params.lambda << std::endl
+		<< "\tdC = " << params.dC << std::endl
 		<< "\tN = " << params.N << std::endl
 		<< "\tI = " << params.I << std::endl
+		<< "\tkappa = " << params.kappa << std::endl
 		<< "};" ;
 		
 	return os;
@@ -30,12 +32,14 @@ void save(v::OutputArchive& archive, const InternalParameters& params)
     archive
 		("m", params.m)
 		("scale", params.scale)
-		("c", params.c)
-		("c_prime", params.c_prime)
-		("kappa", params.kappa)
-		("kappa_approx", params.kappa_approx)
+		("q", params.q)
+		("q_prime", params.q_prime)
+		("dc", params.dc)
+		("dC", params.dC)
 		("N", params.N)
-		("I", params.I);
+		("I", params.I)
+		("kappa", params.kappa)
+		("lambda", params.lambda);
 }
 
 void load(v::InputArchive& archive, InternalParameters& params)
@@ -43,11 +47,13 @@ void load(v::InputArchive& archive, InternalParameters& params)
     archive
 		("m", params.m)
 		("scale", params.scale)
-		("c", params.c)
-		("c_prime", params.c_prime)
-		("kappa", params.kappa)
-		("kappa_approx", params.kappa_approx)
+		("q", params.q)
+		("q_prime", params.q_prime)
+		("dc", params.dc)
+		("dC", params.dC)
 		("N", params.N)
-		("I", params.I);
+		("I", params.I)
+		("kappa", params.kappa)
+		("lambda", params.lambda);
 }
 
