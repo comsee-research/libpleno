@@ -13,8 +13,8 @@
 PlenopticCamera::Mode
 PlenopticCamera::mode() const
 {
-    if (main_lens().focal() < std::abs(mla().pose().translation()[2])) { return Keplerian; }
-	else if (main_lens().focal() > std::abs(mla().pose().translation()[2])) { return Galilean; }
+    if (main_lens().focal() < D()) { return Keplerian; }
+	else if (main_lens().focal() > D()) { return Galilean; }
     else { return Unfocused; }
 }
 
@@ -42,7 +42,14 @@ double& PlenopticCamera::focal() { return main_lens().focal(); }
 double PlenopticCamera::aperture() const { return main_lens().aperture(); }
 double& PlenopticCamera::aperture() { return main_lens().aperture(); }   
 
+double PlenopticCamera::mlaperture() const { return (mla().edge_length()[0] + mla().edge_length()[1]) / 4.; }
+
 std::size_t PlenopticCamera::I() const { return mla().I(); }
+
+double PlenopticCamera::d() const { return std::fabs(mla().pose().translation()[2] - sensor().pose().translation()[2]); }
+double PlenopticCamera::D() const { return std::fabs(mla().pose().translation()[2]); }
+
+double PlenopticCamera::focal_plane(std::size_t i) const { return mla2obj((mla().f(i) * d()) / (d() - mla().f(i))); }
 
 //******************************************************************************
 //******************************************************************************
@@ -63,9 +70,7 @@ PlenopticCamera::mlpp(std::size_t k, std::size_t l) const
 	P2D mi_index{k,l}; ml2mi(mi_index);
 	
 	const auto& ckl = mia().nodeInWorld(mi_index[0], mi_index[1]); //IMAGE
-	const double d = std::fabs(mla().pose().translation()[2] - sensor().pose().translation()[2]);
-	const double D = std::fabs(mla().pose().translation()[2]);
-	const double ratio = d / (D + d);
+	const double ratio = d() / (D() + d());
 	
 	const auto mpp = this->pp();
 	
@@ -236,13 +241,13 @@ bool PlenopticCamera::project_radius_through_micro_lens(
     P3D p_kl_mla = (p_mla - Ckl_mla); // NODE(K,L)
     
     const double a = (p_kl_mla[2]);
-	const double d = std::fabs(mla().pose().translation()[2] - sensor().pose().translation()[2]);
-	const double D = std::fabs(mla().pose().translation()[2]);
+	const double d_ = d();
+	const double D_ = D();
 
 	P2D mi_idx = ml2mi(k,l);
 	const double f = mla().f(mi_idx[0], mi_idx[1]).f;
  
-    const double r = params().dc * (D / (D + d)) * (d / 2.) * ((1. / f) - (1. / a) - (1. / d)); // eq.(12)
+    const double r = params().dc * (D_ / (D_ + d_)) * (d_ / 2.) * ((1. / f) - (1. / a) - (1. / d_)); // eq.(12)
     
     radius = sensor().metric2pxl(r);
     
@@ -388,6 +393,19 @@ bool PlenopticCamera::project(
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
+//Space convertion (obj, mla, virtual)
+double PlenopticCamera::v2mla(double x) const { return -x * d(); }
+double PlenopticCamera::mla2v(double x) const { return -x / d(); }
+
+double PlenopticCamera::obj2mla(double x) const { return D() - (focal() * x) / (x - focal()); }
+double PlenopticCamera::mla2obj(double x) const { return (focal() * (D()-x)) / (D() - x - focal()); }
+
+double PlenopticCamera::v2obj(double x) const { return mla2obj(v2mla(x)); }
+double PlenopticCamera::obj2v(double x) const { return mla2v(obj2mla(x)); }
+	
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
 //Space convertion	(Micro-Images Space / Micro-Lenses Space)
 void PlenopticCamera::mi2ml(P2D& pij) const 
 { 
@@ -490,6 +508,10 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 		os << ","<< std::endl << "\tf = {"; 
 		std::size_t i=0; for(; i<pcm.mla().I()-1; ++i) os << pcm.mla().f(i) <<", ";
 		os << pcm.mla().f(i) << "}" << std::endl;
+		
+		os << ","<< std::endl << "\tfocal_plane = {"; 
+		i=0; for(; i<pcm.mla().I()-1; ++i) os << pcm.focal_plane(i) <<", ";
+		os << pcm.focal_plane(i) << "}" << std::endl;
 	}
 		
 	return os;

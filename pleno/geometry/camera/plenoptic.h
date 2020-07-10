@@ -78,11 +78,18 @@ public:
     
 	double aperture() const;
     double& aperture(); 
+    
+    double mlaperture() const;
  
     PrincipalPoint pp() const;
 	PrincipalPoint mlpp(std::size_t k, std::size_t l) const;
 	
 	std::size_t I() const;
+	
+	double d() const;
+	double D() const;
+	
+	double focal_plane(std::size_t i) const;
     	
 //Project and Raytrace	
 	bool project(const P3D& /*p3d_cam*/, P2D& /*pixel*/) const override final
@@ -114,6 +121,16 @@ public:
 	
 	template<typename Observations> void mi2ml(Observations& obs) const;
 	template<typename Observations> void ml2mi(Observations& obs) const;
+	
+//Space convertion (obj, mla, virtual)
+	double v2mla(double x) const;
+	double mla2v(double x) const;
+	
+	double obj2mla(double x) const;
+	double mla2obj(double x) const;
+	
+	double v2obj(double x) const;
+	double obj2v(double x) const;
 
 protected:
 //Helper functions
@@ -127,7 +144,7 @@ protected:
 		// Testing if the ray hit the lens
 		return is_on_disk(p.head(2), main_lens().diameter());
 	}
-	
+//Helper projection function	
 	bool project_through_main_lens(const P3D& p3d_cam, P3D& projection) const;
 	bool project_through_micro_lens(const P3D& p, std::size_t k, std::size_t l, P2D& projection) const;
 	bool project_radius_through_micro_lens(const P3D& p, std::size_t k, std::size_t l, double& radius) const;
