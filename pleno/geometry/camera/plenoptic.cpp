@@ -42,7 +42,7 @@ double& PlenopticCamera::focal() { return main_lens().focal(); }
 double PlenopticCamera::aperture() const { return main_lens().aperture(); }
 double& PlenopticCamera::aperture() { return main_lens().aperture(); }   
 
-double PlenopticCamera::mlaperture() const { return (mla().edge_length()[0] + mla().edge_length()[1]) / 4.; }
+double PlenopticCamera::mlaperture() const { return (mla().edge_length()[0] + mla().edge_length()[1]) / 2.; }
 
 std::size_t PlenopticCamera::I() const { return mla().I(); }
 

@@ -13,5 +13,6 @@ V_DEFINE_PROPERTIES(ImagesConfig)
 (    
     V_DEFINE_PROPERTY(whites, std::vector<ImageWithInfoConfig>(0), "White images configurations")
     V_DEFINE_PROPERTY(checkerboards, std::vector<ImageWithInfoConfig>(0), "Checkerboard images configurations")
+    V_DEFINE_PROPERTY(images, std::vector<ImageWithInfoConfig>(0), "Raw images configurations")
     V_DEFINE_PROPERTY(mask, ImageWithInfoConfig(), "Mask image configurations")
 )
