@@ -368,7 +368,7 @@ preprocess(
 		
 		params.m 		= coefs[0].m ; // Eq.(10)
 		params.scale	= pxl2metric;
-		params.dc 		= pxl2metric * ( (grid.edge_length()[0] + grid.edge_length()[1]) / 2. );
+		params.dc 		= pxl2metric * grid.diameter();
 		params.dC 		= lambda * params.dc; // Eq.(3)
 		params.lambda	= lambda;
 

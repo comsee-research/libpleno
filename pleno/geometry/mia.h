@@ -21,6 +21,9 @@ public:
 		this->edge_length() = config.mesh().pitch();
 		this->pose() = config.mesh().pose();
 	}
+	
+	double radius() const { return (edge_length()[0] + edge_length()[1]) / 4.; }
+	double diameter() const { return (edge_length()[0] + edge_length()[1]) / 2.; }
 };
 
 using MI					= MicroImage;

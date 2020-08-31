@@ -14,7 +14,7 @@ double virtualdepth(const Observation_t& lhs, const Observation_t& rhs, const MI
 {
 	const auto &lc = mia.nodeInWorld(lhs.k, lhs.l);								
 	const auto &rc = mia.nodeInWorld(rhs.k, rhs.l);								
-	const double dc = (mia.edge_length()[0] + mia.edge_length()[1] ) / 2.;		
+	const double dc = mia.diameter();		
 	const double n = (lc - rc).norm() / dc;										
 	const double ndC = n * dC;					
 	

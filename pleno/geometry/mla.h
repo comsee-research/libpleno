@@ -51,7 +51,9 @@ public:
 		const int t = lens_type(I(), k, l);
 		return focals_[t];
 	}
-		
+	
+	double radius() const { return (edge_length()[0] + edge_length()[1]) / 4.; }
+	double diameter() const { return (edge_length()[0] + edge_length()[1]) / 2.; }
 };
 
 using MLA 					= MicroLensesArray;
