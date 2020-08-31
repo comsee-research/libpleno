@@ -6,13 +6,79 @@
 ////////////////////////////////////////////////////////////////////////////////
 // STD DEVIATION
 ////////////////////////////////////////////////////////////////////////////////
-inline double stddev(std::vector<double> const & v)
+inline double variance(std::vector<double>& v)
 {
-    double mean = std::accumulate(v.begin(), v.end(), 0.0) / v.size();
+	double mean = std::accumulate(v.begin(), v.end(), 0.0) / v.size();
     double sq_sum = std::inner_product(v.begin(), v.end(), v.begin(), 0.0,
         [](double const & x, double const & y) { return x + y; },
         [mean](double const & x, double const & y) { return (x - mean)*(y - mean); });
-    return sq_sum / ( v.size() - 1 );
+    return sq_sum / (v.size() - 1 );
+}
+
+inline double stddev(std::vector<double> & v)
+{
+    return std::sqrt(variance(v));
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+// SKEWNESS
+////////////////////////////////////////////////////////////////////////////////
+inline double skewness(std::vector<double> &v)
+{
+	double mean = std::accumulate(v.begin(), v.end(), 0.0) / v.size();
+	
+    double sq_sum = std::inner_product(v.begin(), v.end(), v.begin(), 0.0,
+        [](double const & x, double const & y) { return x + y; },
+        [mean](double const & x, double const & y) { return (x - mean)*(y - mean); });
+	
+    double cb_sum = std::inner_product(v.begin(), v.end(), v.begin(), 0.0,
+        [](double const & x, double const & y) { return x + y; },
+        [mean](double const & x, double const & y) { return (x - mean)*(y - mean)*(x - mean); });
+    
+    double sigma = sq_sum / (v.size() - 1);
+    
+    return cb_sum / (v.size() * sigma * std::sqrt(sigma));
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// KURTOSIS
+////////////////////////////////////////////////////////////////////////////////
+inline double kurtosis(std::vector<double> &v)
+{
+	double mean = std::accumulate(v.begin(), v.end(), 0.0) / v.size();
+	
+    double sq_sum = std::inner_product(v.begin(), v.end(), v.begin(), 0.0,
+        [](double const & x, double const & y) { return x + y; },
+        [mean](double const & x, double const & y) { return (x - mean)*(y - mean); });
+	
+    double sq_sq_sum = std::inner_product(v.begin(), v.end(), v.begin(), 0.0,
+        [](double const & x, double const & y) { return x + y; },
+        [mean](double const & x, double const & y) { return (x - mean)*(y - mean)*(x - mean)*(y - mean); });
+    
+    double sigma = sq_sum / (v.size() - 1);
+    
+    return sq_sq_sum / (v.size() * sigma * sigma);
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// INTERQUARTILES RANGE
+////////////////////////////////////////////////////////////////////////////////
+inline double iqr(std::vector<double> &v, double& q1, double &med, double &q3)
+{
+	auto const Q1 = v.size() / 4;
+	auto const Q2 = v.size() / 2;
+	auto const Q3 = Q1 + Q2;
+
+	std::nth_element(v.begin(),          v.begin() + Q1, v.end());
+	std::nth_element(v.begin() + Q1 + 1, v.begin() + Q2, v.end());
+	std::nth_element(v.begin() + Q2 + 1, v.begin() + Q3, v.end());
+	
+	q1 = v[Q1];
+	med = v[Q2];
+	q3 = v[Q3];
+	
+	return q3-q1;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
