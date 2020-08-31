@@ -15,7 +15,10 @@ T get_pixel(const Image& i, size_t col, size_t row) { return i.at<T>(row, col); 
 Image extract_roi(const Image&img, float& X, float& Y, int roiw, int roih);
 
 ////////////////////////////////////////////////////////////////////////////////
-void trim(Image& img, float r, float tolerance=0.);
+void trim(Image& img, float r, float tolerance = 0.);
+void trim_binarize(Image& img, float radius, float tolerance = 0.);
+void trim_float(Image& img, float r, float tolerance = 0.);
+void trim_float_binarize(Image& img, float radius, float tolerance = 0.);
 
 void contrast_strech(const Image& input, Image& output, const int threshold);
 

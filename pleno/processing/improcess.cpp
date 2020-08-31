@@ -43,6 +43,78 @@ void trim(Image& img, float r, float tolerance)
 	}
 }
 
+void trim_binarize(Image& img, float radius, float tolerance)
+{
+	const int width 	= img.cols;
+	const int height 	= img.rows;
+	const float centerx = width / 2.;
+	const float centery = height / 2.;
+	
+	uchar * pixel;
+	for(int y = 0 ; y < height ; ++y) //for each row
+	{
+		pixel = img.ptr<uchar>(y);
+		for(int x = 0 ; x < width ; ++x) //for each column
+		{
+			if(std::hypot(x-centerx, y-centery) < radius+tolerance) //in
+			{
+				pixel[x] = 255; 
+			}
+			else //out
+			{	
+				pixel[x] = 0;	
+			}			
+		}
+	}
+}
+
+void trim_float(Image& img, float radius, float tolerance)
+{
+	const int width 	= img.cols;
+	const int height 	= img.rows;
+	const float centerx = width / 2.;
+	const float centery = height / 2.;
+	
+	float * pixel;
+	for(int y = 0 ; y < height ; ++y) //for each row
+	{
+		pixel = img.ptr<float>(y);
+		for(int x = 0 ; x < width ; ++x) //for each column
+		{
+			if(std::hypot(x-centerx, y-centery) > radius+tolerance) //out
+			{
+				pixel[x] = 0.;	
+			}			
+		}
+	}
+}
+
+void trim_float_binarize(Image& img, float radius, float tolerance)
+{
+	const int width 	= img.cols;
+	const int height 	= img.rows;
+	const float centerx = width / 2.;
+	const float centery = height / 2.;
+	
+	float * pixel;
+	for(int y = 0 ; y < height ; ++y) //for each row
+	{
+		pixel = img.ptr<float>(y);
+		for(int x = 0 ; x < width ; ++x) //for each column
+		{
+			if(std::hypot(x-centerx, y-centery) > radius+tolerance) //out
+			{
+				pixel[x] = 0.;	
+			}	
+			else //in
+			{
+				pixel[x] = 1.;
+			}		
+		}
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void devignetting(const Image& raw, const Image& white, Image& unvignetted)
 {    
     unvignetted = raw.clone();
