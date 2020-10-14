@@ -49,7 +49,11 @@ std::size_t PlenopticCamera::I() const { return mla().I(); }
 double PlenopticCamera::d() const { return std::fabs(mla().pose().translation()[2] - sensor().pose().translation()[2]); }
 double PlenopticCamera::D() const { return std::fabs(mla().pose().translation()[2]); }
 
-double PlenopticCamera::focal_plane(std::size_t i) const { return mla2obj((mla().f(i) * d()) / (d() - mla().f(i))); }
+double PlenopticCamera::focal_plane(std::size_t i) const 
+{ 
+	if (I() == 0u) return v2obj(2.); 
+	else return mla2obj((mla().f(i) * d()) / (d() - mla().f(i))); 
+}
 
 //******************************************************************************
 //******************************************************************************
