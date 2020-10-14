@@ -6,7 +6,12 @@ std::size_t height(const Image& i) 	{ return i.rows; }
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-Image extract_roi(const Image&img, float& X, float& Y, int roiw, int roih)
+/* 
+	extract region of interest around the point (X,Y) of size (roiw x roih)
+	when the roi contains pixels outside of the images, the roi is reduce, 
+	and the new coordinates of the top-left corner are save in the (X,Y) variables
+ */ 
+Image extract_roi(const Image&img, double& X, double& Y, int roiw, int roih)
 {
 	//crop image aroud the center
 	const int cx = static_cast<int>(X - roiw/2);
@@ -23,12 +28,15 @@ Image extract_roi(const Image&img, float& X, float& Y, int roiw, int roih)
 
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
-void trim(Image& img, float r, float tolerance)
+/*
+	
+*/
+void trim(Image& img, double r, double tolerance)
 {
 	const int width 	= img.cols;
 	const int height 	= img.rows;
-	const float centerx = width/2.;
-	const float centery = height/2.;
+	const double centerx = width / 2.;
+	const double centery = height / 2.;
 	
 	uchar * pixel;
 	for(int y = 0 ; y < height ; ++y) //for each row
@@ -43,12 +51,12 @@ void trim(Image& img, float r, float tolerance)
 	}
 }
 
-void trim_binarize(Image& img, float radius, float tolerance)
+void trim_binarize(Image& img, double radius, double tolerance)
 {
 	const int width 	= img.cols;
 	const int height 	= img.rows;
-	const float centerx = width / 2.;
-	const float centery = height / 2.;
+	const double centerx = width / 2.;
+	const double centery = height / 2.;
 	
 	uchar * pixel;
 	for(int y = 0 ; y < height ; ++y) //for each row
@@ -68,12 +76,12 @@ void trim_binarize(Image& img, float radius, float tolerance)
 	}
 }
 
-void trim_float(Image& img, float radius, float tolerance)
+void trim_float(Image& img, double radius, double tolerance)
 {
 	const int width 	= img.cols;
 	const int height 	= img.rows;
-	const float centerx = width / 2.;
-	const float centery = height / 2.;
+	const double centerx = width / 2. - 0.5;
+	const double centery = height / 2. - 0.5;
 	
 	float * pixel;
 	for(int y = 0 ; y < height ; ++y) //for each row
@@ -81,7 +89,53 @@ void trim_float(Image& img, float radius, float tolerance)
 		pixel = img.ptr<float>(y);
 		for(int x = 0 ; x < width ; ++x) //for each column
 		{
-			if(std::hypot(x-centerx, y-centery) > radius+tolerance) //out
+			if(std::hypot(x-centerx, y-centery) >= radius+tolerance) //out
+			{
+				pixel[x] = 0.f;	
+			}			
+		}
+	}
+}
+
+void trim_float_binarize(Image& img, double radius, double tolerance)
+{
+	const int width 	= img.cols;
+	const int height 	= img.rows;
+	const double centerx = width / 2. - 0.5;
+	const double centery = height / 2. - 0.5;
+	
+	float * pixel;
+	for(int y = 0 ; y < height ; ++y) //for each row
+	{
+		pixel = img.ptr<float>(y);
+		for(int x = 0 ; x < width ; ++x) //for each column
+		{
+			if(std::hypot(x-centerx, y-centery) >= radius+tolerance) //out
+			{
+				pixel[x] = 0.f;	
+			}	
+			else //in
+			{
+				pixel[x] = 1.f;
+			}		
+		}
+	}
+}
+
+void trim_double(Image& img, double radius, double tolerance)
+{
+	const int width 	= img.cols;
+	const int height 	= img.rows;
+	const double centerx = width / 2. - 0.5;
+	const double centery = height / 2. - 0.5;
+	
+	double * pixel;
+	for(int y = 0 ; y < height ; ++y) //for each row
+	{
+		pixel = img.ptr<double>(y);
+		for(int x = 0 ; x < width ; ++x) //for each column
+		{
+			if(std::hypot(x-centerx, y-centery) >= radius+tolerance) //out
 			{
 				pixel[x] = 0.;	
 			}			
@@ -89,20 +143,20 @@ void trim_float(Image& img, float radius, float tolerance)
 	}
 }
 
-void trim_float_binarize(Image& img, float radius, float tolerance)
+void trim_double_binarize(Image& img, double radius, double tolerance)
 {
 	const int width 	= img.cols;
 	const int height 	= img.rows;
-	const float centerx = width / 2.;
-	const float centery = height / 2.;
+	const double centerx = width / 2. - 0.5;
+	const double centery = height / 2. - 0.5;
 	
-	float * pixel;
+	double * pixel;
 	for(int y = 0 ; y < height ; ++y) //for each row
 	{
-		pixel = img.ptr<float>(y);
+		pixel = img.ptr<double>(y);
 		for(int x = 0 ; x < width ; ++x) //for each column
 		{
-			if(std::hypot(x-centerx, y-centery) > radius+tolerance) //out
+			if(std::hypot(x-centerx, y-centery) >= radius+tolerance) //out
 			{
 				pixel[x] = 0.;	
 			}	
@@ -132,7 +186,7 @@ void devignetting(const Image& raw, const Image& white, Image& unvignetted)
     }
 }
 
-void contrast_strech(const Image& input, Image& output, const int threshold)
+void contrast_strech(const Image& input, Image& output, int threshold)
 {
     for (int row = 0; row < output.rows; ++row)
         for (int col = 0; col < output.cols; ++col)
@@ -145,7 +199,7 @@ void contrast_strech(const Image& input, Image& output, const int threshold)
         }
 }
 
-void erode(const Image& input, Image& output, const int crossSize)
+void erode(const Image& input, Image& output, int crossSize)
 {
     cv::Mat element = getStructuringElement(cv::MORPH_CROSS,
                                             cv::Size(2 * crossSize + 1, 2 * crossSize + 1),
@@ -154,7 +208,7 @@ void erode(const Image& input, Image& output, const int crossSize)
     cv::erode(input, output, element);
 }
 
-void dilate(const Image& input, Image& output, const int crossSize)
+void dilate(const Image& input, Image& output, int crossSize)
 {
     cv::Mat element = getStructuringElement(cv::MORPH_CROSS,
                                             cv::Size(2 * crossSize + 1, 2 * crossSize + 1),
@@ -206,7 +260,7 @@ void hist_radiance(const Image& img, Image& histogram)
 	bool accumulate = false;
 	
 	Image hist;
-	calcHist( &img, 1, 0, Image(), hist, 1, &histSize, &histRange, uniform, accumulate);
+	cv::calcHist( &img, 1, 0, Image(), hist, 1, &histSize, &histRange, uniform, accumulate);
 	
 	// Draw the histograms for R, G and B
 	int hist_w = 512; int hist_h = 400;

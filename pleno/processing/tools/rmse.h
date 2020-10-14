@@ -17,7 +17,7 @@ struct RMSE
     	return size == 0 ? 0. : std::sqrt(sum() / static_cast<double>(size));
     }
     double sum() const {
-    	return value; // / 2; //FIXME: /2 to be homogeneous with LMA, find why ?
+    	return value; // / 2;
     }
     
     RMSE& operator+=(const RMSE& rhs){

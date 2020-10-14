@@ -12,7 +12,7 @@
  * d: A rotation in axis-angle representation (radian)
  *
 */
-inline void apply_rotation(Eigen::Matrix2d& matrix, const double theta)
+inline void apply_rotation(Eigen::Matrix2d& matrix, double theta)
 {
     matrix <<
     std::cos(theta), -std::sin(theta),

@@ -23,7 +23,7 @@ void glAddLine(const P3D& p1, const P3D& p2)
 /*
     @Brief glAddLine Draw a line using OpenGL
 */
-void glAddLine(const Ray3D& r, const float c)
+void glAddLine(const Ray3D& r, double c)
 {
     glAddLine(r.origin(), r(c));
 }
@@ -33,7 +33,7 @@ void glAddLine(const Ray3D& r, const float c)
  * @Brief draw_axis
     tres mal pensee (j etais jeune)
  */
-void draw_axis(const Pose& pose, const float s = 1.0)
+void draw_axis(const Pose& pose, double s = 1.0)
 {
     P3DS base {P3D{0.0, 0.0, 0.0},
                P3D{  s, 0.0, 0.0},
@@ -54,7 +54,7 @@ void draw_axis(const Pose& pose, const float s = 1.0)
     @Brief colorize
     tres mal pensee (j etais jeune)
 */
-void colorize(const int d, const float f)
+void colorize(int d, double f)
 {
     switch (d)
     {

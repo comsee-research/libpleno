@@ -225,7 +225,7 @@ compute_model(const Image& mi, const Image& mask)
 	{
 		case 0u: //if no peak then it's a FULL
 			model.type = FULL;
-    		model.colors[0] = model.colors[1] = static_cast<float>(mi.at<uchar>(mi.rows / 2, mi.cols / 2));
+    		model.colors[0] = model.colors[1] = static_cast<double>(mi.at<uchar>(mi.rows / 2, mi.cols / 2));
     	break;
 		
 		case 1u: //if there is only one peak then it's a BORDER

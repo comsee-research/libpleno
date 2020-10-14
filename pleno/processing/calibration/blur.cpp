@@ -59,7 +59,7 @@ void optimize(
 							//compute rho_r
 							const double rho_r = std::sqrt(std::abs(lhs.rho * lhs.rho - rhs.rho * rhs.rho));
 							
-							float refu = 0.f, refv = 0.f, ediu = 0.f, ediv = 0.f;
+							double refu = 0.f, refv = 0.f, ediu = 0.f, ediv = 0.f;
 							
 							//get more in-focus image
 							if(std::abs(lhs.rho) > std::abs(rhs.rho)) //lhs -> ref, rhs -> edi
@@ -74,8 +74,8 @@ void optimize(
 							}
 							
 							Image ref, edi;
-							cv::getRectSubPix(img, cv::Size{W,W}, cv::Point2f{refu, refv}, ref);
-							cv::getRectSubPix(img, cv::Size{W,W}, cv::Point2f{ediu, ediv}, edi);
+							cv::getRectSubPix(img, cv::Size{W,W}, cv::Point2d{refu, refv}, ref);
+							cv::getRectSubPix(img, cv::Size{W,W}, cv::Point2d{ediu, ediv}, edi);
 							
 							solver.add(
 								RelativeBlurCostError{ref, edi, rho_r},

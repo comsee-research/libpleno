@@ -15,12 +15,12 @@ void meta_glAddPoint(T&& ... a)
 }
 
 void glAddLine(const P3D& p1,  const P3D& p2);
-void glAddLine(const Ray3D& r, const float = 1000.0);
+void glAddLine(const Ray3D& r, double = 1000.0);
 
 // draw camera axis
-void draw_axis(const Pose& pose, const float d);
+void draw_axis(const Pose& pose, double d);
 
-void colorize(const int d, const float f);
+void colorize(int d, double f);
 void fill_form(const Quad3D& q);
 
 // Working only with rays

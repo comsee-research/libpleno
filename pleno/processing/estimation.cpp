@@ -62,9 +62,9 @@ estimation_gaussian_least_squares(
 	const Image& img, const GaussianCoefficients& init, bool truncated, const unsigned int thr
 )
 {//LEAST SQUARE ESTIMATION OF SIGMA
-	using A_t = Eigen::Matrix<float, Eigen::Dynamic, 2>;
-	using B_t = Eigen::Matrix<float, Eigen::Dynamic, 1>;
-	using X_t = Eigen::Matrix<float, 2, 1>;
+	using A_t = Eigen::Matrix<double, Eigen::Dynamic, 2>;
+	using B_t = Eigen::Matrix<double, Eigen::Dynamic, 1>;
+	using X_t = Eigen::Matrix<double, 2, 1>;
 	
 	const auto& [meanx, meany, s, a] = init; UNUSED(a); UNUSED(s);
 	const std::size_t eroiw = img.cols;
@@ -95,9 +95,9 @@ estimation_gaussian_least_squares(
 	X_t X = A.colPivHouseholderQr().solve(B);
 	//DEBUG_VAR(X);  
 
-	const float sigma2 	= - 1. / (2. * X(0));
-	const float sigma	= std::sqrt(sigma2);
-	const float alpha	= std::exp(X(1));
+	const double sigma2 	= - 1. / (2. * X(0));
+	const double sigma	= std::sqrt(sigma2);
+	const double alpha	= std::exp(X(1));
 	
 	PRINT_DEBUG("Sigma estimation =  "<<alpha<<" * exp( -( (x - "<<meanx<<")² + (y - "<<meany<<")² / 2 * "<<sigma2<<"))");
 	
@@ -128,11 +128,11 @@ estimation_min_enclosing_circle(
 	
 	//center the index of the closest detected to the observation (eroiw/2,eroih/2) in roi coordinates
 	int index = -1; 
-	float mindist = eroiw + eroih;
+	double mindist = eroiw + eroih;
 	for(std::size_t i = 0; i < center.size() ; ++i)
 	{
 		const auto &c = center[i];
-		const float dist = std::hypot(eroiw/2 - c.x, eroih/2 - c.y);
+		const double dist = std::hypot(eroiw/2 - c.x, eroih/2 - c.y);
 		if(dist < mindist)
 		{
 			mindist = dist;
@@ -157,9 +157,9 @@ estimation_lines_with_slope_constraint_least_squares(
 	coefs.reserve(I);
 	
 //LINEAR REGRESSION USING CONSTRAINTS ON SLOPE	
-	using A_t = Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
-	using B_t = Eigen::Matrix<float, Eigen::Dynamic, 1>;
-	using X_t = Eigen::Matrix<float, Eigen::Dynamic, 1>;
+	using A_t = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
+	using B_t = Eigen::Matrix<double, Eigen::Dynamic, 1>;
+	using X_t = Eigen::Matrix<double, Eigen::Dynamic, 1>;
 	
 	//compute size
 	std::size_t size = 0;
@@ -196,18 +196,18 @@ estimation_line_fitting(
 	const std::vector<P2D>& data, cv::DistanceTypes dist
 )
 {//LINE FITTING USING OPENCV
-	std::vector<cv::Point2f> points;
+	std::vector<cv::Point2d> points;
 	points.reserve(data.size());
 	
 	for(const auto&point : data)
     	points.emplace_back(point[0], point[1]);
 	
-	cv::Vec4f line;
+	cv::Vec4d line;
 	// find the optimal line
 	cv::fitLine(points, line, dist, 0, 0.0001, 0.0001);
 	
-	const float m = line[1] / line[0];
-	const float c = line[3] - m * line[2];
+	const double m = line[1] / line[0];
+	const double c = line[3] - m * line[2];
 	
 	PRINT_DEBUG("Line: y = "<< m << " * x + " << c);	
 	

@@ -12,18 +12,20 @@ template<typename T>
 T get_pixel(const Image& i, size_t col, size_t row) { return i.at<T>(row, col); }
 
 ////////////////////////////////////////////////////////////////////////////////
-Image extract_roi(const Image&img, float& X, float& Y, int roiw, int roih);
+Image extract_roi(const Image&img, double& X, double& Y, int roiw, int roih);
 
 ////////////////////////////////////////////////////////////////////////////////
-void trim(Image& img, float r, float tolerance = 0.);
-void trim_binarize(Image& img, float radius, float tolerance = 0.);
-void trim_float(Image& img, float r, float tolerance = 0.);
-void trim_float_binarize(Image& img, float radius, float tolerance = 0.);
+void trim(Image& img, double r, double tolerance = 0.);
+void trim_binarize(Image& img, double radius, double tolerance = 0.);
+void trim_float(Image& img, double r, double tolerance = 0.);
+void trim_float_binarize(Image& img, double radius, double tolerance = 0.);
+void trim_double(Image& img, double r, double tolerance = 0.);
+void trim_double_binarize(Image& img, double radius, double tolerance = 0.);
 
-void contrast_strech(const Image& input, Image& output, const int threshold);
+void contrast_strech(const Image& input, Image& output, int threshold);
 
-void erode(const Image& input, Image& output, const int crossSize);
-void dilate(const Image& input, Image& output, const int crossSize);
+void erode(const Image& input, Image& output, int crossSize);
+void dilate(const Image& input, Image& output, int crossSize);
 
 void devignetting(const Image& raw, const Image& white, Image& unvignetted);
 

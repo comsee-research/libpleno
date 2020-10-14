@@ -20,7 +20,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 void hist_data(const std::vector<double>& data, Image& dst, double min, double max, int binSize, int height, int nbbin)
 {		
-	float step = (max - min) / nbbin;
+	const double step = (max - min) / nbbin;
 	std::vector<int> hist(nbbin);
 	for(const auto&d : data)
 	{
@@ -32,13 +32,13 @@ void hist_data(const std::vector<double>& data, Image& dst, double min, double m
     int max_value = *std::max_element(hist.begin(), hist.end());
     int rows = 0;
     int cols = 0;
-    float scale = 1;
+    double scale = 1;
     if (height == 0) {
         rows = max_value + 10;
     }
     else {
         rows = height; 
-        scale = float(height) / (max_value + 10);
+        scale = double(height) / (max_value + 10);
     }
     cols = hist.size() * binSize;
     dst = Image::zeros(rows, cols, CV_8UC3);
@@ -127,14 +127,14 @@ void display_data(const std::vector<P2D>& pts, const LineCoefficients& coefs, Im
 	const std::size_t rows = 500;
 	const std::size_t cols = 600;
 	
-	const float xmax = 0.3;
-	const float xmin = 0.0;
-	const float ymin = 0.01;
-	const float ymax = 0.1;
+	const double xmax = 0.3;
+	const double xmin = 0.0;
+	const double ymin = 0.01;
+	const double ymax = 0.1;
 	
 	const auto & [m,c] = coefs;
-	const float cscaled = rows * (1.f - (c - ymin) / (ymax - ymin) + ymin ); 
-	const float endscaled = rows * (1.f - ((m * xmax + c) - ymin) / (ymax - ymin) + ymin);
+	const double cscaled = rows * (1. - (c - ymin) / (ymax - ymin) + ymin ); 
+	const double endscaled = rows * (1. - ((m * xmax + c) - ymin) / (ymax - ymin) + ymin);
 	
 	out = Image::zeros(rows, cols, CV_8UC3);
 	
@@ -142,7 +142,7 @@ void display_data(const std::vector<P2D>& pts, const LineCoefficients& coefs, Im
 	{
 		cv::Point2f pscaled;
 		pscaled.x = cols * (p[0] - xmin) / (xmax - xmin);
-		pscaled.y = rows * (1.f - (p[1] - ymin) / (ymax - ymin)); 
+		pscaled.y = rows * (1. - (p[1] - ymin) / (ymax - ymin)); 
 			
 		cv::circle(out, pscaled, 2, cv::Scalar(0, 255, 255));
 	}
@@ -156,10 +156,10 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 	const std::size_t rows = 500;
 	const std::size_t cols = 800;
 	
-	const float xmax = 0.3;
-	const float xmin = 0.0;
-	const float ymin = -0.08;
-	const float ymax = 0.02;
+	const double xmax = 0.3;
+	const double xmin = 0.0;
+	const double ymin = -0.08;
+	const double ymax = 0.02;
 	
 	out = Image::zeros(rows, cols, CV_8UC3);
 	
@@ -174,7 +174,7 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 		{
 			cv::Point2f pscaled;
 			pscaled.x = cols * (p[0] - xmin) / (xmax - xmin) + 3.*i;
-			pscaled.y = rows * (1.f - (p[1] - ymin) / (ymax - ymin)); 
+			pscaled.y = rows * (1. - (p[1] - ymin) / (ymax - ymin)); 
 				
 			cv::circle(out, pscaled, 1, colors_pts[i]);
 		}
@@ -188,8 +188,8 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 	i=0;
 	for(const auto & [m,c] : coefs)
 	{		
-		const float cscaled = rows * (1.f - ((c - ymin) / (ymax - ymin) + ymin) ); 
-		const float endscaled = rows * (1.f - (((m * xmax + c) - ymin) / (ymax - ymin) + ymin));
+		const double cscaled = rows * (1. - ((c - ymin) / (ymax - ymin) + ymin) ); 
+		const double endscaled = rows * (1. - (((m * xmax + c) - ymin) / (ymax - ymin) + ymin));
 		DEBUG_VAR(endscaled);
 	
 		cv::line(out, cv::Point(0, cscaled), cv::Point(cols, endscaled), colors_lines[i++]);
@@ -237,7 +237,7 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
     
     for(std::size_t k = 0 + EXCLUDED_BORDER_SIZE; k < centers.width() - EXCLUDED_BORDER_SIZE ; ++k) //iterate through columns //x-axis
     {
-    	for(std::size_t l = 0 + EXCLUDED_BORDER_SIZE ; l < centers.height()/2. /*- EXCLUDED_BORDER_SIZE * 1.5 */; ++l) //iterate through lines //y-axis
+    	for(std::size_t l = 0 + EXCLUDED_BORDER_SIZE ; l < centers.height() / 2. /*- EXCLUDED_BORDER_SIZE * 1.5 */; ++l) //iterate through lines //y-axis
 		{
 			Viewer::pop();	
 					
@@ -245,7 +245,7 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
 			const int t = lens_type(I,k,l); //k=col, l=row
 			
 			//crop image aroud the center
-			float X = c[0], Y = c[1]; 
+			double X = c[0], Y = c[1]; 
 	 		
 	 		Image roi = extract_roi(blurred, X, Y, roiw, roih); //crop
  			cv::normalize(roi, roi, 0, 255, cv::NORM_MINMAX); //normalize
@@ -348,7 +348,7 @@ preprocess(
 		for(const auto&mi: microimages)
 		{
 			data[mi.type].emplace_back(
-					1.f/fnumber, 
+					1./fnumber, 
 					sgn * pxl2metric * mi.radius //see note in subsection (6.2)
 			);
 		}

@@ -235,7 +235,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 			const int t = lens_type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
 			const double r = std::fabs(params.radius(t)); //radius
 			//crop image aroud the center
-			float X = c[0], Y = c[1]; 
+			double X = c[0], Y = c[1]; 
  	
 	//1.1) EXTRACT ROI			
     		Image roi = extract_roi(img, X, Y, roiw, roih).clone(); //crop
@@ -303,7 +303,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 		const double r = std::fabs(params.radius(t)); //radius
 		
 		//crop image aroud the center
-		float X = c[0], Y = c[1]; 
+		double X = c[0], Y = c[1]; 
 
 	//2.1) EXTRACT ROI			
 		Image observation = extract_roi(img, X, Y, 24u, 24u).clone(); //crop
