@@ -16,7 +16,7 @@ The libpleno library has a light dependency list:
  * [lma], a non-linear optimization library implementing the Levenberg Marquardt Algorithm,
  
 and was compiled on:
-  * Ubuntu 18.04.4 LTS.
+  * Ubuntu 18.04.4 LTS, with Eigen 3.3.4, Boost 1.65.1, and OpenCV 3.2.0.
   
 ### Compilation & Installation 
 
