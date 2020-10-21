@@ -238,7 +238,9 @@ set(PLENO_GRAPHIC_SRC
 set(PLENO_PROCESSING_SRC
 	pleno/processing/estimation.cpp
 	pleno/processing/improcess.cpp
-	pleno/processing/preprocess.cpp
+#--Precalibration
+	pleno/processing/precalibration/preprocess.cpp
+	pleno/processing/precalibration/display.cpp
 #--Calibration
 	pleno/processing/calibration/mia.cpp	
 	pleno/processing/calibration/plenoptic.cpp	

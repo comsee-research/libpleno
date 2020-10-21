@@ -48,7 +48,7 @@ using Index = int;
 
 using Image 				= cv::Mat;
 using Images 				= AlignedVector<cv::Mat>;
-struct ImageWithInfo 		{ Image img; Real fnumber; };
+struct ImageWithInfo 		{ Image img; Real fnumber; Index frame = -1; };
 
 struct LineCoefficients 	{ Real m; Real c; };
 struct GaussianCoefficients { Real mu_x; Real mu_y; Real sigma; Real alpha; };
