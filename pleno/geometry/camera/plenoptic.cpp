@@ -13,8 +13,18 @@
 PlenopticCamera::Mode
 PlenopticCamera::mode() const
 {
-    if (main_lens().focal() < D()) { return Keplerian; }
-	else if (main_lens().focal() > D()) { return Galilean; }
+    double f_ = main_lens().focal();
+    double d_ = D();
+    
+    //If we consider micro-lenses focal lengths, use f<d as definition for mode
+    if (I() > 0u)
+    {
+    	f_ = mla().f(0);
+    	d_ = d();    
+    }
+        
+    if ( f_ < d_ ) { return Keplerian; }
+	else if (f_ > d_) { return Galilean; }
     else { return Unfocused; }
 }
 
@@ -116,13 +126,27 @@ void PlenopticCamera::init(
 	distortions_.radial() << 0., 0., 0.;
 	distortions_.tangential() << 0., 0.;
 	
+	/* 	
+		Init of d and D is kinda tricky: 
+			- In Keplerian configuration, F < D whatever the focus distance.
+			- In Galilean configuration, normally we should have F > D, 
+				- but when the main lens focus distance is at infinity
+				- the main lens focuses on the TCP (i.e., v = 2)
+				- or when h decrease, D increase,
+				- so in most cases, we will still have F > D
+				- thus initializing most of the time both case in Keplerian configuration.
+		TODO: add consistancy check of initialization given the mode			
+	*/
 	double d,D;
 	const double m = std::fabs(params_.m);
+	
 	switch(mode)
 	{
 		case Unfocused:
 			d = m * 2.; D = F;
 		break;
+		
+		case Galilean:
 		case Keplerian: 
 		{
 			//d = (2. * params_.m * F) / (F - 2. * params_.m); D = F + d; 
@@ -131,6 +155,8 @@ void PlenopticCamera::init(
 			D = H - 2. * d; // eq.(17)
 		}
 		break;
+		
+	#if 0 //DEPRECATED INTIALIZATION	
 		case Galilean:
 		{
 			//d = (2. * F * params_.m) / (2. * params_.m + F); D = F - d;
@@ -139,9 +165,11 @@ void PlenopticCamera::init(
 			D = H - 2. * d; // eq.(17)
 		}
 		break;
+	#endif
 	}
-
-	const double theta_z 	= get_rotation_angle(mia_.pose().rotation()); //std::atan2( mia_.pose().rotation()(1, 0), mia_.pose().rotation()(0, 0) );
+	
+	//std::atan2( mia_.pose().rotation()(1, 0), mia_.pose().rotation()(0, 0) );
+	const double theta_z 	= get_rotation_angle(mia_.pose().rotation()); 
 	const double t_x		= sensor.pxl2metric(mia_.pose().translation()[0]);
 	const double t_y		= sensor.pxl2metric(mia_.pose().translation()[1]);
 	const double lambda		= (D / (D + d)); // eq.(3)
@@ -486,9 +514,9 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera::Mode& mode)
 {
 	switch(mode)
 	{
-		case PlenopticCamera::Mode::Unfocused: os << "Unfocused (F = D and f = d)"; break;
-		case PlenopticCamera::Mode::Keplerian: os << "Keplerian (F < D and f < d)"; break;
-		case PlenopticCamera::Mode::Galilean: os << "Galilean (F > D and f > d)"; break;
+		case PlenopticCamera::Mode::Unfocused: os << "Unfocused (F = D --> f = d)"; break;
+		case PlenopticCamera::Mode::Keplerian: os << "Keplerian (f < d --> F < D)"; break;
+		case PlenopticCamera::Mode::Galilean: os << "Galilean (f > d)"; break;
 	}
 	return os;
 }
