@@ -8,6 +8,7 @@
 #include "geometry/pose.h"
 
 #include "io/printer.h"
+#include "io/choice.h"
 
 #include "graphic/gui.h"
 #include "graphic/display.h"
@@ -267,7 +268,8 @@ void init_extrinsics(
 			PRINT_ERR("Wrong hypothesis. Can't fix it. Remove pose and observations of frame f = " << f <<".");
 			DEBUG_VAR(pose);
 			Viewer::pop();
-			std::getchar();
+			
+			wait();
 			continue;
 		}
 		
@@ -283,7 +285,7 @@ void init_extrinsics(
 			display(f, ubarycenters, tag::Barycenters{});
 				
 			Viewer::pop();
-			std::getchar();	
+			wait();	
 		);
 		//Viewer::enable(false);
 		

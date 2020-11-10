@@ -6,7 +6,9 @@
 
 #include "processing/improcess.h"
 #include "processing/tools/lens.h"
+
 #include "io/printer.h"
+#include "io/choice.h"
 
 #include "unused.h"
 
@@ -113,5 +115,5 @@ void calibration_relativeBlur(
 	
 	internals.kappa = kappa.kappa;
 
-	std::getchar();	
+	wait();
 }

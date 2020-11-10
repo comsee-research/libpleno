@@ -7,6 +7,7 @@
 #include "graphic/viewer_2d.h"
 
 #include "io/printer.h"
+#include "io/choice.h"
 
 #include "processing/estimation.h"
 #include "processing/improcess.h"
@@ -141,7 +142,7 @@ preprocess(
 			hist_radii(microimages);
 			Viewer::update();
 			
-			std::getchar(); 
+			wait();
 		);
 		
 		//for each microimage compute the pair (invfnumber, radius)

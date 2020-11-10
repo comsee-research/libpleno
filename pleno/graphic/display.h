@@ -7,6 +7,8 @@
 #include "graphic/viewer_3d.h"
 #include "graphic/viewer_2d.h"
 
+#include "io/choice.h"
+
 #include "types.h"
 
 #include "geometry/camera/plenoptic.h"
@@ -251,6 +253,7 @@ inline void display(
 		Viewer::context().point_style(v::Pixel); //restore point style
 		Viewer::update();
 		Viewer::update();
-		std::getchar();	
+		
+		wait();
 	}
 }

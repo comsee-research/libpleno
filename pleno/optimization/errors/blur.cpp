@@ -1,6 +1,7 @@
 #include "blur.h"
 
 #include "io/printer.h"
+#include "io/choice.h"
 
 bool RelativeBlurCostError::operator()(
     const BlurProportionalityCoefficient& kappa,
@@ -35,7 +36,7 @@ bool RelativeBlurCostError::operator()(
 	cv::resizeWindow("bli", 200u, 200u);
 	
 	//DEBUG_VAR(cost);
-	std::getchar();
+	wait();
 #endif
 	
     return true;
