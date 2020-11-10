@@ -244,6 +244,7 @@ set(PLENO_PROCESSING_SRC
 #--Calibration
 	pleno/processing/calibration/mia.cpp	
 	pleno/processing/calibration/plenoptic.cpp	
+	pleno/processing/calibration/extrinsics.cpp	
 	pleno/processing/calibration/blur.cpp	
 #--Detection
 	pleno/processing/detection/mic.cpp

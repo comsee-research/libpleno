@@ -29,6 +29,9 @@ void calibration_PlenopticCamera(
 	const std::vector<Image>& pictures /* for GUI only */
 );
 
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
 void calibration_ExtrinsicsPlenopticCamera(                        
 	CalibrationPoses& poses, /* out */                   
 	const PlenopticCamera& model, /* in */   
