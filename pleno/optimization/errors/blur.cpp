@@ -11,14 +11,14 @@ bool RelativeBlurCostError::operator()(
     error.setZero();
 	
 	Image blurred, fedi, fref;
-	ref.convertTo(fref, CV_32FC1, 1./255.0); 
-	edi.convertTo(fedi, CV_32FC1, 1./255.0);
+	ref.convertTo(fref, CV_64FC1, 1./255.); 
+	edi.convertTo(fedi, CV_64FC1, 1./255.);
 	
 	//compute equally-defocused image
 	const double sigma_r = kappa.kappa * rho_r;
 	cv::GaussianBlur(fedi, blurred, cv::Size{0,0}, sigma_r, sigma_r);	
 	
-	const double cost = cv::norm(fref, blurred, cv::NORM_L1) / (fref.cols * fref.rows);	
+	const double cost = cv::norm(fref, blurred, cv::NORM_L2); // / (fref.cols * fref.rows);	
 	
 	error[0] = cost;
 
@@ -35,7 +35,7 @@ bool RelativeBlurCostError::operator()(
 	cv::resizeWindow("edi", 200u, 200u);
 	cv::resizeWindow("bli", 200u, 200u);
 	
-	//DEBUG_VAR(cost);
+	DEBUG_VAR(cost);
 	wait();
 #endif
 	

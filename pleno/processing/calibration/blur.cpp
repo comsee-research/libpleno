@@ -28,7 +28,7 @@ void optimize(
 	
 	using Solver_t = lma::Solver<RelativeBlurCostError>;
 	
-	Solver_t solver{1e3, 25, 1.0 - 1e-12};
+	Solver_t solver{1e3, 50, 1.0 - 1e-13};
 	
 	//split observations according to frame index
 	std::unordered_map<Index /* frame index */, BAPObservations> obs;
@@ -105,7 +105,8 @@ void calibration_relativeBlur(
 //1) Init Parameters
 	PRINT_INFO("=== Init Parameter");	
 	BlurProportionalityCoefficient kappa{internals.kappa};
-		 
+	DEBUG_VAR(kappa.kappa);
+	
 //3) Run optimization
 	PRINT_INFO("=== Run optimization");	
 	optimize(kappa, internals, observations, images);
