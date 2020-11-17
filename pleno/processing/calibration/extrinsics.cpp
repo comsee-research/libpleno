@@ -5,8 +5,7 @@
 
 //optimization
 #include "optimization/optimization.h"
-#include "optimization/errors/extrinsics/extrinsics_corner.h" //ExtrinsicsCornerReprojectionError
-#include "optimization/errors/extrinsics/extrinsics_bap.h" //ExtrinsicsBlurAwarePlenopticReprojectionError
+#include "optimization/errors/extrinsics.h" //ExtrinsicsCornerReprojectionError, ExtrinsicsBlurAwarePlenopticReprojectionError
 
 //io
 #include "io/cfg/observations.h" // save and load

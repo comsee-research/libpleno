@@ -221,9 +221,7 @@ set(PLENO_OPTIMIZATION_SRC
 		pleno/optimization/errors/corner.cpp
 		pleno/optimization/errors/radius.cpp
 		pleno/optimization/errors/blur.cpp
-		#extrinsics
-			pleno/optimization/errors/extrinsics/extrinsics_bap.cpp
-			pleno/optimization/errors/extrinsics/extrinsics_corner.cpp
+		pleno/optimization/errors/extrinsics.cpp
 )
 
 set(PLENO_IO_SRC
