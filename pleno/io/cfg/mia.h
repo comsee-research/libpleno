@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libv/core/serialization/serializable_properties.hpp>
+#include <libv/core/serialization/eigen.hpp>
 
 #include "types.h"
 #include "geometry/pose.h"

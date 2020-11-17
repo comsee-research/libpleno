@@ -1,6 +1,7 @@
 #pragma once
 
 #include <libv/core/serialization/serializable_properties.hpp>
+#include <libv/core/serialization/contiguous_containers.hpp> //support for std::vector
 
 #include "geometry/observation.h"
 #include "types.h"
