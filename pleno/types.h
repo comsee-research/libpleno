@@ -15,24 +15,38 @@ template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 template<class T>
 using AlignedVector = std::vector<T, Eigen::aligned_allocator<T>>;
 
-using P2D = Eigen::Vector2d;
-using P2DS = AlignedVector<P2D>;
-using P3D = Eigen::Vector3d;
-using P3DS = AlignedVector<P3D>;
+using P2D 	= Eigen::Vector2d;
+using P2DS 	= AlignedVector<P2D>;
+using P3D 	= Eigen::Vector3d;
+using P3DS 	= AlignedVector<P3D>;
 
 template<std::size_t N> class Pose_;
-using Poses = AlignedVector<Pose_<3>>;
-using Poses3D = AlignedVector<Pose_<3>>;
-using Poses2D = AlignedVector<Pose_<2>>;
+using Poses 	= AlignedVector<Pose_<3u>>;
+using Poses3D 	= AlignedVector<Pose_<3u>>;
+using Poses2D 	= AlignedVector<Pose_<2u>>;
+
+template<std::size_t N> struct Rotation_ {
+	typename Pose_<N>::Matrix &R;
+};
+using Rotation2D 	= Rotation_<2u>;
+using Rotation3D	= Rotation_<3u>;
+using Rotation 		= Rotation_<3u>;
+
+template<std::size_t N> struct Translation_ {
+	typename Pose_<N>::Vector &t;
+};
+using Translation2D	= Translation_<2u>;
+using Translation3D	= Translation_<3u>;
+using Translation	= Translation_<3u>;
 
 template<std::size_t N> class Ray_;
-using Rays = AlignedVector<Ray_<3>>;
-using Rays3D = AlignedVector<Ray_<3>>;
-using Rays2D = AlignedVector<Ray_<2>>;
+using Rays 		= AlignedVector<Ray_<3u>>;
+using Rays3D 	= AlignedVector<Ray_<3u>>;
+using Rays2D 	= AlignedVector<Ray_<2u>>;
 
-using Quad   = std::array<P3D, 4>;
-using Quad3D = std::array<P3D, 4>;
-using Quad2D = std::array<P2D, 4>;
+using Quad   = std::array<P3D, 4u>;
+using Quad3D = std::array<P3D, 4u>;
+using Quad2D = std::array<P2D, 4u>;
 
 struct Corner {
 	enum : std::size_t {
