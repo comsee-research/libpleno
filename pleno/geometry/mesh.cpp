@@ -18,7 +18,7 @@ std::ostream& operator<<(std::ostream& o, const Geometry& geometry)
 template<std::size_t Dim>
 GridMesh_<Dim>::GridMesh_(
 	const P2D& e, size_t w, size_t h, Geometry g)
-: edge_length_(e), width_(w), height_(h), geometry_(g)
+: pitch_(e), width_(w), height_(h), geometry_(g)
 {}
 
 template<std::size_t Dim>
@@ -36,14 +36,14 @@ typename GridMesh_<Dim>::Pose_t& GridMesh_<Dim>::pose()
     return pose_;
 }
 template<std::size_t Dim>
-const P2D& GridMesh_<Dim>::edge_length() const
+const P2D& GridMesh_<Dim>::pitch() const
 {
-    return edge_length_;
+    return pitch_;
 }
 template<std::size_t Dim>
-P2D& GridMesh_<Dim>::edge_length()
+P2D& GridMesh_<Dim>::pitch()
 {
-    return edge_length_;
+    return pitch_;
 }
 template<std::size_t Dim>
 size_t GridMesh_<Dim>::width() const
@@ -102,8 +102,8 @@ GridMesh_<Dim>::node(size_t col, size_t row) const
     const double colOffset = ((this->geometry_ == HexagonalRowsAligned and row%2 == 0) ? 0.5 : 0.0) ;
     const double rowOffset = ((this->geometry_ == HexagonalColsAligned and col%2 == 0) ? 0.5 : 0.0) ;
     
-	node[0] = this->edge_length_[0] * (double(col) + colOffset) * ((this->geometry_ == HexagonalColsAligned) ? sin60 : 1.0);
- 	node[1] = this->edge_length_[1] * (double(row) + rowOffset) * ((this->geometry_ == HexagonalRowsAligned) ? sin60 : 1.0);
+	node[0] = this->pitch_[0] * (double(col) + colOffset) * ((this->geometry_ == HexagonalColsAligned) ? sin60 : 1.0);
+ 	node[1] = this->pitch_[1] * (double(row) + rowOffset) * ((this->geometry_ == HexagonalRowsAligned) ? sin60 : 1.0);
 
     return node;
 }

@@ -31,7 +31,7 @@ public:
 	};
 private:
     Pose_t pose_; // the pose of the grid (from node 0)
-    P2D edge_length_; // the mean distance between two nodes
+    P2D pitch_; // the mean distance between two nodes
     
     size_t width_, height_; // the size of the grid (number of nodes)
     Geometry geometry_;
@@ -49,8 +49,8 @@ public:
     const Pose_t& pose() const;
           Pose_t& pose();
 
-    const P2D& edge_length() const;
-          P2D& edge_length();
+    const P2D& pitch() const;
+          P2D& pitch();
 
     size_t width() const;
     size_t& width();
@@ -92,7 +92,7 @@ operator<<(std::ostream& o, const GridMesh_<Dim>& g)
 {
     o << "Geometry: " << g.geometry() << "\n";
     o << "Dimensions: [" << g.width() << ", " << g.height() << "]\n";
-    o << "Edge length: [" << g.edge_length()[0] << ", " << g.edge_length()[1] << "]\n";
+    o << "Pitch: [" << g.pitch()[0] << ", " << g.pitch()[1] << "]\n";
     o << "Pose:\n" << g.pose();
 
     return o;

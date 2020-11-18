@@ -189,7 +189,7 @@ void PlenopticCamera::init(
 	mla_.geometry() 	= mia_.geometry();
 	mla_.width() 		= mia_.width();
 	mla_.height() 		= mia_.height();
-	mla_.edge_length() 	= P2D{dC, dC};
+	mla_.pitch() 		= P2D{dC, dC};
 	
 	mla_.pose().rotation() << 	std::cos(theta_z),	std::sin(theta_z),		0.,
 								-std::sin(theta_z),	std::cos(theta_z),		0.,
@@ -565,7 +565,7 @@ void save(std::string path, const PlenopticCamera& pcm)
     config.mia().mesh().pose().translation() = pcm.mia().pose().translation();
     config.mia().mesh().width() = pcm.mia().width();
     config.mia().mesh().height() = pcm.mia().height();
-    config.mia().mesh().pitch() = pcm.mia().edge_length();
+    config.mia().mesh().pitch() = pcm.mia().pitch();
     config.mia().mesh().geometry() = pcm.mia().geometry();
     
      // Configuring the MicroLensesArray
@@ -573,7 +573,7 @@ void save(std::string path, const PlenopticCamera& pcm)
     config.mla().mesh().pose().translation() = pcm.mla().pose().translation();
     config.mla().mesh().width() = pcm.mla().width();
     config.mla().mesh().height() = pcm.mla().height();
-    config.mla().mesh().pitch() = pcm.mla().edge_length();
+    config.mla().mesh().pitch() = pcm.mla().pitch();
     config.mla().mesh().geometry() = pcm.mla().geometry();
     
     config.mla().focal_lengths().resize(pcm.mla().I());

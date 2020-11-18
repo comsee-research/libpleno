@@ -18,12 +18,12 @@ public:
 		this->geometry() = Geometry(config.mesh().geometry());
 		this->width() = config.mesh().width();
 		this->height() = config.mesh().height();
-		this->edge_length() = config.mesh().pitch();
+		this->pitch() = config.mesh().pitch();
 		this->pose() = config.mesh().pose();
 	}
 	
-	double radius() const { return (edge_length()[0] + edge_length()[1]) / 4.; }
-	double diameter() const { return (edge_length()[0] + edge_length()[1]) / 2.; }
+	double radius() const { return (pitch()[0] + pitch()[1]) / 4.; }
+	double diameter() const { return (pitch()[0] + pitch()[1]) / 2.; }
 };
 
 using MI					= MicroImage;

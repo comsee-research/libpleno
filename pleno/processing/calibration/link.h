@@ -217,7 +217,7 @@ inline void link_center_to_node_index(
 )
 {
 	constexpr double tolerance = 0.7;
-	const double interdist = grid.edge_length()[0];
+	const double interdist = grid.pitch()[0];
 	const int size = static_cast<int>(grid.nodeNbr());
 	
 	//Invalidate all observations

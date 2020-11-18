@@ -26,7 +26,7 @@ void optimize(MIA& grid, const MICObservations& observations)
         {
             solver.add(
             	GridReconstructionError{o}, //error
-            	&grid, 			//MIA (edge_lengths + angle)
+            	&grid, 			//MIA (pitch + angle)
             	&grid.pose()	//MIA POSE (theta_z + t_x + t_y)
             );
         	++nbobs;
