@@ -4,7 +4,7 @@
 
 #include "io/printer.h"
 
-bool RadiusReprojectionError::operator()(
+bool BlurRadiusReprojectionError::operator()(
 	const Pose& camera_pose,
 	const Pose& mla_pose,
 	const MLA_t& /*mla*/,

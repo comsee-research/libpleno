@@ -20,6 +20,8 @@ inline void apply_rotation(Eigen::Matrix2d& matrix, double theta)
 }
 
 using v::apply_rotation;
+using v::apply_small_rotation;
+using v::rotation_orthogonalize;
 
 //inline void apply_rotation(Eigen::Matrix3d& matrix, const Eigen::Vector3d& d)
 //{

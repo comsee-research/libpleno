@@ -31,3 +31,5 @@ namespace ttt
 		static std::string name(){ return "MicroImageCenterReprojectionError"; } 
 	};
 } // namespace ttt
+
+using MICReprojectionError = MicroImageCenterReprojectionError;

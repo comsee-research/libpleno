@@ -13,7 +13,7 @@
 
 #include "geometry/object/checkerboard.h"
 
-struct RadiusReprojectionError
+struct BlurRadiusReprojectionError
 {
 	using ErrorType 	= Eigen::Matrix<double, 1, 1>; //rho
 	using MLA_t			= GridMesh3D;
@@ -37,8 +37,8 @@ struct RadiusReprojectionError
 namespace ttt
 {
 	template<> 
-	struct Name<RadiusReprojectionError> 
+	struct Name<BlurRadiusReprojectionError> 
 	{ 
-		static std::string name(){ return "RadiusReprojectionError"; } 
+		static std::string name(){ return "BlurRadiusReprojectionError"; } 
 	};
 } // namespace ttt

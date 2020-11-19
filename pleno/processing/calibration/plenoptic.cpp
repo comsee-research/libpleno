@@ -40,7 +40,7 @@ void optimize(
 {	
 	const bool useRadius = (model.I() > 0u); 
 	
-	using SolverBAP = lma::Solver<CornerReprojectionError, RadiusReprojectionError, MicroImageCenterReprojectionError>;
+	using SolverBAP = lma::Solver<CornerReprojectionError, BlurRadiusReprojectionError, MicroImageCenterReprojectionError>;
 	using SolverCorner = lma::Solver<CornerReprojectionError, MicroImageCenterReprojectionError>;
 	using Solver_t = std::variant<std::monostate, SolverBAP, SolverCorner>;
 	
@@ -79,7 +79,7 @@ void optimize(
 						//ADD RADII OBSERVATIONS
 						if constexpr (std::is_same_v<T, SolverBAP>) {
 							s.add(
-								RadiusReprojectionError{
+								BlurRadiusReprojectionError{
 									model, checkboard, o
 								},
 								&p,

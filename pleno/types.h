@@ -25,15 +25,17 @@ using Poses 	= AlignedVector<Pose_<3u>>;
 using Poses3D 	= AlignedVector<Pose_<3u>>;
 using Poses2D 	= AlignedVector<Pose_<2u>>;
 
+/* Holder for rotation */
 template<std::size_t N> struct Rotation_ {
-	typename Pose_<N>::Matrix &R;
+	typename Pose_<N>::Matrix * R;
 };
 using Rotation2D 	= Rotation_<2u>;
 using Rotation3D	= Rotation_<3u>;
 using Rotation 		= Rotation_<3u>;
 
+/* Holder for translation */
 template<std::size_t N> struct Translation_ {
-	typename Pose_<N>::Vector &t;
+	typename Pose_<N>::Vector * t;
 };
 using Translation2D	= Translation_<2u>;
 using Translation3D	= Translation_<3u>;

@@ -42,3 +42,5 @@ namespace ttt
 		static std::string name(){ return "BlurAwarePlenopticReprojectionError"; } 
 	};
 } // namespace ttt
+
+using BAPReprojectionError = BlurAwarePlenopticReprojectionError;
