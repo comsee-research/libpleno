@@ -10,7 +10,7 @@ namespace lma
 void apply_increment(Rotation& rot, const double delta[Size<Rotation>::value], const lma::Adl&)
 {    
     apply_rotation(*(rot.R), Eigen::Vector3d(delta[0], delta[1], delta[2]));
-    //v::rotation_orthogonalize(p.rotation());
+    rotation_orthogonalize(*(rot.R));
 }
 
 void apply_small_increment(Rotation& rot, double h, const v::core::numeric_tag<0>&, const lma::Adl&)
