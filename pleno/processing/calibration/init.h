@@ -19,7 +19,7 @@
 #include "link.h"
 
 template<typename CameraModel, typename Observations>
-Pose select_best_pose(
+PoseWithError select_best_pose(
 	const CameraModel& camera, 
 	const CheckerBoard& grid,
     const Observations& observations, 
@@ -27,7 +27,7 @@ Pose select_best_pose(
 );
 
 template<typename CameraModel, typename Observations>
-Pose estimate_pose(
+PoseWithError estimate_pose(
 	const CameraModel& model, 
 	const CheckerBoard& grid, 
 	const Observations& barycenters
@@ -50,7 +50,7 @@ void init_extrinsics(
 //******************************************************************************
 //******************************************************************************
 template<typename CameraModel, typename Observations>
-Pose select_best_pose(
+PoseWithError select_best_pose(
 	const CameraModel& camera, 
 	const CheckerBoard& grid,
     const Observations& observations, 
@@ -105,11 +105,11 @@ Pose select_best_pose(
     for(const auto&p : rmse_poses) PRINT_DEBUG("RMSE = " << p.rmse.get());
 	
 	PRINT_DEBUG("Best pose is p = " << rmse_poses[0].pose << "with rmse = " << rmse_poses[0].rmse.get());
-   	return rmse_poses[0].pose;
+   	return rmse_poses[0];
 }
 
 template<typename CameraModel, typename Observations>
-Pose estimate_pose(
+PoseWithError estimate_pose(
 	const CameraModel& model, 
 	const CheckerBoard& grid, 
 	const Observations& barycenters
@@ -199,7 +199,7 @@ Pose estimate_pose(
 	
 	//Select best using RANSAC
 	PRINT_DEBUG("Select best using RANSAC");
-	Pose extrinsics = select_best_pose(monocular, grid, barycenters, candidates);
+	PoseWithError extrinsics = select_best_pose(monocular, grid, barycenters, candidates);
 			
 	return extrinsics;
 }
@@ -257,16 +257,18 @@ void init_extrinsics(
 				
 		//Estimate Pose
 		PRINT_DEBUG("Estimate Pose of frame f = " << f);
-		Pose pose = estimate_pose(model, grid, barycenters);
+		const auto [pose, rmse] = estimate_pose(model, grid, barycenters);
 		
 		PRINT_DEBUG("Sanity check of pose frame f = " << f);
 		if( pose.translation()[2] > 0. 
+			or rmse.get() > 1e9
 			or not(((pose.translation().array() == pose.translation().array())).all()) //check is_nan
 			or not(((pose.rotation().array() == pose.rotation().array())).all()) //check is_nan
 		) 
 		{
 			PRINT_ERR("Wrong hypothesis. Can't fix it. Remove pose and observations of frame f = " << f <<".");
 			DEBUG_VAR(pose);
+			DEBUG_VAR(rmse.get());
 			Viewer::pop();
 			
 			wait();

@@ -97,7 +97,7 @@ void evaluate_rmse(
 	PRINT_DEBUG("---------------------------------------------");
 	if (export_as_csv)
 	{	
-		std::ofstream ofs("rmse-"+std::to_string(getpid())+".csv");
+		ofs.open("rmse-"+std::to_string(getpid())+".csv");
 		if (!ofs.good())
 			throw std::runtime_error(std::string("Cannot open file errors.csv"));
 	
@@ -159,5 +159,6 @@ void evaluate_rmse(
 			<< rmse_center.get() 			<< "\n"; 
 		
 		ofs << oss.str();
+		ofs.close();
 	}
 }

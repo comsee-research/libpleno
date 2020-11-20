@@ -3,6 +3,8 @@
 #include <type_traits> // std::remove_reference_t
 #include <variant> //std::variant
 
+#include "unused.h"
+
 //optimization
 #include "optimization/optimization.h"
 #include "optimization/errors/mic.h" //MICReprojectionError
@@ -210,10 +212,10 @@ void calibration_PlenopticCamera(
 FORCE_GUI(true);
 //4) Checking the parameters
 	PRINT_INFO("=== Computing individual RMSE");
-	evaluate_rmse(model, poses, grid, features, centers);
+	evaluate_rmse(model, poses, grid, features, centers, true);
 	PRINT_INFO("=== Graphically checking the parameters");
 	display(model, poses, grid, features, centers, pictures);
-		
+	
 	wait();
 	
 FORCE_GUI(false);	

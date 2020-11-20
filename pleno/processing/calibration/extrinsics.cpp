@@ -92,7 +92,7 @@ void calibration_ExtrinsicsPlenopticCamera(
 	init_extrinsics(
 		features, poses,
 		model, grid, observations,
-		pictures
+		{}//pictures
 	);
 
 //2) Sanitize Observations
