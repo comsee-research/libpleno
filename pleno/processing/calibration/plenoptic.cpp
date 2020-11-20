@@ -158,6 +158,12 @@ void calibration_PlenopticCamera(
 		features.end()
 	);
 	features.shrink_to_fit();
+	
+	PRINT_DEBUG("Save linked observations");
+	ObservationsConfig cfg_obs;
+	cfg_obs.features() = features;
+	cfg_obs.centers() = centers;			
+	v::save("linked-observations-"+std::to_string(getpid())+".bin.gz", cfg_obs);
 
 	PRINT_DEBUG("Change indexes' space from MI to ML");
 	model.mi2ml(centers);
