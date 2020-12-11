@@ -315,6 +315,10 @@ target_include_directories(pleno PRIVATE ${CMAKE_SOURCE_DIR}/pleno/simulation)
 
 # link all libraries to libpleno
 add_definitions(-Wall -Wextra -Werror)
+if (NOT OPENMP_FOUND)
+	add_definitions(-Wno-unknown-pragmas)
+endif ()
+
 target_link_libraries(pleno ${EXTERNAL_LIBS} pthread)
 
 if(EXTRA_DEPS)
