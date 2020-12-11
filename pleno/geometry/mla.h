@@ -42,18 +42,24 @@ public:
 	
 	FocalLength f(std::size_t k, std::size_t l) const {
 		assert(I()!=0u and k<width() and l<height());
-		const int t = lens_type(I(), k, l);
+		const int t = type(k, l);
 		return focals_[t];
 	}
 	
 	FocalLength& f(std::size_t k, std::size_t l) {
 		assert(I()!=0u and k<width() and l<height());
-		const int t = lens_type(I(), k, l);
+		const int t = type(k, l);
 		return focals_[t];
 	}
 	
 	double radius() const { return (pitch()[0] + pitch()[1]) / 4.; }
 	double diameter() const { return (pitch()[0] + pitch()[1]) / 2.; }
+	
+	int type(std::size_t k, std::size_t l) const 
+	{ 
+		if (geometry() == HexagonalRowsAligned) return lens_type(I(), k ,l);
+		else return lens_type(I(), l, k);
+	} 	
 };
 
 using MLA 					= MicroLensesArray;

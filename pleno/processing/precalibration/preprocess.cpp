@@ -50,21 +50,22 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
     	 
 /////////////////////////////////////Compute radii///////////////////////////////////////////////////
 	PRINT_INFO("Computing radius of each micro-image");
-	constexpr int roiw=22;
-    constexpr int roih=22;
-    
-    constexpr std::size_t EXCLUDED_BORDER_SIZE = 50; //70
-    
+	const int roiw = std::floor(centers.diameter())-1;
+	const int roih = roiw;
+	
+	const std::size_t borderk = centers.width() / 4;
+	const std::size_t borderl = centers.height() / 4;
+
     Viewer::stash();
     
-    for(std::size_t k = 0 + EXCLUDED_BORDER_SIZE; k < centers.width() - EXCLUDED_BORDER_SIZE ; ++k) //iterate through columns //x-axis
+    for(std::size_t k = borderk; k < centers.width() - borderk ; ++k) //iterate through columns //x-axis
     {
-    	for(std::size_t l = 0 + EXCLUDED_BORDER_SIZE ; l < centers.height() / 2. /*- EXCLUDED_BORDER_SIZE * 1.5 */; ++l) //iterate through lines //y-axis
+    	for(std::size_t l = borderl ; l < centers.height() - borderl; ++l) //iterate through lines //y-axis
 		{
 			Viewer::pop();	
 					
 	 		const auto& c = centers.nodeInWorld(k,l); //col,row
-			const int t = lens_type(I,k,l); //k=col, l=row
+			const int t = centers.type(I,k,l); //k=col, l=row
 			
 			//crop image aroud the center
 			double X = c[0], Y = c[1]; 

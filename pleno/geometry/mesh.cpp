@@ -93,6 +93,7 @@ typename GridMesh_<Dim>::Node
 GridMesh_<Dim>::node(size_t col, size_t row) const
 {        
     static constexpr double sin60 = std::sin(60.0 / 180.0 * M_PI);
+    static constexpr double cos30 = std::cos(30.0 / 180.0 * M_PI);
    
 	DEBUG_ASSERT(col < width() and row < height(), "GridMesh::node: wrong indexes ("<<col<<", "<<row<<")");
 	
@@ -100,9 +101,9 @@ GridMesh_<Dim>::node(size_t col, size_t row) const
     node.setZero();
     
     const double colOffset = ((this->geometry_ == HexagonalRowsAligned and row%2 == 0) ? 0.5 : 0.0) ;
-    const double rowOffset = ((this->geometry_ == HexagonalColsAligned and col%2 == 0) ? 0.5 : 0.0) ;
+    const double rowOffset = ((this->geometry_ == HexagonalColsAligned and col%2 == 1) ? -0.5 : 0.0) ;
     
-	node[0] = this->pitch_[0] * (double(col) + colOffset) * ((this->geometry_ == HexagonalColsAligned) ? sin60 : 1.0);
+	node[0] = this->pitch_[0] * (double(col) + colOffset) * ((this->geometry_ == HexagonalColsAligned) ? cos30 : 1.0);
  	node[1] = this->pitch_[1] * (double(row) + rowOffset) * ((this->geometry_ == HexagonalRowsAligned) ? sin60 : 1.0);
 
     return node;

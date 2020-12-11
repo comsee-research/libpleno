@@ -59,12 +59,12 @@ double compute_virtualdepth(const Observations_t&obs, const MIA& mia, const Inte
 }
 
 template<typename InputObservations_t>
-void update_observations(const InputObservations_t& inobs, BAPObservations& outobs, double v, const InternalParameters& params)
+void update_observations(const InputObservations_t& inobs, BAPObservations& outobs, double v, const MIA& mia, const InternalParameters& params)
 {	
 	std::transform(inobs.begin(), inobs.end(), std::back_inserter(outobs),
-		[&v, &params](const auto& io) -> BAPObservation {
+		[&v, &params, &mia](const auto& io) -> BAPObservation {
 			const double r = (params.dC / 2. ) * (1. / v) 
-							+ params.q_prime[lens_type(params.I, io.k, io.l)] 
+							+ params.q_prime[mia.type(params.I, io.k, io.l)] 
 							- (params.dC / 2. ); // Eq.(14)
 				
 			return BAPObservation{
@@ -100,7 +100,7 @@ BAPObservations compute_bapfeatures(const InputObservations_t& cbos, const MIA& 
 		double v = compute_virtualdepth(obs, mia, params);
 			
 		PRINT_DEBUG("Update observations");
-		update_observations(obs, bapobs, v, params);
+		update_observations(obs, bapobs, v, mia, params);
 	}
 	
 	bapobs.shrink_to_fit();
