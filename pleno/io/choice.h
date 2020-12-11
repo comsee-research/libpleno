@@ -3,8 +3,8 @@
 #include <iostream>
 #include <string>
 
-#include <pleno/graphic/gui.h>
-#include <pleno/io/printer.h>
+#include "graphic/gui.h"
+#include "io/printer.h"
 
 inline bool yes_no_question(std::string msg) 
 {
