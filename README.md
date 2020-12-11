@@ -37,6 +37,9 @@ Currently available applications using the libpleno:
  * [COMPOTE](https://github.com/comsee-research/compote) (Calibration Of Multi-focus PlenOpTic camEra), a set of tools to pre-calibrate and calibrate a multifocus plenoptic camera.
  * ...
  
+Configuration file examples are given in the folder `./examples/config/` for the datasets `R12-A` (see below).
+Observations for the dataset `R12-A` are also given in the folder `./examples/obs/`.
+ 
 Datasets
 ========
 
