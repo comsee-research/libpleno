@@ -29,7 +29,7 @@ Image extract_roi(const Image&img, double& X, double& Y, int roiw, int roih)
 ////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////
 /*
-	
+	Image must be in 8-bits format
 */
 void trim(Image& img, double r, double tolerance)
 {
@@ -50,7 +50,9 @@ void trim(Image& img, double r, double tolerance)
 		}
 	}
 }
-
+/*
+	Image must be in 8-bits format
+*/
 void trim_binarize(Image& img, double radius, double tolerance)
 {
 	const int width 	= img.cols;
@@ -75,7 +77,9 @@ void trim_binarize(Image& img, double radius, double tolerance)
 		}
 	}
 }
-
+/*
+	Image must be in 32-bits format
+*/
 void trim_float(Image& img, double radius, double tolerance)
 {
 	const int width 	= img.cols;
@@ -96,7 +100,9 @@ void trim_float(Image& img, double radius, double tolerance)
 		}
 	}
 }
-
+/*
+	Image must be in 32-bits format
+*/
 void trim_float_binarize(Image& img, double radius, double tolerance)
 {
 	const int width 	= img.cols;
@@ -121,7 +127,9 @@ void trim_float_binarize(Image& img, double radius, double tolerance)
 		}
 	}
 }
-
+/*
+	Image must be in 64-bits format
+*/
 void trim_double(Image& img, double radius, double tolerance)
 {
 	const int width 	= img.cols;
@@ -142,7 +150,9 @@ void trim_double(Image& img, double radius, double tolerance)
 		}
 	}
 }
-
+/*
+	Image must be in 64-bits format
+*/
 void trim_double_binarize(Image& img, double radius, double tolerance)
 {
 	const int width 	= img.cols;
@@ -169,23 +179,54 @@ void trim_double_binarize(Image& img, double radius, double tolerance)
 }
 
 ////////////////////////////////////////////////////////////////////////////////
+/* 
+	Images must be 8-bits format
+ */ 
 void devignetting(const Image& raw, const Image& white, Image& unvignetted)
 {    
     unvignetted = raw.clone();
-
+   
     for (int row = 0; row < unvignetted.rows; ++row)
     {
         for (int col = 0; col < unvignetted.cols; ++col)
         {            
             auto & w = white.at<cv::Vec3b>(row, col);              
             auto & u = unvignetted.at<cv::Vec3b>(row, col);
-            u[0] = static_cast<uchar>( std::min(255.f, u[0] * 255.f / (w[0] + 1e-3f)) );
-            u[1] = static_cast<uchar>( std::min(255.f, u[1] * 255.f / (w[1] + 1e-3f)) );
-            u[2] = static_cast<uchar>( std::min(255.f, u[2] * 255.f / (w[2] + 1e-3f)) );
+            u[0] = static_cast<uchar>( std::min(255., u[0] * 255. / (w[0] + 1e-3)) );
+            u[1] = static_cast<uchar>( std::min(255., u[1] * 255. / (w[1] + 1e-3)) );
+            u[2] = static_cast<uchar>( std::min(255., u[2] * 255. / (w[2] + 1e-3)) );
         }
     }
 }
 
+/* 
+	Images must be 16-bits format
+ */ 
+void devignetting_u16(const Image& raw, const Image& white, Image& unvignetted)
+{    
+    unvignetted = raw.clone();
+   
+    for (int row = 0; row < unvignetted.rows; ++row)
+    {
+        for (int col = 0; col < unvignetted.cols; ++col)
+        {            
+            auto & w = white.at<cv::Vec3w>(row, col);              
+            auto & u = unvignetted.at<cv::Vec3w>(row, col);
+            u[0] = static_cast<ushort>( std::min(65535., u[0] * 65535. / (w[0] + 1e-3)) );
+            u[1] = static_cast<ushort>( std::min(65535., u[1] * 65535. / (w[1] + 1e-3)) );
+            u[2] = static_cast<ushort>( std::min(65535., u[2] * 65535. / (w[2] + 1e-3)) );
+        }
+    }
+}
+
+////////////////////////////////////////////////////////////////////////////////
+void debayering(const Image& raw, Image& debayered)
+{    
+    debayered = raw.clone();
+    cv::cvtColor(debayered, debayered, cv::COLOR_BayerGR2BGR);
+}
+
+////////////////////////////////////////////////////////////////////////////////
 void contrast_strech(const Image& input, Image& output, int threshold)
 {
     for (int row = 0; row < output.rows; ++row)

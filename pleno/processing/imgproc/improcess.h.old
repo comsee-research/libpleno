@@ -28,6 +28,9 @@ void erode(const Image& input, Image& output, int crossSize);
 void dilate(const Image& input, Image& output, int crossSize);
 
 void devignetting(const Image& raw, const Image& white, Image& unvignetted);
+void devignetting_u16(const Image& raw, const Image& white, Image& unvignetted)
+
+void debayering(const Image& raw, Image& debayered);
 
 ////////////////////////////////////////////////////////////////////////////////
 std::vector<std::vector<cv::Point>> detect_shapes(Image& ioSource);

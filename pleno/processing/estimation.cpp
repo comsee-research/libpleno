@@ -24,7 +24,7 @@
 
 #include "graphic/gui.h"
 #include "io/printer.h"
-#include "processing/improcess.h"
+#include "processing/imgproc/improcess.h"
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/fast_math.hpp>

@@ -5,7 +5,7 @@
 
 #include "io/printer.h"
 
-#include "processing/improcess.h"
+#include "processing/imgproc/improcess.h"
 #include "processing/algorithms/dbscan.h"
 
 CBObservations clusterize(const CBObservations& obs, double eps, std::size_t min_pts, bool filter)

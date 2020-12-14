@@ -4,7 +4,7 @@
 #include "optimization/optimization.h"
 #include "optimization/errors/blur.h" //RelativeBlurCostError
 
-#include "processing/improcess.h"
+#include "processing/imgproc/improcess.h"
 #include "processing/tools/lens.h"
 
 #include "io/printer.h"

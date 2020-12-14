@@ -226,6 +226,7 @@ set(PLENO_OPTIMIZATION_SRC
 
 set(PLENO_IO_SRC
 	pleno/io/printer.cpp
+	pleno/io/images.cpp
 )
 
 set(PLENO_GRAPHIC_SRC
@@ -237,7 +238,7 @@ set(PLENO_GRAPHIC_SRC
 
 set(PLENO_PROCESSING_SRC
 	pleno/processing/estimation.cpp
-	pleno/processing/improcess.cpp
+	
 #--Precalibration
 	pleno/processing/precalibration/preprocess.cpp
 	pleno/processing/precalibration/display.cpp
@@ -255,6 +256,13 @@ set(PLENO_PROCESSING_SRC
 	pleno/processing/detection/bapfeatures.cpp
 #--Algorithm
 	pleno/processing/algorithms/p3p.cpp
+#--Imgprocessing
+	pleno/processing/imgproc/access.cpp
+	pleno/processing/imgproc/devignetting.cpp
+	pleno/processing/imgproc/debayering.cpp
+	pleno/processing/imgproc/interp.cpp
+	pleno/processing/imgproc/morph.cpp
+	pleno/processing/imgproc/trim.cpp
 )
 
 set(PLENO_SIMULATION_SRC

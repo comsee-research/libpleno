@@ -6,7 +6,7 @@
 #include "graphic/gui.h"
 #include "io/printer.h"
 
-#include "processing/improcess.h"
+#include "processing/imgproc/improcess.h"
 #include "processing/tools/rotation.h"
 /*
  * @orientation_histogram compute an histogram based on orientation and magnitude image gradients

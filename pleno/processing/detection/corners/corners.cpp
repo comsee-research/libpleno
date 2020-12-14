@@ -32,7 +32,7 @@
 
 #include "geometry/model/microimage.h"
 
-#include "processing/improcess.h"
+#include "processing/imgproc/improcess.h"
 #include "processing/tools/stats.h"
 #include "processing/tools/lens.h"
 

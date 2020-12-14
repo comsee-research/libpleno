@@ -10,7 +10,7 @@
 #include "io/printer.h"
 #include "io/colors.h"
 
-#include "processing/improcess.h"
+#include "processing/imgproc/improcess.h"
 
 template<typename ImageType>
 struct GenericLevenbergMarquardt

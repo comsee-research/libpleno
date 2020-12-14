@@ -7,9 +7,23 @@
 #include "graphic/gui.h"
 #include "graphic/viewer_2d.h"
 
-#include "processing/improcess.h"
+#include "processing/imgproc/improcess.h"
 
-static void imerode(const Image& raw, Image& preprocessed)
+static void contrast_strech(const Image& input, Image& output, int threshold)
+{
+    for (int row = 0; row < output.rows; ++row)
+    {
+        for (int col = 0; col < output.cols; ++col)
+        {
+            auto intensity = input.at<uchar>(row, col);
+            if (intensity < threshold) intensity = 0;
+
+            output.at<uchar>(row, col) = intensity;
+        }
+    }
+}
+
+static void impreprocess(const Image& raw, Image& preprocessed)
 {
 /////////////////////////////////////Grayscale conversion///////////////////////////////////////////
     PRINT_INFO("Grayscale conversion");
@@ -40,7 +54,7 @@ static void imerode(const Image& raw, Image& preprocessed)
 #if 1
 //////////////////////////////////////////Eroding image/////////////////////////////////////////////
     PRINT_INFO("Eroding image");
-    Image eroded_image;
+    //Image eroded_image;
     erode(preprocessed, preprocessed, 3); // raytrix
     
     RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).name("Preprocessing::erroded"), preprocessed);
@@ -51,7 +65,7 @@ MICObservations detection_mic(const Image& raw)
 {
 ////////////////////////////////////////Preprocessing///////////////////////////////////////////////
 	Image preprocessed;
-	imerode(raw /* in */, preprocessed /* out */);
+	impreprocess(raw /* in */, preprocessed /* out */);
 
 ////////////////////////////////////////Detecting contours//////////////////////////////////////////
     PRINT_INFO("Detecting contours");
