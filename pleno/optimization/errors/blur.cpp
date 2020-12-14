@@ -23,17 +23,27 @@ bool RelativeBlurCostError::operator()(
 	error[0] = cost;
 
 #if 0
+	const int ksize = fref.cols;
+	Image kernelX = cv::getGaussianKernel(ksize, sigma_r, CV_64F);
+	Image kernelY = cv::getGaussianKernel(ksize, sigma_r, CV_64F);
+	
+	Image kernel = kernelX * kernelY.t();
+	cv::normalize(kernel, kernel, 1., 0., cv::NORM_MINMAX);
+
 	cv::namedWindow("ref", cv::WINDOW_NORMAL);
 	cv::namedWindow("edi", cv::WINDOW_NORMAL);
 	cv::namedWindow("bli", cv::WINDOW_NORMAL);
+	cv::namedWindow("kernel", cv::WINDOW_NORMAL);
 	
 	cv::imshow("ref", fref);
 	cv::imshow("edi", fedi);
 	cv::imshow("bli", blurred);
+	cv::imshow("kernel", kernel);
 	
 	cv::resizeWindow("ref", 200u, 200u);
 	cv::resizeWindow("edi", 200u, 200u);
 	cv::resizeWindow("bli", 200u, 200u);
+	cv::resizeWindow("kernel", 200u, 200u);
 	
 	DEBUG_VAR(cost);
 	wait();
