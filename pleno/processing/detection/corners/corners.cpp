@@ -189,15 +189,17 @@ FORCE_GUI(false);
 CBObservations
 detection_corners(const Image& raw, const MIA& mia, const InternalParameters& params)
 {
-	constexpr int roiw=28;
-    constexpr int roih=28;
-    
-//  constexpr int kernel_size = 3;
-//  constexpr double ratio = 3.; //Canny recommended a upper:lower ratio between 2:1 and 3:1.
-    
+	constexpr int roipadding = 3;
+	const int roiw = std::ceil(mia.diameter()) + roipadding; //=28;
+    const int roih = roiw;
+
+#if 0 //USING CANNY EDGES    
+	constexpr int kernel_size = 3;
+	constexpr double ratio = 3.; //Canny recommended a upper:lower ratio between 2:1 and 3:1.
+#endif    
     const double radius = std::fabs(params.radius(0));
     
-    static const decltype(v::red) colors[4] = {v::red, v::green, v::blue, v::yellow};
+    static const decltype(v::red) colors[] = {v::red, v::green, v::blue, v::purple, v::yellow, v::orange};
         
     PRINT_DEBUG("Grayscale conversion");
     Image img = Image::zeros(raw.rows, raw.cols, CV_8UC1);
@@ -306,7 +308,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 		double X = c[0], Y = c[1]; 
 
 	//2.1) EXTRACT ROI			
-		Image observation = extract_roi(img, X, Y, 24u, 24u).clone(); //crop
+		Image observation = extract_roi(img, X, Y, roiw-roipadding, roih-roipadding).clone(); //crop
 		//trim(observation, r, -1. );
 		observation.convertTo(observation, CV_64FC1);
 			

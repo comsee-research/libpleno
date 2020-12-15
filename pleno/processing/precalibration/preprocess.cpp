@@ -50,7 +50,8 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
     	 
 /////////////////////////////////////Compute radii///////////////////////////////////////////////////
 	PRINT_INFO("Computing radius of each micro-image");
-	const int roiw = std::floor(centers.diameter())-1;
+	constexpr int roiborder = 1;
+	const int roiw = std::floor(centers.diameter()) - roiborder;
 	const int roih = roiw;
 	
 	const std::size_t borderk = centers.width() / 4;
@@ -120,7 +121,7 @@ preprocess(
 	const MIA& grid, 
 	double pxl2metric,
 	std::size_t I_,
-	int mode
+	int mode, double fmatchingnumber
 )
 {
 	const std::size_t I = (I_ == 0) ? 1 : I_;
@@ -182,15 +183,20 @@ preprocess(
 			params.q_prime[i] = coefs[i].c + params.dc / 2.; // Eq.(10)
 		}
 		
+		//For debug only
 		for (std::size_t i = 0; i < I; ++i) 
-			PRINT_DEBUG("r(1/4)|"<<i<<" = " << (params.m / 4. + params.q[i]) / pxl2metric);
+			PRINT_DEBUG("r(1/" << fmatchingnumber << ")|" << i << " = " << (params.m / 4. + params.q[i]) / pxl2metric);
 		for (std::size_t i = 0; i < I; ++i) 
 			PRINT_DEBUG("N|"<<i<<" = " << std::fabs(params.m) / ( params.dc / 2.0 - std::fabs(params.q[i])));
 
 		double N = 0.0;
 		for (std::size_t i = 0; i < I; ++i) N += (std::fabs(params.m) / ( params.dc / 2.0 - std::fabs(params.q[i])));
-		params.N = N / double(I);
+		N = N / I;
 		
+		PRINT_DEBUG("Estimated N must be near the fnumber respecting the matching principle.");
+		DEBUG_VAR(fmatchingnumber-N);
+		
+		params.N = fmatchingnumber;
 		params.I = I_;
 	}
 	

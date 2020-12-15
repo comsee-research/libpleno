@@ -178,6 +178,7 @@ void PlenopticCamera::init(
 	//re-set internals
 	params_.lambda = lambda;
 	params_.dC = dC;
+	params_.N = aperture;
 	
 	//SENSOR
 	sensor_ = sensor;

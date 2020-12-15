@@ -47,8 +47,8 @@ void optimize(
 	using Solver_t = std::variant<std::monostate, SolverBAP, SolverCorner>;
 	
 	Solver_t vsolver;
-		if(useRadius) vsolver.emplace<SolverBAP>(1e-4, 25, 1.0 - 1e-6);
-		else vsolver.emplace<SolverCorner>(1e-4, 25, 1.0 - 1e-6);  
+		if(useRadius) vsolver.emplace<SolverBAP>(1e-4, 45, 1.0 - 1e-6);
+		else vsolver.emplace<SolverCorner>(1e-4, 45, 1.0 - 1e-6);  
 	
 	//split observations according to frame index
 	std::unordered_map<Index /* frame index */, BAPObservations> obs;

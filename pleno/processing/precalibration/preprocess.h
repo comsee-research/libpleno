@@ -16,5 +16,6 @@ preprocess(
 	const MIA& grid, 
 	double pxl2metric = 0.0055,
 	std::size_t I = 3u,
-	int mode = PlenopticCamera::Mode::Galilean
+	int mode = PlenopticCamera::Mode::Galilean,
+	double fmatchingnumber = 4.
 );
