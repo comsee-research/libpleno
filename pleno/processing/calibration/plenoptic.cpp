@@ -209,14 +209,17 @@ void calibration_PlenopticCamera(
 			cfg_poses
 		);
 	}
-FORCE_GUI(true);
 //4) Checking the parameters
 	PRINT_INFO("=== Computing individual RMSE");
 	evaluate_rmse(model, poses, grid, features, centers, true);
-	PRINT_INFO("=== Graphically checking the parameters");
-	display(model, poses, grid, features, centers, pictures);
-	
-	wait();
-	
-FORCE_GUI(false);	
+
+	if (pictures.size() > 0)
+	{
+		FORCE_GUI(true);
+		PRINT_INFO("=== Graphically checking the parameters");
+		display(model, poses, grid, features, centers, pictures);
+		
+		wait();
+		FORCE_GUI(false);
+	}
 }
