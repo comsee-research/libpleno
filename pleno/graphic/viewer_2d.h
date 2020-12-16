@@ -7,6 +7,8 @@
 #include "geometry/disk.h"
 #include "geometry/ray.h"
 #include "geometry/mesh.h"
+#include "geometry/mia.h"
+
 
 // Wrapper libv for opencv mat
 void libv_wrapper(v::ViewerContext& v, const Image& image, int u_position = 0, int v_position = 0);
@@ -27,3 +29,6 @@ void viewer_2d(v::ViewerContext& v, const Disk& d);
 
 // Displaying a GridMesh2D
 void viewer_2d(v::ViewerContext& v, const GridMesh2D& gm);
+
+// Displaying MIA with edges
+void viewer_2d(v::ViewerContext& v, const MIA& mia);

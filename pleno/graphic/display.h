@@ -56,6 +56,27 @@ inline void display(const PlenopticCamera& model)
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
+inline void display(const Image& white, const MIA& mia)
+{
+	RENDER_DEBUG_2D(
+		Viewer::context().layer(Viewer::layer()++)
+			.name("White image"), 
+		white
+	);
+	RENDER_DEBUG_2D(
+		Viewer::context().layer(Viewer::layer()++)
+			.name("Micro-Image Array")
+			.pen_color(v::red).pen_width(2),
+		mia
+	);
+	
+	Viewer::update();
+}
+
+
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
+//------------------------------------------------------------------------------
 inline void display(const CalibrationPoses& poses)
 {
 	for(const auto& [p, f] : poses ) 
