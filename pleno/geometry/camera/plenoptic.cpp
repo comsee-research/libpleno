@@ -71,11 +71,13 @@ double PlenopticCamera::focal_plane(std::size_t i) const
 PlenopticCamera::PrincipalPoint 
 PlenopticCamera::pp() const
 {
-	P2D PP = sensor().pose().translation().head(2); //SENSOR
-	PP = sensor().metric2pxl(PP); PP *= -1.; //IMAGE XY
-	xy2uv(PP); //IMAGE UV
+	P3D PP = main_lens().pose().translation(); //CAMERA
+	PP = to_coordinate_system_of(sensor().pose(), PP); // SENSOR
+	
+	P2D pp = sensor().metric2pxl(PP).head(2); //IMAGE XY
+	xy2uv(pp); //IMAGE UV
 		
-	return PP;
+	return pp;
 }
     
 PlenopticCamera::PrincipalPoint
@@ -134,11 +136,10 @@ void PlenopticCamera::init(
 				- the main lens focuses on the TCP (i.e., v = 2)
 				- or when h decrease, D increase,
 				- so in most cases, we will still have F > D
-				- thus initializing most of the time both case in Keplerian configuration.
-		TODO: add consistancy check of initialization given the mode			
 	*/
 	double d,D;
 	const double m = std::fabs(params_.m);
+	const double H = (h / 2.) * (1. - std::sqrt(1. - 4. * (F / h))); DEBUG_VAR(H); // eq.(18)
 	
 	switch(mode)
 	{
@@ -146,26 +147,19 @@ void PlenopticCamera::init(
 			d = m * 2.; D = F;
 		break;
 		
-		case Galilean:
 		case Keplerian: 
 		{
-			//d = (2. * params_.m * F) / (F - 2. * params_.m); D = F + d; 
-			const double H = (h / 2.) * (1. - sqrt(1. - 4. * (F / h))); DEBUG_VAR(H); // eq.(18)
 			d = (2. * m * H) / (F + 4. * m); // eq.(17)
-			D = H - 2. * d; // eq.(17)
+			D = H + 2. * d; // eq.(17)
 		}
 		break;
 		
-	#if 0 //DEPRECATED INTIALIZATION	
 		case Galilean:
 		{
-			//d = (2. * F * params_.m) / (2. * params_.m + F); D = F - d;
-			const double H = std::fabs((h / 2.) * (1. - sqrt(1. + 4. * (F / h)))); DEBUG_VAR(H); // eq.(18)
 			d = (2. * m * H) / (F + 4. * m); // eq.(17)
 			D = H - 2. * d; // eq.(17)
 		}
 		break;
-	#endif
 	}
 	
 	//std::atan2( mia_.pose().rotation()(1, 0), mia_.pose().rotation()(0, 0) );
@@ -525,7 +519,7 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera::Mode& mode)
 std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 {	
 	os 	<< "Plenoptic Camera:" << std::endl
-		<< "\tmode = " << pcm.mode() << "," << std::endl
+		<< "\tinternal configuration = " << pcm.mode() << "," << std::endl
 		<< "\th = " << pcm.distance_focus() << "," << std::endl
 		<< "\tI = " << pcm.I() << "," << std::endl
 		<< "\tpose = {" << std::endl << pcm.pose() << "}," << std::endl
