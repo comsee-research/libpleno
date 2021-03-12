@@ -189,12 +189,13 @@ void link_cluster_to_node_index(
 				id_mapping[cluster] = id;
 		}
 	}
-
-	GUI(
-		Viewer::context().point_style(v::Pixel); //restore point style
-		Viewer::update();
-	);
-
+	if(verbose) 
+    {
+		GUI(
+			Viewer::context().point_style(v::Pixel); //restore point style
+			Viewer::update();
+		);
+	}
 	//Assign new cluster id
 	for (auto& o : observations)
 	{

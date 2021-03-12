@@ -6,6 +6,7 @@
 #include "geometry/observation.h"
 
 #include "geometry/object/checkerboard.h"
+#include "geometry/object/plate.h"
 
 using CameraModel_t = PlenopticCamera;
 
@@ -37,4 +38,10 @@ void generate_bapfeatures(
 	const CheckerBoard& grid
 );
 
+void generate_image(
+	Image& raw,
+	const CameraModel_t& model,
+	const Plate& scene,
+	bool blur = true
+);
 

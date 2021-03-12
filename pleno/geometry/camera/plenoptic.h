@@ -91,18 +91,8 @@ public:
 	
 	double focal_plane(std::size_t i) const;
     	
-//Project and Raytrace	
-	bool project(const P3D& /*p3d_cam*/, P2D& /*pixel*/) const override final
-    {
-		PRINT_WARN("PlenopticCamera::project: No micro-lens' index specified.");
-		return false;
-    }
-    
-    bool raytrace(const P2D& /*pixel*/, Ray3D& /*ray*/) const override final
-    {
-		PRINT_WARN("PlenopticCamera::raytrace: No micro-lens' index specified.");
-		return false;
-    }	
+//Project
+	bool project(const P3D& /*p3d_cam*/, P2D& /*pixel*/) const override final;
     
 	bool project(const P3D& p3d_cam, std::size_t k, std::size_t l, P3D& bap) const;	
 	bool project(const P3D& p3d_cam, std::size_t k, std::size_t l, P2D& pixel) const;
@@ -110,6 +100,12 @@ public:
 	
 	bool project(const P3D& p3d_cam, CBObservations& observations) const;
 	bool project(const P3D& p3d_cam, BAPObservations& observations) const;
+	
+//Raytrace		
+    bool raytrace(const P2D& /*pixel*/, Ray3D& /*ray*/) const override final;
+    
+    bool raytrace(const P2D& pixel, std::size_t k, std::size_t l, Ray3D& ray) const;
+    bool raytrace(const P2D& pixel, std::size_t k, std::size_t l, std::size_t n, Rays3D& rays) const;
 		
 //Space convertion	(Micro-Images Space / Micro-Lenses Space)
 	void mi2ml(P2D& pij) const;
@@ -134,16 +130,9 @@ public:
 
 protected:
 //Helper functions
-	bool is_on_disk(const P2D& p, double disk_diameter) const {
-    	return p.norm() <= (disk_diameter / 2.0) ; //FIXME
-    }
+	bool is_on_disk(const P2D& p, double disk_diameter) const;
+    bool hit_main_lens(const Ray3D& ray) const;
     
-    bool hit_main_lens(const Ray3D& ray) const {
-		// compute the intersection point between the ray and the lens
-		P3D p = line_plane_intersection(Eigen::Vector4d{0.0, 0.0, 1.0, 0.0}, ray);
-		// Testing if the ray hit the lens
-		return is_on_disk(p.head(2), main_lens().diameter());
-	}
 //Helper projection function	
 	bool project_through_main_lens(const P3D& p3d_cam, P3D& projection) const;
 	bool project_through_micro_lens(const P3D& p, std::size_t k, std::size_t l, P2D& projection) const;

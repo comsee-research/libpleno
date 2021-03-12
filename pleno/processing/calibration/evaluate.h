@@ -123,7 +123,7 @@ void evaluate_rmse(
 		PRINT_DEBUG("rho\t"<< (rmse_radius.sum()) << "\t\t" << rmse_radius.get());
 		rmse_radius_all += rmse_radius;
 			
-		RMSE rmse_bap = rmse_corner; rmse_bap.value += rmse_bap.value;	
+		RMSE rmse_bap = rmse_corner; rmse_bap.value += rmse_radius.value;	
 		PRINT_DEBUG("bap\t"<< (rmse_bap.sum()) << "\t\t" << rmse_bap.get());
 		rmse_bap_all += rmse_bap;	
 		

@@ -194,6 +194,8 @@ set(PLENO_GEOMETRY_SRC
 	pleno/geometry/sensor.cpp
 	pleno/geometry/observation.cpp
 	pleno/geometry/internals.cpp
+	pleno/geometry/mia.cpp
+	pleno/geometry/mla.cpp
 	#camera	
 		pleno/geometry/camera/plenoptic.cpp
 	#model
@@ -271,6 +273,7 @@ set(PLENO_SIMULATION_SRC
 	pleno/simulation/generate/mic.cpp
 	pleno/simulation/generate/corner.cpp
 	pleno/simulation/generate/bapfeatures.cpp
+	pleno/simulation/generate/image.cpp
 )
 
 set(PLENO_SRC

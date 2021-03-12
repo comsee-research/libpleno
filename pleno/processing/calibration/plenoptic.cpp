@@ -135,6 +135,8 @@ void calibration_PlenopticCamera(
 		model, grid, observations,
 		/*pictures*/ {}
 	);
+	clear();
+	
 //2) Sanitize Observations
 	PRINT_INFO("=== Sanitize Observations");
 	
@@ -216,9 +218,19 @@ void calibration_PlenopticCamera(
 	if (pictures.size() > 0)
 	{
 		FORCE_GUI(true);
+		clear();
 		PRINT_INFO("=== Graphically checking the parameters");
-		display(model, poses, grid, features, centers, pictures);
-		
+		if (model.I() > 0u)
+		{
+			display(model, poses, grid, features, centers, pictures);
+		} 
+		else
+		{
+			CBObservations cfeatures;
+			convert(features, cfeatures);
+			display(model, poses, grid, cfeatures, centers, pictures);
+		}
+			
 		wait();
 		FORCE_GUI(false);
 	}

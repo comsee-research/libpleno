@@ -363,3 +363,32 @@ void viewer_3d(v::ViewerContext& v, const GridMesh3D& gm)
         glEnd();
     });
 }
+
+/**
+ * @Brief viewer_3d draw a a plate in 3D using OpenGL
+ */
+void viewer_3d(v::ViewerContext& v, const Plate& plate)
+{
+    v.add_opengl([&plate](){
+        double transparency_value = 0.6;
+        glPointSize(5.0);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_DEPTH_TEST);
+		
+        glBegin(GL_POINTS);
+            for (int row = 0; row < plate.height(); ++row)
+            {
+                for (int col = 0; col < plate.width(); ++col)
+                {
+                    const auto& color = plate.get_color(col, row);
+                    const auto& point = from_coordinate_system_of(plate.pose(), P3D{double(col), double(row), 0.0});
+                    
+                    glColor4f(color.r / 255., color.g / 255., color.b / 255., transparency_value);
+                    glAddPoint(point);
+                }
+            }
+        glEnd();
+    });
+}

@@ -21,7 +21,7 @@ detection_bapfeatures(const Image& raw, const MIA& mia, const InternalParameters
 	
 	GUI(
 		v::Palette<int> palette;
-		for(const auto& ob: bapobs)
+		for (const auto& ob: bapobs)
 		{
 			RENDER_DEBUG_2D(
 	  			Viewer::context().layer(Viewer::layer())

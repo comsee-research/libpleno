@@ -38,7 +38,7 @@ public:
                 const RGBA& c = {0.0, 0.0, 0.0, 255.0});
 
     // Return a point on a ray
-    Vector operator()(const double t) const;
+    Vector operator()(double t) const;
 };
 
 

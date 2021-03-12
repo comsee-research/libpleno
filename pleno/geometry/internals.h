@@ -23,7 +23,10 @@ struct InternalParameters {
 	
 	double kappa = 1.; 		//blur proportionality coefficient
 	
-	double radius(int t) const { DEBUG_ASSERT((std::size_t(t)<I), "Can't access type = "<<t<<"/"<<I); return (m / N + q[t]) / scale; }
+	double radius(int t) const { 
+		DEBUG_ASSERT((std::size_t(t) < I), "Can't access type = " << t << "/" << I); 
+		return (m / N + q[t]) / scale; 
+	}
 };
 
 std::ostream& operator<<(std::ostream& os, const InternalParameters& params);

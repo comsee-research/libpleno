@@ -225,11 +225,11 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
     Viewer::stash();
 //1) For each micro-image, determine the type of the mi: NONE, FULL, BORDER, CORNER
 	PRINT_INFO("=== Caracterizing micro-images' type");
-    for(std::size_t k = 0; k < mia.width() ; ++k) //iterate through columns //x-axis
+    for (std::size_t k = 0; k < mia.width(); ++k) //iterate through columns //x-axis
     {
-    	for(std::size_t l = 0 ; l < mia.height() ; ++l) //iterate through lines //y-axis
+    	for (std::size_t l = 0; l < mia.height(); ++l) //iterate through lines //y-axis
 		{
-	 		if ( not is_inside_quad(P2D{k,l}, view) ) continue;
+	 		if (not is_inside_quad(P2D{k,l}, view)) continue;
 	 		 
 	 		Viewer::pop();	
 	 				
@@ -242,7 +242,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 	//1.1) EXTRACT ROI			
     		Image roi = extract_roi(img, X, Y, roiw, roih).clone(); //crop
  			cv::threshold(roi, roi, 100, 255, cv::THRESH_BINARY); //cv::THRESH_TOZERO); //
- 			trim(roi, r, -2. );
+ 			trim(roi, r, -2.);
  			
  	//1.2) COMPUTE MASK (only keeping internal edges)
 #if 0 //USING CANNY EDGES
@@ -275,7 +275,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 			);		
 	
 	//1.4) SAVE OBSERVATIONS
-			if(mitype == CORNER)
+			if (mitype == CORNER)
 			{
 				obs.emplace_back(
 					CheckerBoardObservation{
@@ -290,8 +290,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 	
 //2) Optimize position of each corner (using the computed model and a warping process)
 	PRINT_INFO("=== Optimizing corner position in micro-images");
-	constexpr double lens_border = 2. * 1.5; //see Konz2016
-
+	
 #pragma omp parallel for
 	for (int i = 0; i < int(obs.size()); ++i) //for(auto& cbo : obs)
 	{
@@ -314,7 +313,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 			
 	//2.2) COMPUTE MASK
 		Image mask{observation.rows, observation.cols, CV_8UC1, cv::Scalar{255}};
-		trim(mask, r, - lens_border);	
+		trim(mask, r, - 2. * mia.border());	
 		mask.convertTo(mask, CV_64FC1);
 		
 	//2.3) GENERATE MODEL 00
@@ -349,7 +348,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
         const P2D corner = (T().inverse() * model.center.homogeneous()).head(2);
         
         auto is_accepted = [&](const P2D& corner_) -> bool { 
-        	return (residual < 1e6 and std::hypot(c[0]-X - corner_[0], c[1]-Y - corner_[1]) < r - lens_border);
+        	return (residual < 1e6 and std::hypot(c[0]-X - corner_[0], c[1]-Y - corner_[1]) < r - 2. * mia.border());
         };
         
         //check if inside and residual not too hight

@@ -26,6 +26,15 @@ inline void display(const CheckerBoard& checkboard)
 	Viewer::update(Viewer::Mode::m3D);
 }
 
+inline void display(const Plate& plate)
+{
+	RENDER_DEBUG_3D(
+		Viewer::context(Viewer::Mode::m3D).layer(Viewer::layer(Viewer::Mode::m3D)).name("Plate"), 
+		plate
+	);
+	Viewer::update(Viewer::Mode::m3D);
+}
+
 inline void display(const PlenopticCamera& model)
 {
 	RENDER_DEBUG_3D(
@@ -213,18 +222,18 @@ inline void display(
 	
 	v::Palette<int> palette;
 
-	const Viewer::Layer center_layer = 100;
+	const Viewer::Layer layer = Viewer::layer();
 	for(const auto& c : centers)
 	{	
 		RENDER_DEBUG_2D(
-  			Viewer::context().layer(center_layer)
+  			Viewer::context().layer(layer)
   				.name("Center")
   				.pen_color(v::purple).pen_width(1),
   			P2D{c[0], c[1]}
 		);
 		const auto p = reproject_miccenter(model, c);
 		RENDER_DEBUG_2D(
-  			Viewer::context().layer(center_layer+1)
+  			Viewer::context().layer(layer+1)
   				.name("Reprojected Center")
   				.pen_color(v::cyan).pen_width(1),
   			p
@@ -244,17 +253,33 @@ inline void display(
 		if (usePictures)
 		{
 			RENDER_DEBUG_2D(
-				Viewer::context().layer(Viewer::layer()++).name("Frame f = "+std::to_string(f)), 
+				Viewer::context().layer(Viewer::layer()).name("Frame f = "+std::to_string(f)), 
 				pictures[f]
 			);
 		}
+		Viewer::update();
 		
-		for(const auto& o : ob)
+		//get theorical reprojection
+		Observations tbaps; int cluster = 0;
+		for (const auto& pw : grid)
+		{
+			const P3D pc = to_coordinate_system_of(model.pose(), pw); // CAMERA
+			
+			Observations temp;
+			mfpc.project(pc, temp);
+			for (auto& o : temp) { o.frame = f; o.cluster = cluster; }
+			
+			tbaps.insert(tbaps.end(), std::make_move_iterator(temp.begin()), std::make_move_iterator(temp.end()));
+			++cluster;
+		}
+		
+		const Viewer::Layer layer = Viewer::layer();
+		for (const auto& o : ob)
 		{				
 			RENDER_DEBUG_2D(
-	  			Viewer::context().layer(Viewer::layer()++)
+	  			Viewer::context().layer(layer)
 	  				.name("BAP ("+std::to_string(f)+")")
-	  				.point_style(v::Pixel)
+	  				.point_style(v::Round)
 	  				.pen_color(palette[o.cluster]).pen_width(2),
 	  			Disk{o[0], o[1], (std::is_same_v<Observations, BAPObservations>?o[2]:0.0)}
 			);
@@ -263,16 +288,30 @@ inline void display(
 			const double radius = (mfpc.I() > 0u and std::is_same_v<Observations, BAPObservations>) ? reproject_radius(model, model.pose(), grid, o) : 0.0;
 
 			RENDER_DEBUG_2D(
-	  			Viewer::context().layer(Viewer::layer()--)
+	  			Viewer::context().layer(layer+1)
 	  				.name("Reprojected BAP ("+std::to_string(f)+")")
 					.point_style(v::Cross)
 	  				.pen_color(palette[o.cluster+1]).pen_width(2),
 	  			Disk{corner, radius}
 			);
 		}
-
-		Viewer::context().point_style(v::Pixel); //restore point style
+		
 		Viewer::update();
+		Viewer::update();
+		
+		for (const auto& o : tbaps)
+		{
+			RENDER_DEBUG_2D(
+	  			Viewer::context().layer(Viewer::layer())
+	  				.name("Theorical BAP ("+std::to_string(f)+")")
+	  				.point_style(v::Cross)
+	  				.pen_style(v::DashLine)
+	  				.pen_color(palette[o.cluster]).pen_width(2),
+	  			Disk{o[0], o[1], (std::is_same_v<Observations, BAPObservations>?o[2]:0.0)}
+			);
+		}
+
+		Viewer::context().point_style(v::Pixel).pen_style(v::SolidLine); //restore point style
 		Viewer::update();
 		
 		wait();

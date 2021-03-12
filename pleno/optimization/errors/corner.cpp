@@ -5,10 +5,10 @@
 bool CornerReprojectionError::operator()(
 	const Pose& camera_pose,
 	const Pose& mla_pose,
-	const MLA_t& /*mla*/,
-	const Sensor& sensor,
+	const MLA_t& /* mla */,
+	const Sensor& /* sensor */,
 	const ThinLensCamera& tcm, 
-	const Distortions& /*distortions*/,
+	const Distortions& /* distortions */,
 	ErrorType& error
 ) const
 {    
@@ -22,7 +22,7 @@ bool CornerReprojectionError::operator()(
 	error[1] = observation.v - prediction[1];
 
     // mla is behind the sensor
-    const double dist_sensor_mla = 1e2 * (mla_pose.translation().z() - sensor.pose().translation().z());
+    const double dist_sensor_mla = 1e2 * (mla_pose.translation().z() - pcm.sensor().pose().translation().z());
     if (dist_sensor_mla < 0.0)
     {
         error[0] += std::expm1(-dist_sensor_mla);

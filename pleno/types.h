@@ -19,6 +19,14 @@ using P2D 	= Eigen::Vector2d;
 using P2DS 	= AlignedVector<P2D>;
 using P3D 	= Eigen::Vector3d;
 using P3DS 	= AlignedVector<P3D>;
+using P4D 	= Eigen::Vector4d;
+using P4DS 	= AlignedVector<P4D>;
+
+template <std::size_t N>
+using PnD = Eigen::Matrix<double, N, 1>;
+
+template <std::size_t N>
+using PnDS = AlignedVector<Eigen::Matrix<double, N, 1>>;
 
 template<std::size_t N> class Pose_;
 using Poses 	= AlignedVector<Pose_<3u>>;
@@ -62,6 +70,16 @@ struct Corner {
 using Real = double;
 using Index = int;
 
+struct Depth 		{ Real z = 0.; };
+struct VirtualDepth { Real v = 0.; };
+
+struct IndexPair {
+	std::size_t k;
+	std::size_t l;
+	
+	IndexPair(std::size_t k_ = 0u, std::size_t l_ = 0u) : k{k_}, l{l_} {}
+};
+
 using Image 				= cv::Mat;
 using Images 				= AlignedVector<cv::Mat>;
 struct ImageWithInfo 		{ Image img; Real fnumber; Index frame = -1; };
@@ -84,6 +102,6 @@ using PosesWithError 		= AlignedVector<PoseWithError>;
 struct FocalLength 			{ Real f; };
 using FocalLengths 			= AlignedVector<FocalLength>;
 
-struct RGBA					{ Real r,g,b,a; };
+struct RGBA					{ Real r = 0., g = 0., b = 0., a = 255.; };
 
 struct BlurProportionalityCoefficient { Real kappa; };

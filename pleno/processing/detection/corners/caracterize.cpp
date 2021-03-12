@@ -28,15 +28,15 @@ hist_orientation(
 	
 	const double *o, *w;
 	const uchar *m;
-	for(int y = 0 ; y < height ; ++y) //for each row
+	for (int y = 0; y < height; ++y) //for each row
 	{
 		o = orientation.ptr<const double>(y);
 		w = magnitude.ptr<const double>(y);
 		m = mask.ptr<const uchar>(y);
 		
-		for(int x = 0 ; x < width ; ++x) //for each column
+		for (int x = 0; x < width; ++x) //for each column
 		{
-			if(m[x] == 0) continue; //if off the mask skip it
+			if (m[x] == 0) continue; //if off the mask skip it
 
 			const int bin = int(o[x] / stepsize);
         	histogram.at(bin) += w[x];
@@ -80,15 +80,15 @@ hist_orientation_modulo_180(
 	
 	const double *o, *w;
 	const uchar *m;
-	for(int y = 0 ; y < height ; ++y) //for each row
+	for (int y = 0; y < height; ++y) //for each row
 	{
 		o = orientation.ptr<const double>(y);
 		w = magnitude.ptr<const double>(y);
 		m = mask.ptr<const uchar>(y);
 		
-		for(int x = 0 ; x < width ; ++x) //for each column
+		for (int x = 0; x < width; ++x) //for each column
 		{
-			if(m[x] == 0) continue; //if off the mask skip it
+			if (m[x] == 0) continue; //if off the mask skip it
 
 			const int bin =  (int(o[x]) % 180) / int(stepsize);
         	histogram.at(bin) += w[x];
@@ -111,7 +111,6 @@ hist_orientation_modulo_180(
 	
 	return histogram;
 }
-
 
 std::vector<double>
 compute_polar_histogram(
@@ -214,14 +213,14 @@ compute_model(const Image& mi, const Image& mask)
         }
     }
     
-    if ( peaks.size() > 1u ) filter_peaks(peaks, max_distance_between_2_peaks);
+    if (peaks.size() > 1u) filter_peaks(peaks, max_distance_between_2_peaks);
     	
 	auto satisfy_orthogonality = [&max_distance_between_2_peaks](const double diff) {
 		return (diff >= 90 - max_distance_between_2_peaks and diff <  90 + max_distance_between_2_peaks)
 			or (diff >= 270 - max_distance_between_2_peaks and diff <  270 + max_distance_between_2_peaks);
 	};
         	    
-	switch(peaks.size())
+	switch (peaks.size())
 	{
 		case 0u: //if no peak then it's a FULL
 			model.type = FULL;
@@ -234,7 +233,7 @@ compute_model(const Image& mi, const Image& mask)
 		break;
 		
 		case 2u: //if there is 2 peaks left, we check if there are opposed
-		{	if(satisfy_orthogonality(peaks[1].angle - peaks[0].angle))
+		{	if (satisfy_orthogonality(peaks[1].angle - peaks[0].angle))
 			{
 				model.type = CORNER;
 			    model.lines_angles[0] = deg_to_rad(peaks[0].angle);

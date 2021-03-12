@@ -17,7 +17,7 @@ std::ostream& operator<<(std::ostream& o, const Geometry& geometry)
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 template<std::size_t Dim>
 GridMesh_<Dim>::GridMesh_(
-	const P2D& e, size_t w, size_t h, Geometry g)
+	const P2D& e, std::size_t w, std::size_t h, Geometry g)
 : pitch_(e), width_(w), height_(h), geometry_(g)
 {}
 
@@ -46,22 +46,22 @@ P2D& GridMesh_<Dim>::pitch()
     return pitch_;
 }
 template<std::size_t Dim>
-size_t GridMesh_<Dim>::width() const
+std::size_t GridMesh_<Dim>::width() const
 {
     return width_;
 }
 template<std::size_t Dim>
-size_t& GridMesh_<Dim>::width()
+std::size_t& GridMesh_<Dim>::width()
 {
     return width_;
 }
 template<std::size_t Dim>
-size_t GridMesh_<Dim>::height() const
+std::size_t GridMesh_<Dim>::height() const
 {
     return height_;
 }
 template<std::size_t Dim>
-size_t& GridMesh_<Dim>::height()
+std::size_t& GridMesh_<Dim>::height()
 {
     return height_;
 }
@@ -77,12 +77,12 @@ Geometry& GridMesh_<Dim>::geometry()
 }
 
 template<std::size_t Dim>
-size_t GridMesh_<Dim>::nodeNbr() const
+std::size_t GridMesh_<Dim>::nodeNbr() const
 {
     return this->width_ * this->height_;
 }
 template<std::size_t Dim>
-size_t GridMesh_<Dim>::size() const
+std::size_t GridMesh_<Dim>::size() const
 {
     return this->width_ * this->height_;
 }
@@ -90,7 +90,7 @@ size_t GridMesh_<Dim>::size() const
 // returns 2D coordinates of a desired node
 template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 
-GridMesh_<Dim>::node(size_t col, size_t row) const
+GridMesh_<Dim>::node(std::size_t col, std::size_t row) const
 {        
     static constexpr double sin60 = std::sin(60.0 / 180.0 * M_PI);
     static constexpr double cos30 = std::cos(30.0 / 180.0 * M_PI);
@@ -111,18 +111,18 @@ GridMesh_<Dim>::node(size_t col, size_t row) const
 
 template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 
-GridMesh_<Dim>::node(size_t i) const
+GridMesh_<Dim>::node(std::size_t i) const
 {
     DEBUG_ASSERT(i < this->nodeNbr(), "GridMesh::node: wrong node value (" << i << ").");
 
-    const std::array<size_t, 2> coords = index_to_colRow(this->width_, i);
+    const std::array<std::size_t, 2> coords = index_to_colRow(this->width_, i);
     return node(coords[0], coords[1]);
 }
 
 // returns 2D coordinates of a desired node in world coordinate
 template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 
-GridMesh_<Dim>::nodeInWorld(size_t col, size_t row) const
+GridMesh_<Dim>::nodeInWorld(std::size_t col, std::size_t row) const
 {
 	DEBUG_ASSERT(col < width() and row < height(), "GridMesh::node: wrong indexes ("<< col <<", "<< row <<")");
 
@@ -131,11 +131,11 @@ GridMesh_<Dim>::nodeInWorld(size_t col, size_t row) const
 }
 template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 
-GridMesh_<Dim>::nodeInWorld(size_t i) const
+GridMesh_<Dim>::nodeInWorld(std::size_t i) const
 {
     DEBUG_ASSERT(i < this->nodeNbr(), "GridMesh::node: wrong node value (" << i << ").");
 
-    const std::array<size_t, 2> coords = index_to_colRow(this->width_, i);
+    const std::array<std::size_t, 2> coords = index_to_colRow(this->width_, i);
     return nodeInWorld(coords[0], coords[1]);
 }
 

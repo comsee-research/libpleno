@@ -51,7 +51,7 @@ public:
 	static void pop(Mode m = m2D) { _layer[m] = _saved_layer[m]; }
 
 	static void update(Mode m = m2D) { Viewer::context(m).layer(Viewer::layer(m)++).update().clear();}
-	static void clear(Mode m = m2D) {for(Layer l=0; l < _layer[m]; ++l) Viewer::context(m).layer(l).clear().update(); _layer[m] = 0;}
+	static void clear(Mode m = m2D) {for(Layer l=0; l < _layer[m]; ++l) Viewer::context(m).layer(l).update().clear(); _layer[m] = 0;}
 
 	static void wait() { v::wait_viewers(); }
 	static void stop() { v::stop_viewers(); }

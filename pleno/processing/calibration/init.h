@@ -234,9 +234,11 @@ void init_extrinsics(
 	poses.clear();
 	poses.reserve(pictures.size());	
 	
+	Viewer::stash();
 	//For each frame 
 	for(auto & [f, ob] : obs)
 	{
+		Viewer::pop();
 		Viewer::stash();
 		//Estimate barycenters
 		PRINT_DEBUG("Estimate barycenters of frame f = " << f);
@@ -247,9 +249,10 @@ void init_extrinsics(
 			if (usePictures)
 			{	
 				RENDER_DEBUG_2D(
-					Viewer::context().layer(Viewer::layer()++).name("Frame f = "+std::to_string(f)), 
+					Viewer::context().layer(Viewer::layer()).name("Frame f = "+std::to_string(f)), 
 					pictures[f]
 				);	
+				Viewer::update();
 			}
 			display(f, ob);
 			display(f, barycenters, tag::Barycenters{});	
@@ -269,7 +272,6 @@ void init_extrinsics(
 			PRINT_ERR("Wrong hypothesis. Can't fix it. Remove pose and observations of frame f = " << f <<".");
 			DEBUG_VAR(pose);
 			DEBUG_VAR(rmse.get());
-			Viewer::pop();
 			
 			wait();
 			continue;
@@ -285,11 +287,8 @@ void init_extrinsics(
 			Observations ubarycenters = compute_barycenters(ob);			
 			display(f, ob);
 			display(f, ubarycenters, tag::Barycenters{});
-				
-			Viewer::pop();
 			wait();	
 		);
-		//Viewer::enable(false);
 		
 		poses.emplace_back( CalibrationPose{ pose, f } );
 		features.insert(features.end(), ob.begin(), ob.end());	

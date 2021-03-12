@@ -14,3 +14,5 @@ public:
 		this->pose() = config.pose();
 	}
 };
+
+using CheckerBoards = AlignedVector<CheckerBoard>;

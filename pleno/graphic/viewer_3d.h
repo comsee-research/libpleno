@@ -10,6 +10,7 @@
 
 #include "geometry/camera/plenoptic.h"
 #include "geometry/object/checkerboard.h"
+#include "geometry/object/plate.h"
 
 void viewer_3d(v::ViewerContext& v, const CheckerBoard& gm, double scale = 2.);
 
@@ -32,3 +33,6 @@ void viewer_3d(v::ViewerContext&, const P3DS& ps, double = 1.0);
 
 // Displaying a GridMesh3D
 void viewer_3d(v::ViewerContext&, const GridMesh3D& gm);
+
+// Displaying a plate in 3D
+void viewer_3d(v::ViewerContext&, const Plate& plate);

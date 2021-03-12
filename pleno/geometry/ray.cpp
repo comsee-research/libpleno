@@ -46,7 +46,7 @@ void Ray_<N>::config(const typename Ray_<N>::Vector& p1,
 
 // Return a point on a ray
 template<std::size_t N>
-typename Ray_<N>::Vector Ray_<N>::operator()(const double t) const
+typename Ray_<N>::Vector Ray_<N>::operator()(double t) const
 {
     return (direction_ * t + origin_);
 }
@@ -59,7 +59,7 @@ template class Ray_<3ul>;
 double compute_t_coef(const Eigen::Matrix<double, 4, 1>& plane, const Ray3D& line)
 {                
 	DEBUG_ASSERT(
-		(line.direction()(0) != 0.0 and line.direction()(1) != 0.0 and line.direction()(2) != 0),
+		(line.direction()(0) != 0.0 and line.direction()(1) != 0.0 and line.direction()(2) != 0.0),
 		"In compute_t_coef: Direction is null (division by 0)"	
 	);
 	

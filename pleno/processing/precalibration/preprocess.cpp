@@ -22,7 +22,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 // Processing
 ////////////////////////////////////////////////////////////////////////////////
-void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>& data, std::size_t I)
+void compute_radii(
+	const Image& img, const MIA& centers, 
+	std::vector<MicroImage>& data, std::size_t I
+)
 {
 	DEBUG_ASSERT((I > 0u), "Can't compute radii when I=0");
 	
@@ -59,9 +62,9 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
 
     Viewer::stash();
     
-    for(std::size_t k = borderk; k < centers.width() - borderk ; ++k) //iterate through columns //x-axis
+    for (std::size_t k = borderk; k < centers.width() - borderk ; ++k) //iterate through columns //x-axis
     {
-    	for(std::size_t l = borderl ; l < centers.height() - borderl; ++l) //iterate through lines //y-axis
+    	for (std::size_t l = borderl; l < centers.height() - borderl; ++l) //iterate through lines //y-axis
 		{
 			Viewer::pop();	
 					
@@ -83,23 +86,26 @@ void compute_radii(const Image& img, const MIA& centers, std::vector<MicroImage>
  			const auto& [meanx, meany, sigma, alpha] = estimation_gaussian_moments(roi); UNUSED(alpha);
 	 		
 	 		const double r = sigma99p * sigma; DEBUG_VAR(r);
-	 		data.emplace_back(MicroImage{k,l,P2D{X+meanx,Y+meany},r,t});
+	 		data.emplace_back(k, l, P2D{X+meanx,Y+meany}, r, t);
 	 			
  			RENDER_DEBUG_2D(
 	  			Viewer::context().layer(Viewer::layer()++).name("main:radii(0:red,1:green,2:blue)").pen_color(colors[t]).pen_width(5),
-	  			Disk{P2D{X+meanx, Y+meany},r}
+	  			Disk{P2D{X+meanx, Y+meany}, r}
 			);			
 		} //end iterate through lines
 	}//end iterate through columns 
 }
 
-void compute_coefs(const std::vector<std::vector<P2D>>& data, std::vector<LineCoefficients>& coefs)
+void compute_coefs(
+	const std::vector<std::vector<P2D>>& data, 
+	std::vector<LineCoefficients>& coefs
+)
 {
 	coefs = estimation_lines_with_slope_constraint_least_squares(data);
 	
 	GUI(
-		int i=0;
-		for(const auto&points : data)
+		int i = 0;
+		for (const auto&points : data)
 		{
 			const auto& [m,c] = coefs[i];
 			PRINT_DEBUG("Line("<<i<<"): y = "<< m << " * x + " << c);	
@@ -128,9 +134,9 @@ preprocess(
 	const double sgn = (mode == PlenopticCamera::Mode::Galilean) ? -1.0 : 1.0;
 	
 	std::vector<std::vector<P2D>> data(I);
-	for(auto& d: data) d.reserve(grid.size()*imgs.size());
+	for (auto& d: data) d.reserve(grid.size()*imgs.size());
 		
-	for(const auto& [img, fnumber, frame] : imgs)
+	for (const auto& [img, fnumber, frame] : imgs)
 	{
 		UNUSED(frame);
 		
@@ -148,7 +154,7 @@ preprocess(
 		);
 		
 		//for each microimage compute the pair (invfnumber, radius)
-		for(const auto&mi: microimages)
+		for (const auto&mi: microimages)
 		{
 			data[mi.type].emplace_back(
 					1./fnumber, 
@@ -157,7 +163,7 @@ preprocess(
 		}
 	}
 	
-	for(auto& d: data) d.shrink_to_fit();
+	for (auto& d: data) d.shrink_to_fit();
 	export_radii(data);
 	
 	PRINT_INFO("=== Computing lines coefficients");

@@ -1,12 +1,9 @@
 #pragma once
 
+#include "types.h"
 #include "geometry/mesh.h"
 
 #include "cfg/mla.h"
-
-#include "types.h"
-#include "processing/tools/lens.h"
-
 
 struct MicroLensesArray : public GridMesh3D {
 private:
@@ -14,52 +11,21 @@ private:
 	FocalLengths focals_;
 
 public:
-	MicroLensesArray(const MLAConfig& config = {}) {
-		this->geometry() = Geometry(config.mesh().geometry());
-		this->width() = config.mesh().width();
-		this->height() = config.mesh().height();
-		this->pitch() = config.mesh().pitch();
-		this->pose() = config.mesh().pose();
-		
-		init(config.focal_lengths().size());
-		
-		for(std::size_t i=0; i<I(); ++i) 
-			this->focals_[i].f = config.focal_lengths()[i];
-	}
+	MicroLensesArray(const MLAConfig& config = {});
 	
-	void init(std::size_t I) { this->I_ = I; this->focals_.resize(I); }
+	void init(std::size_t I);
+	std::size_t I() const;
 	
-	std::size_t I() const { return I_; }
+	double f(std::size_t i) const;
+	double& f(std::size_t i);
 	
-	double f(std::size_t i) const { 
-		assert(i<I()); 
-		return focals_[i].f; 
-	}
-	double& f(std::size_t i) { 
-		assert(i<I()); 
-		return focals_[i].f; 
-	}
+	FocalLength f(std::size_t k, std::size_t l) const;
+	FocalLength& f(std::size_t k, std::size_t l);
 	
-	FocalLength f(std::size_t k, std::size_t l) const {
-		assert(I()!=0u and k<width() and l<height());
-		const int t = type(k, l);
-		return focals_[t];
-	}
+	double radius() const;
+	double diameter() const;
 	
-	FocalLength& f(std::size_t k, std::size_t l) {
-		assert(I()!=0u and k<width() and l<height());
-		const int t = type(k, l);
-		return focals_[t];
-	}
-	
-	double radius() const { return (pitch()[0] + pitch()[1]) / 4.; }
-	double diameter() const { return (pitch()[0] + pitch()[1]) / 2.; }
-	
-	int type(std::size_t k, std::size_t l) const 
-	{ 
-		if (geometry() == HexagonalRowsAligned) return lens_type(I(), k ,l);
-		else return lens_type(I(), l, k);
-	} 	
+	int type(std::size_t k, std::size_t l) const;
 };
 
 using MLA 					= MicroLensesArray;

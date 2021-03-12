@@ -34,7 +34,7 @@ double compute_virtualdepth(const Observations_t&obs, const MIA& mia, const Inte
 	
 	DEBUG_ASSERT((obs.size() >= 2), "Need at least 2 observations to compute virtual depth !");
 	
-	for(std::size_t i = 0; i < obs.size() ; ++i)
+	for (std::size_t i = 0; i < obs.size(); ++i)
 	{
 		auto current = obs.begin()+i;
 		
@@ -81,17 +81,17 @@ BAPObservations compute_bapfeatures(const InputObservations_t& cbos, const MIA& 
 	BAPObservations bapobs;
 	bapobs.reserve(cbos.size());
 
-	std::unordered_map<int /* cluster */, InputObservations_t> observations;
+	std::unordered_map<Index /* cluster */, InputObservations_t> observations;
 	
 	PRINT_INFO("=== Splitting observations according to cluster");
-	for(const auto& ob : cbos)
+	for (const auto& ob : cbos)
 		observations[ob.cluster].push_back(ob);			
 			
 //For each cluster, compute virtual depth	
 	PRINT_INFO("=== Computing virtual depth for each cluster");
-	for(auto & [c, obs] : observations)
+	for (auto & [c, obs] : observations)
 	{
-		if(obs.size() < 2) 
+		if (obs.size() < 2) 
 		{
 			PRINT_ERR("No enought observations to compute virtual depth of cluster ("<<c<<")");
 			continue;

@@ -119,14 +119,14 @@ void PlenopticCamera::init(
 	pose_.rotation()	= Pose::Matrix::Identity();
 	
 	//MAIN LENS
-	main_lens_.focal() = F;
-	main_lens_.aperture() = aperture;
+	main_lens_.focal() 				= F;
+	main_lens_.aperture() 			= aperture;
 	main_lens_.pose().translation() = pose_.translation();
 	main_lens_.pose().rotation()	= pose_.rotation();
 		
 	//DISTORTIONS
-	distortions_.radial() << 0., 0., 0.;
-	distortions_.tangential() << 0., 0.;
+	distortions_.radial() 		<< 0., 0., 0.;
+	distortions_.tangential() 	<< 0., 0.;
 	
 	/* 	
 		Init of d and D is kinda tricky: 
@@ -137,7 +137,7 @@ void PlenopticCamera::init(
 				- or when h decrease, D increase,
 				- so in most cases, we will still have F > D
 	*/
-	double d,D;
+	double d = 0., D = 0.;
 	const double m = std::fabs(params_.m);
 	const double H = (h / 2.) * (1. - std::sqrt(1. - 4. * (F / h))); DEBUG_VAR(H); // eq.(18)
 	
@@ -149,7 +149,7 @@ void PlenopticCamera::init(
 		
 		case Keplerian: 
 		{
-			d = (2. * m * H) / (F + 4. * m); // eq.(17)
+			d = (2. * m * H) / (F - 4. * m); // eq.(17)
 			D = H + 2. * d; // eq.(17)
 		}
 		break;
@@ -170,15 +170,15 @@ void PlenopticCamera::init(
 	const double dC 		= params_.dc * lambda ; // eq.(3)
 	
 	//re-set internals
-	params_.lambda = lambda;
-	params_.dC = dC;
-	params_.N = aperture;
+	params_.lambda 	= lambda;
+	params_.dC 		= dC;
+	params_.N 		= aperture;
 	
 	//SENSOR
 	sensor_ = sensor;
-	sensor_.pose().translation()[0] = sensor_.pxl2metric(- (sensor_.width()  / 2.)); //set x coordinate
-	sensor_.pose().translation()[1] = sensor_.pxl2metric(- (sensor_.height() / 2.)); //set y coordinate
-	sensor_.pose().translation()[2] = - (D + d); //set z coordinate
+	sensor_.pose().translation()[0] = sensor_.pxl2metric(-(sensor_.width() / 2.)); //set x coordinate
+	sensor_.pose().translation()[1] = sensor_.pxl2metric(-(sensor_.height() / 2.)); //set y coordinate
+	sensor_.pose().translation()[2] = -(D + d); //set z coordinate
 	
 	//MLA
 	mla_.geometry() 	= mia_.geometry();
@@ -192,11 +192,12 @@ void PlenopticCamera::init(
 														
 	mla_.pose().translation()[0] = t_x + sensor_.pose().translation()[0]; //set x coordinate
 	mla_.pose().translation()[1] = t_y + sensor_.pose().translation()[1]; //set y coordinate
-	mla_.pose().translation()[2] = - D; //set z coordinate
+	mla_.pose().translation()[2] = -D; //set z coordinate
 	
 	//set focal lengths
 	mla_.init(I); 
-	for(std::size_t i=0; i<I; ++i ) mla().f(i) = (1. / params_.q_prime[i]) * params_.dC * (d / 2.);  // eq.(19)
+	for (std::size_t i = 0; i < I; ++i) 
+		mla().f(i) = (1. / params_.q_prime[i]) * params_.dC * (d / 2.);  // eq.(19)
 	
 	DEBUG_VAR(D);
 	DEBUG_VAR(d);
@@ -213,6 +214,18 @@ void PlenopticCamera::init(
 //******************************************************************************
 //******************************************************************************
 //Helper functions
+bool PlenopticCamera::is_on_disk(const P2D& p, double disk_diameter) const {
+	return p.norm() <= (disk_diameter / 2.0) ; //FIXME
+}
+
+bool PlenopticCamera::hit_main_lens(const Ray3D& ray) const {
+	// compute the intersection point between the ray and the lens
+	P3D p = line_plane_intersection(Eigen::Vector4d{0.0, 0.0, 1.0, 0.0}, ray);
+	// Testing if the ray hit the lens
+	return is_on_disk(p.head(2), main_lens().diameter());
+}
+
+//Helper projection function	
 bool PlenopticCamera::project_through_main_lens(const P3D& p3d_cam, P3D& projection) const
 {
 	bool is_projected = true;
@@ -256,18 +269,18 @@ bool PlenopticCamera::project_radius_through_micro_lens(
 	const P3D& p, std::size_t k, std::size_t l, double& radius
 ) const
 {
-	if(mla().I() == 0u) 
+	if (I() == 0u) 
 	{
 		PRINT_ERR("PlenopticCamera::project_radius_through_micro_lens: Can't get radius when MLA is acting as a pinhole array.");
 		return false;
 	}
 	
     // computing radius
-    P3D Ckl_mla = mla().node(k,l);
-    P3D p_mla = to_coordinate_system_of(mla().pose(), p); // MLA
-    P3D p_kl_mla = (p_mla - Ckl_mla); // NODE(K,L)
+    P3D Ckl_mla 	= mla().node(k,l);
+    P3D p_mla 		= to_coordinate_system_of(mla().pose(), p); // MLA
+    P3D p_kl_mla 	= (p_mla - Ckl_mla); // NODE(K,L)
     
-    const double a = (p_kl_mla[2]);
+    const double a 	= (p_kl_mla[2]);
 	const double d_ = d();
 	const double D_ = D();
 
@@ -284,13 +297,19 @@ bool PlenopticCamera::project_radius_through_micro_lens(
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
+bool PlenopticCamera::project(const P3D& /*p3d_cam*/, P2D& /*pixel*/) const
+{
+	PRINT_WARN("PlenopticCamera::project: No micro-lens' index specified.");
+	return false;
+}
+    
 bool PlenopticCamera::project(
 	const P3D& p3d_cam,
     std::size_t k, std::size_t l,
     P3D& bap
 ) const
 {
-	if(mla().I() == 0u) 
+	if (I() == 0u) 
 	{
 		PRINT_ERR("PlenopticCamera::project: Can't get radius when MLA is acting as a pinholes array.");
 		return false;
@@ -308,7 +327,7 @@ bool PlenopticCamera::project(
 	bool is_projected_through_micro_lens = project_through_micro_lens(p, k, l, pixel);	
 
 	bap.head(2) = pixel;
-    bap[2]	= radius;
+    bap[2]		= radius;
 
     return is_projected_through_main_lens and is_radius_projected and is_projected_through_micro_lens;
 }
@@ -335,7 +354,7 @@ bool PlenopticCamera::project(
     double& rho
 ) const
 {
-	if(mla().I() == 0u) 
+	if (I() == 0u) 
 	{
 		PRINT_ERR("PlenopticCamera::project: Can't get radius when MLA is acting as a pinholes array.");
 		return false;
@@ -358,14 +377,13 @@ bool PlenopticCamera::project(
 {
 	observations.clear();
 	observations.reserve(mla().nodeNbr());
-
-#pragma omp parallel for	
-	for(std::size_t k = 0; k < mla().width() ; ++k) //iterate through columns //x-axis
+	
+	for (std::size_t k = 0; k < mla().width(); ++k) //iterate through columns //x-axis
     {
-    	for(std::size_t l = 0 ; l < mla().height() ; ++l) //iterate through lines //y-axis
+    	for (std::size_t l = 0; l < mla().height(); ++l) //iterate through lines //y-axis
 		{
 			P2D corner; corner.setZero();
-			if(project(p3d_cam, k, l, corner))
+			if (project(p3d_cam, k, l, corner))
 			{
 				observations.emplace_back(
 					CBObservation{
@@ -386,7 +404,7 @@ bool PlenopticCamera::project(
     BAPObservations& observations
 ) const
 {
-	if(mla().I() == 0u) 
+	if (I() == 0u) 
 	{
 		PRINT_ERR("PlenopticCamera::project: Can't get radius when MLA is acting as a pinholes array.");
 		return false;
@@ -395,13 +413,12 @@ bool PlenopticCamera::project(
 	observations.clear();
 	observations.reserve(mla().nodeNbr());
 
-#pragma omp parallel for	
-	for(std::size_t k = 0; k < mla().width() ; ++k) //iterate through columns //x-axis
+	for (std::size_t k = 0; k < mla().width(); ++k) //iterate through columns //x-axis
     {
-    	for(std::size_t l = 0 ; l < mla().height() ; ++l) //iterate through lines //y-axis
+    	for (std::size_t l = 0; l < mla().height(); ++l) //iterate through lines //y-axis
 		{
 			P3D bap; bap.setZero();
-			if(project(p3d_cam, k, l, bap))
+			if (project(p3d_cam, k, l, bap))
 			{
 				observations.emplace_back(
 					BAPObservation{
@@ -415,6 +432,60 @@ bool PlenopticCamera::project(
 	
 	observations.shrink_to_fit();
 	return (observations.size() > 0u);
+}
+
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+bool PlenopticCamera::raytrace(const P2D& /*pixel*/, Ray3D& /*ray*/) const
+{
+	PRINT_WARN("PlenopticCamera::raytrace: No micro-lens' index specified.");
+	return false;
+}	
+
+
+bool PlenopticCamera::raytrace(
+	const P2D& pixel, std::size_t k, std::size_t l, Ray3D& ray
+) const
+{	
+//configure ray from pixel to ml center
+	Ray3D r;
+
+	//get pixel in camera coordinate	
+	P2D pix = pixel; //IMAGE UV
+	uv2xy(pix); //IMAGE XY		
+	
+	P3D p{pix[0], pix[1], 0.0};
+	p = sensor().pxl2metric(p); // SENSOR
+	p = from_coordinate_system_of(sensor().pose(), p); // CAMERA
+	
+	//get ml center
+	P3D ckl = mla().nodeInWorld(k,l); //CAMERA
+	
+	//get ray
+	r.config(p, ckl);
+		
+//raytrace in main lens
+	return main_lens().raytrace(r, ray);
+}
+
+bool PlenopticCamera::raytrace(
+	const P2D& pixel, std::size_t k, std::size_t l, std::size_t /* n */, Rays3D& rays
+) const
+{
+	PRINT_WARN("PlenopticCamera::raytrace: multiple raytracing not implemented yet");
+	
+	bool raytraced = false;
+	
+	Ray3D r;
+	if (this->raytrace(pixel, k, l, r))
+	{
+		rays.emplace_back(r);
+		raytraced = true;
+	}	
+	
+	return raytraced;
 }
 
 //******************************************************************************
@@ -507,7 +578,7 @@ template void PlenopticCamera::ml2mi(BAPObservations& obs) const ;
 //******************************************************************************
 std::ostream& operator<<(std::ostream& os, const PlenopticCamera::Mode& mode)
 {
-	switch(mode)
+	switch (mode)
 	{
 		case PlenopticCamera::Mode::Unfocused: os << "Unfocused (F = D --> f = d)"; break;
 		case PlenopticCamera::Mode::Keplerian: os << "Keplerian (f < d --> F < D)"; break;
@@ -530,14 +601,14 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 		<< "\tdistortions = {" << std::endl << pcm.main_lens_distortions() << "}," << std::endl
 		<< "\tprincipal point = {" << pcm.pp() << "}";
 	
-	if(pcm.mla().I() != 0u)
+	if (pcm.I() != 0u)
 	{
 		os << ","<< std::endl << "\tf = {"; 
-		std::size_t i=0; for(; i<pcm.mla().I()-1; ++i) os << pcm.mla().f(i) <<", ";
+		std::size_t i = 0; for(; i < pcm.I()-1; ++i) os << pcm.mla().f(i) <<", ";
 		os << pcm.mla().f(i) << "}" << std::endl;
 		
 		os << ","<< std::endl << "\tfocal_plane = {"; 
-		i=0; for(; i<pcm.mla().I()-1; ++i) os << pcm.focal_plane(i) <<", ";
+		i = 0; for(; i < pcm.I()-1; ++i) os << pcm.focal_plane(i) <<", ";
 		os << pcm.focal_plane(i) << "}" << std::endl;
 	}
 		
@@ -571,8 +642,9 @@ void save(std::string path, const PlenopticCamera& pcm)
     config.mla().mesh().pitch() = pcm.mla().pitch();
     config.mla().mesh().geometry() = pcm.mla().geometry();
     
-    config.mla().focal_lengths().resize(pcm.mla().I());
-    for(std::size_t i=0; i<pcm.mla().I(); ++i) config.mla().focal_lengths()[i] = pcm.mla().f(i);
+    config.mla().focal_lengths().resize(pcm.I());
+    for (std::size_t i = 0; i < pcm.I(); ++i) 
+    	config.mla().focal_lengths()[i] = pcm.mla().f(i);
 
 	// Configuring the Main Lens
     config.main_lens().pose().rotation() = pcm.main_lens().pose().rotation();
