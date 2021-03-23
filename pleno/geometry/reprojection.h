@@ -23,7 +23,7 @@ inline P2D reproject_miccenter(const PlenopticCamera& model, const MICObservatio
 	ray.config(optical_center, ml_center);
 	
 	const P3D projected_center = line_plane_intersection(model.sensor().planeInWorld(), ray); //CAMERA
-	P2D center = to_coordinate_system_of(model.sensor().pose(), projected_center).head(2); //SENSOR
+	P2D center = to_coordinate_system_of(model.sensor().pose(), projected_center).head<2>(); //SENSOR
 	center = model.sensor().metric2pxl(center); //IMAGE XY
 	    	
 	model.xy2uv(center); //IMAGE UV

@@ -37,14 +37,24 @@ double& MicroLensesArray::f(std::size_t i)
 	return focals_[i].f; 
 }
 
-FocalLength MicroLensesArray::f(std::size_t k, std::size_t l) const 
+double MicroLensesArray::f(std::size_t k, std::size_t l) const 
+{
+	return focal_length(k,l).f;
+}
+
+double& MicroLensesArray::f(std::size_t k, std::size_t l) 
+{
+	return focal_length(k,l).f;
+}
+
+FocalLength MicroLensesArray::focal_length(std::size_t k, std::size_t l) const 
 {
 	assert(I() != 0u and k < width() and l < height());
 	const int t = type(k, l);
 	return focals_[t];
 }
 
-FocalLength& MicroLensesArray::f(std::size_t k, std::size_t l) 
+FocalLength& MicroLensesArray::focal_length(std::size_t k, std::size_t l) 
 {
 	assert(I() != 0u and k < width() and l < height());
 	const int t = type(k, l);
@@ -62,6 +72,9 @@ double MicroLensesArray::diameter() const
 
 int MicroLensesArray::type(std::size_t k, std::size_t l) const 
 { 
+	k = width()-1 - k; 
+	l = height()-1 - l;
+	
 	if (geometry() == HexagonalRowsAligned) return lens_type(I(), k ,l);
 	else return lens_type(I(), l, k);
 } 	

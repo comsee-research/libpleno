@@ -17,8 +17,8 @@ struct MicroImage {
 	
 	Image mi;
 	
-	MicroImage(std::size_t k_ = 0, std::size_t l_ = 0, P2D c = {-1., -1.}, double r = -1., int t = -1);
-	MicroImage(std::size_t k_, std::size_t l_, P2D c, double r, int t, const Image& i);
+	MicroImage(std::size_t k_ = 0, std::size_t l_ = 0, const P2D& c = {-1., -1.}, double r = -1., int t = -1);
+	MicroImage(std::size_t k_, std::size_t l_, const P2D& c, double r, int t, const Image& i);
 	
 	MicroImage(const MicroImage& o);
 	MicroImage(MicroImage&& o);
@@ -51,6 +51,9 @@ public:
 //******************************************************************************
 //******************************************************************************
 using MI					= MicroImage;
-using MIA 					= MicroImagesArray;
+using MicroImageObservation = MicroImage;
+using MIObservation 		= MicroImageObservation;
+using MIObservations		= AlignedVector<MIObservation>;
 
+using MIA 					= MicroImagesArray;
 //******************************************************************************

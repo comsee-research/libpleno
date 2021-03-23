@@ -133,7 +133,7 @@ void display_data(const std::vector<P2D>& pts, const LineCoefficients& coefs, Im
 	
 	out = Image::zeros(rows, cols, CV_8UC3);
 	
-	for(const auto& p : pts)
+	for(const P2D& p : pts)
 	{
 		cv::Point2f pscaled;
 		pscaled.x = cols * (p[0] - xmin) / (xmax - xmin);
@@ -165,7 +165,7 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 	int i=0;
 	for(const auto& pts : data)
 	{	
-		for(const auto& p : pts)
+		for(const P2D& p : pts)
 		{
 			cv::Point2f pscaled;
 			pscaled.x = cols * (p[0] - xmin) / (xmax - xmin) + 3.*i;

@@ -6,13 +6,13 @@
 //******************************************************************************
 //******************************************************************************
 MicroImage::MicroImage(
-	std::size_t k_, std::size_t l_, P2D c, double r, int t
+	std::size_t k_, std::size_t l_, const P2D& c, double r, int t
 ) :	k{k_}, l{l_}, center{c}, radius{r}, type{t}
 { 
 }
 
 MicroImage::MicroImage(
-	std::size_t k_, std::size_t l_, P2D c, double r, int t, const Image& i
+	std::size_t k_, std::size_t l_, const P2D& c, double r, int t, const Image& i
 ) :	k{k_}, l{l_}, center{c}, radius{r}, type{t}, mi{i.clone()} //deep copy
 { 
 }
@@ -113,7 +113,8 @@ void MicroImagesArray::extract(MicroImage& mi, const Image& from) const
 
 std::pair<std::size_t, std::size_t> MicroImagesArray::uv2kl(double u, double v) const 
 {
-	std::size_t k = 0u, l = 0u;
+    static constexpr double sin60 = std::sin(60.0 / 180.0 * M_PI);
+    std::size_t k = 0u, l = 0u;
 	
 	const auto p00 = nodeInWorld(0,0);
 	
@@ -125,14 +126,14 @@ std::pair<std::size_t, std::size_t> MicroImagesArray::uv2kl(double u, double v) 
 	if (geometry() == HexagonalRowsAligned)
 	{
 		//find row
-		l = static_cast<std::size_t>(std::floor((v - p00[1]) / (diameter() * std::sin(60.))));
+		l = static_cast<std::size_t>(std::floor((v - p00[1]) / (diameter() * sin60)));
 		const auto p0l = nodeInWorld(0,l);
 		k = static_cast<std::size_t>(std::floor((u - p0l[0]) / diameter()));
 	}
 	else if (geometry() == HexagonalColsAligned) 
 	{
 		//find col
-		k = static_cast<std::size_t>(std::floor((u - p00[0]) / (diameter() * std::sin(60.))));
+		k = static_cast<std::size_t>(std::floor((u - p00[0]) / (diameter() * sin60)));
 		const auto pk0 = nodeInWorld(k,0);
 		l = static_cast<std::size_t>(std::floor((v - pk0[1]) / diameter()));
 	}

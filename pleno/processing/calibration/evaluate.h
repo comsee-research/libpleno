@@ -25,7 +25,7 @@ inline RMSE compute_rmse_center(
 	RMSE rmse;
 	for(const auto& c : centers)
 	{	
-		const auto p = reproject_miccenter(model, c);
+		const P2D p = reproject_miccenter(model, c);
 		const P2D residual{P2D{c[0], c[1]} - p};
 		
 		rmse.add(residual);
@@ -43,7 +43,7 @@ RMSE compute_rmse_corner(
 	RMSE rmse;
 	for(const auto& o : ob)
 	{	
-		const auto p = reproject_corner(model, model.pose(), grid, o, false);
+		const P2D p = reproject_corner(model, model.pose(), grid, o, false);
 		const P2D residual{P2D{o[0], o[1]} - p};
 		
 		rmse.add(residual);

@@ -45,7 +45,6 @@ template<std::size_t N>
 const typename Pose_<N>::Matrix & Pose_<N>::rotation() const { return rotation_; }
 
 
-
 template<std::size_t N>
 void Pose_<N>::serialize(v::InputArchive &archive)
 {

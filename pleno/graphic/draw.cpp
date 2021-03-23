@@ -35,14 +35,14 @@ void glAddLine(const Ray3D& r, double c)
  */
 void draw_axis(const Pose& pose, double s = 1.0)
 {
-    P3DS base {P3D{0.0, 0.0, 0.0},
+    const P3DS base {P3D{0.0, 0.0, 0.0},
                P3D{  s, 0.0, 0.0},
                P3D{0.0,   s, 0.0},
                P3D{0.0, 0.0,   s}};
 
     //Expressing base in WORLD
     int i = 0;
-    for (auto& r : base)
+    for (const P3D& r : base)
     {
         colorize(i++, 1.0);
         glAddLine(pose.translation(), from_coordinate_system_of(pose, r));

@@ -35,7 +35,7 @@ public:
 		P3D p3d = line_plane_intersection(sensor().planeInWorld(), ray); // CAMERA
 		p3d = to_coordinate_system_of(sensor().pose(), p3d); // SENSOR
 
-		pixel = sensor().metric2pxl(p3d).head(2); //IMAGE XY
+		pixel = sensor().metric2pxl(p3d).head<2>(); //IMAGE XY
 		xy2uv(pixel); //IMAGE UV
 
 		return hit_the_sensor(pixel);

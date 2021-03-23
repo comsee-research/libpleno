@@ -18,7 +18,7 @@ void generate_mic(
 		{
 			MICObservation obs;
 			obs.k = k; obs.l = l;
-			const auto c = reproject_miccenter(model, obs);
+			const P2D c = reproject_miccenter(model, obs);
 			obs[0] = c[0], obs[1] = c[1];
 			
 			observations.emplace_back(obs);		

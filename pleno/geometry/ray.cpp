@@ -16,6 +16,22 @@ Ray_<N>::Ray_(
  	direction_.normalize();
 }
 
+// Copy Constructor
+template<std::size_t N>
+Ray_<N>::Ray_(
+	const Ray_<N>& o
+) : origin_(o.origin()), direction_(o.direction()), color_(o.color())
+{
+}
+
+// Move Constructor
+template<std::size_t N>
+Ray_<N>::Ray_(
+	Ray_<N>&& o
+) : origin_(std::move(o.origin_)), direction_(std::move(o.direction_)), color_(std::move(o.color_))
+{
+}
+
 template<std::size_t N> Ray_<N>::~Ray_() {}
 
 template<std::size_t N>

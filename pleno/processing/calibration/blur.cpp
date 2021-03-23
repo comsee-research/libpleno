@@ -56,7 +56,7 @@ void optimize(
 				std::for_each( current+1, obs_.end(), 
 					[lhs=*current, I=internals.I, &W, img=images[frame], &kappa, &solver](const auto &rhs) -> void {
 						//check type
-						if (lens_type(I, lhs.k, lhs.l) != lens_type(I, rhs.k, rhs.l))
+						if (lens_type(I, lhs.k, lhs.l) != lens_type(I, rhs.k, rhs.l)) //k,l in mia space
 						{
 							//compute rho_r
 							const double rho_r = std::sqrt(std::abs(lhs.rho * lhs.rho - rhs.rho * rhs.rho));

@@ -9,7 +9,7 @@ struct Disk
     P2D center;
     double radius;
     
-    Disk(P2D c, double r) : center{c}, radius{r} {}
+    Disk(const P2D& c, double r) : center{c}, radius{r} {}
     Disk(double u, double v, double r) : center{P2D{u,v}}, radius{r} {}
 
     //verify is a point is present on the disk
@@ -27,5 +27,5 @@ struct Disk
 template<typename T>
 bool is_on_disk(const T& p, double disk_diameter)
 {
-    return ((p.head(2)).norm() <= disk_diameter / 2.0 );
+    return ((p.template head<2>()).norm() <= disk_diameter / 2.0 );
 }

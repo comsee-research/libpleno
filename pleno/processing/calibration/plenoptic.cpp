@@ -53,13 +53,8 @@ void optimize(
 	//split observations according to frame index
 	std::unordered_map<Index /* frame index */, BAPObservations> obs;
 	for(const auto& ob : observations)
-		obs[ob.frame].push_back(ob);	
-
-	auto extract_f = [&model](std::size_t k, size_t l) -> FocalLength& {
-		P2D pkl = model.ml2mi(k,l); //ML->MI
-		return model.mla().f(pkl[0], pkl[1]);
-	};
-
+		obs[ob.frame].push_back(ob);
+		
 	std::visit(
 		[&](auto&& s) { 
 			using T = std::decay_t<decltype(s)>;
@@ -87,7 +82,7 @@ void optimize(
 								&p,
 								&model.mla().pose(),
 								&model.mla(),
-								&(extract_f(o.k, o.l)),
+								&model.mla().focal_length(o.k, o.l),
 								&model.sensor(),
 								&model.main_lens(),
 								&model.main_lens_distortions()

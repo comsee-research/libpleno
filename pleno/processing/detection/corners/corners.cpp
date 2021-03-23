@@ -87,7 +87,7 @@ FORCE_GUI(true);
 		}
 				
 		GUI(
-			auto c = P2D{x,y};
+			P2D c = P2D{x,y};
   			Viewer::context().layer(Viewer::layer())
   				.name("Checkerboard bounds")
   				.pen_color(v::purple).pen_width(5)
@@ -233,7 +233,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 	 		 
 	 		Viewer::pop();	
 	 				
-	 		const auto& c = mia.nodeInWorld(k,l); //col,row
+	 		const P2D c = mia.nodeInWorld(k,l); //col,row
 			const int t = mia.type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
 			const double r = std::fabs(params.radius(t)); //radius
 			//crop image aroud the center
@@ -299,7 +299,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 		const int k = cbo.k; 
 		const int l = cbo.l;
 		
-		const auto& c = mia.nodeInWorld(k,l); //col,row
+		const P2D c = mia.nodeInWorld(k,l); //col,row
 		const int t = mia.type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
 		const double r = std::fabs(params.radius(t)); //radius
 		

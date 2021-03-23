@@ -169,9 +169,9 @@ estimation_lines_with_slope_constraint_least_squares(
 	B_t B = B_t::Zero(size);
 	
 	int i=1,j=0;	
-	for(const auto&points : data)
+	for(const auto& points : data)
     {
-    	for(const auto&p : points)
+    	for(const P2D& p : points)
     	{
     		A(j,0) 	= p[0];
     		A(j,i)	= 1;
@@ -199,7 +199,7 @@ estimation_line_fitting(
 	std::vector<cv::Point2d> points;
 	points.reserve(data.size());
 	
-	for(const auto&point : data)
+	for(const P2D& point : data)
     	points.emplace_back(point[0], point[1]);
 	
 	cv::Vec4d line;

@@ -12,8 +12,8 @@
 template<typename Observation_t>
 double virtualdepth(const Observation_t& lhs, const Observation_t& rhs, const MIA& mia, double dC, double pixel2metric)
 {
-	const auto &lc = mia.nodeInWorld(lhs.k, lhs.l);								
-	const auto &rc = mia.nodeInWorld(rhs.k, rhs.l);								
+	const P2D lc = mia.nodeInWorld(lhs.k, lhs.l);								
+	const P2D rc = mia.nodeInWorld(rhs.k, rhs.l);								
 	const double dc = mia.diameter();		
 	const double n = (lc - rc).norm() / dc;										
 	const double ndC = n * dC;					

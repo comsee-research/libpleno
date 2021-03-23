@@ -48,8 +48,28 @@ Pose_<3>::Matrix rotation(const double alpha, const double beta, const double ga
 template<std::size_t N>
 inline std::ostream& operator<<(std::ostream& o, const Pose_<N>& p)
 {
-    o << "\ttranslation = {" <<  p.translation().transpose() << "};\n";
+    o << "\ttranslation = {" <<  p.translation().transpose() << "},\n";
     o << "\trotation = {\n" << p.rotation() << "\n};\n";
+
+    return o;
+}
+
+template<>
+inline std::ostream& operator<<(std::ostream& o, const Pose_<3>& p)
+{
+    o << "\ttranslation = {" <<  p.translation().transpose() << "},\n";
+    o << "\trotation = {\n" << p.rotation() << "\n},\n";
+    o << "\tRxyz = {" << p.rotation().eulerAngles(0,1,2).transpose() << "};\n";
+
+    return o;
+}
+
+template<>
+inline std::ostream& operator<<(std::ostream& o, const Pose_<2>& p)
+{
+    o << "\ttranslation = {" <<  p.translation().transpose() << "},\n";
+    o << "\trotation = {\n" << p.rotation() << "\n},\n";
+    o << "\ttheta = " << std::atan2(p.rotation()(1, 0), p.rotation()(0, 0)) << "\n";
 
     return o;
 }

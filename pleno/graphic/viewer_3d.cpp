@@ -65,7 +65,7 @@ void viewer_3d(v::ViewerContext& v, const CheckerBoard& gm, double scale)
         glEnable(GL_DEPTH_TEST);
 
         glBegin(GL_POINTS);
-            for(auto n : gm)
+            for(const P3D& n : gm)
                 glAddPoint(n);
         glEnd();
 
@@ -73,7 +73,7 @@ void viewer_3d(v::ViewerContext& v, const CheckerBoard& gm, double scale)
         	draw_axis(gm.pose(), scale);
         	
             P3D tmp = gm.nodeInWorld(0);
-            for(auto n : gm)
+            for(const P3D& n : gm)
             {
                 glAddLine(n, tmp);
                 tmp = n;
@@ -158,13 +158,13 @@ void viewer_3d(v::ViewerContext& v, const PlenopticCamera& mfpc, tag::MLA, doubl
         glEnable(GL_DEPTH_TEST);
 
         glBegin(GL_POINTS);
-            for(auto n : gm)
+            for(const P3D& n : gm)
                 glAddPoint(from_coordinate_system_of(ref,n));
         glEnd();
 
         glBegin(GL_LINES);        
             P3D tmp = gm.nodeInWorld(0);
-            for(auto n : gm)
+            for(const P3D& n : gm)
             {
                 glAddLine(from_coordinate_system_of(ref,n), from_coordinate_system_of(ref,tmp));
                 tmp = n;
@@ -327,7 +327,7 @@ void viewer_3d(v::ViewerContext& v, const P3DS& ps, double scale)
         glEnable(GL_DEPTH_TEST);
 
         glBegin(GL_POINTS);
-            for (auto& p : ps)
+            for (const P3D& p : ps)
                 glAddPoint(p);
         glEnd();
 
@@ -349,13 +349,13 @@ void viewer_3d(v::ViewerContext& v, const GridMesh3D& gm)
         glEnable(GL_DEPTH_TEST);
 
         glBegin(GL_POINTS);
-            for(auto n : gm)
+            for(const P3D& n : gm)
                 glAddPoint(n);
         glEnd();
 
         glBegin(GL_LINES);
             P3D tmp = gm.nodeInWorld(0);
-            for(auto n : gm)
+            for(const P3D& n : gm)
             {
                 glAddLine(n, tmp);
                 tmp = n;
@@ -383,7 +383,7 @@ void viewer_3d(v::ViewerContext& v, const Plate& plate)
                 for (int col = 0; col < plate.width(); ++col)
                 {
                     const auto& color = plate.get_color(col, row);
-                    const auto& point = from_coordinate_system_of(plate.pose(), P3D{double(col), double(row), 0.0});
+                    const P3D& point = from_coordinate_system_of(plate.pose(), P3D{double(col), double(row), 0.0});
                     
                     glColor4f(color.r / 255., color.g / 255., color.b / 255., transparency_value);
                     glAddPoint(point);

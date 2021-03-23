@@ -10,10 +10,10 @@ std::ostream& operator<<(std::ostream& os, const InternalParameters& params)
 		<< "\tscale = " << params.scale << std::endl;
 		
 	std::size_t i=0;	
-	for(const auto& qi : params.q)
+	for(double qi : params.q)
 		os << "\tq["<<i++<<"] = " << qi << std::endl;
 	i=0;
-	for(const auto& qpi : params.q_prime)	
+	for(double qpi : params.q_prime)	
 		os << "\tq'["<<i++<<"] = " << qpi << std::endl;
 		
 	os	<< "\tdc = " << params.dc << std::endl

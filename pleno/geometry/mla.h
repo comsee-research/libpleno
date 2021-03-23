@@ -19,8 +19,11 @@ public:
 	double f(std::size_t i) const;
 	double& f(std::size_t i);
 	
-	FocalLength f(std::size_t k, std::size_t l) const;
-	FocalLength& f(std::size_t k, std::size_t l);
+	double f(std::size_t k, std::size_t l) const;
+	double& f(std::size_t k, std::size_t l);
+	
+	FocalLength focal_length(std::size_t k, std::size_t l) const;
+	FocalLength& focal_length(std::size_t k, std::size_t l);
 	
 	double radius() const;
 	double diameter() const;

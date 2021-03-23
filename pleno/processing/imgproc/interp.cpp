@@ -26,7 +26,7 @@ bool warp(const Transformation& t, const Image& input, Image& output)
             new_p3d = t() * pixel.homogeneous();
 
             // Normalisation: Put the transformed point on a plane
-            pixel = new_p3d.head(2) / new_p3d.z();
+            pixel = new_p3d.head<2>() / new_p3d.z();
 
             output.at<double>(row, col) = interpolator(input, pixel);
         }
@@ -70,7 +70,7 @@ P2DS GrayInterpolator::neighbors(const P2D& pixel) const
     };
 
     // filtering neighbors with mask
-    for (auto& p : four_neighbors)
+    for (const P2D& p : four_neighbors)
     {
         if (is_valid(p))
         {

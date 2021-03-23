@@ -2,6 +2,8 @@
 
 #include "types.h"
 
+#include <libv/geometry/plane_equation.hpp>
+
 #include "camera.h"
 #include "pinhole.h"
 
@@ -30,6 +32,22 @@ public:
 
 //Computed parameters    
     double diameter() const { return std::fabs(this->focal()) / this->aperture(); }
+    double radius() const { return diameter() / 2.; }
+    
+    // the plane equation coefficients
+    // the plane coefficients
+	Eigen::Matrix<double, 4, 1> plane() const
+	{
+		return v::plane_from_3_points(P3D{0., 0., 0.}, P3D{1., 0., 0.}, P3D{1., 1., 0.});
+	};
+
+	// the plane coefficients in WORLD coordinate system
+	Eigen::Matrix<double, 4, 1> planeInWorld() const
+	{
+		return v::plane_from_3_points(from_coordinate_system_of(pose(), P3D{0., 0., 0.}),
+		                          from_coordinate_system_of(pose(), P3D{1., 0., 0.}),
+		                          from_coordinate_system_of(pose(), P3D{1., 1., 0.}));
+	};
     
 //Project and Raytrace
 	bool project(const P3D& p3d_cam, P3D& projection) const
@@ -56,8 +74,8 @@ public:
  
     bool raytrace(const Ray3D& ray_in, Ray3D& ray_out) const 
     {
-		auto is_on_disk = [](const P2D& p, double disk_diameter) {
-			return p.norm() <= disk_diameter / 2.0 ;
+		auto is_on_disk = [](const P2D& p, double r) {
+			return p.norm() <=  r; //std::sqrt(2.)
 		};
 		
 		bool raytraced = false;
@@ -67,10 +85,10 @@ public:
 		if (this->project(ray_in.origin(), projected_point))
 		{
 		    // compute the intersection point between the ray and the lens
-		    ray_out.origin() = line_plane_intersection(Eigen::Vector4d{0.0, 0.0, 1.0, 0.0}, ray_in);
+		    ray_out.origin() = line_plane_intersection(plane(), ray_in);
 
 		    // Testing if the ray hit the lens
-		    if (is_on_disk(ray_out.origin().head(2), this->diameter()))
+		    if (is_on_disk(ray_out.origin().head<2>(), this->radius()))
 		    {
 		        ray_out.config(ray_out.origin(), projected_point);
 		        raytraced = true;

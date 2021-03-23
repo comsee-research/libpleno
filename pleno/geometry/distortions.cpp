@@ -2,7 +2,7 @@
 
 #include "io/printer.h"
 
-inline double Distortions::radius(const P2D& p) const
+double Distortions::radius(const P2D& p) const
 {
     //TODO: check performance over std::sqrt
     return std::hypot(p[0], p[1]); 
@@ -54,7 +54,7 @@ void Distortions::apply_tangential(P2D& p) const
 */
 void Distortions::apply_depth(P3D& p) const
 {
-    const double r = radius(p.head(2));
+    const double r = radius(p.head<2>());
 
     // ∆z =  (1 + D_0 . z) . (D_1 . r^2 + D_2 . r^4 + ...)
     p[2] = (1 + depth[0] * p[3]) * (depth[1] * r * r + depth[2] * r * r * r * r);
@@ -62,20 +62,20 @@ void Distortions::apply_depth(P3D& p) const
 
 void Distortions::apply_depth(P3DS& ps) const
 {
-    for(auto&p : ps)
+    for(P3D& p : ps)
     	apply_depth(p);
 }
 #endif
 
 void Distortions::apply_radial(P2DS& ps) const
 {
-    for(auto&p : ps)
+    for(P2D& p : ps)
     	apply_radial(p);
 }
 
 void Distortions::apply_tangential(P2DS& ps) const
 {
-    for(auto&p : ps)
+    for(P2D& p : ps)
     	apply_tangential(p);
 }
 
@@ -88,8 +88,8 @@ void Distortions::apply_tangential(P2DS& ps) const
 void Distortions::apply(P3D& p) const
 {
     // les points dans le repère du point_principal
-    P2D p_rad = p.head(2);
-    P2D p_tan = p.head(2);
+    P2D p_rad = p.head<2>();
+    P2D p_tan = p.head<2>();
 
     //on calcule les delta rad et tan
     apply_radial(p_rad);
@@ -114,7 +114,7 @@ void Distortions::apply(P3D& p) const
 */
 void Distortions::apply(P3DS& ps) const
 {
-    for(auto& p : ps)
+    for(P3D& p : ps)
     	apply(p);
 }
 
@@ -128,8 +128,8 @@ void Distortions::unapply(P3D& /*p*/) const
 
 std::ostream& operator<<(std::ostream& o, const Distortions& dist)
 {
-    const auto& r = dist.radial();
-    const auto& t = dist.tangential();
+    const P3D& r = dist.radial();
+    const P2D& t = dist.tangential();
     
 #if defined(USE_DEPTH_DISTORTION) && USE_DEPTH_DISTORTION
     const auto& d = dist.depth();    

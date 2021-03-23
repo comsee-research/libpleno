@@ -43,14 +43,14 @@ void viewer_2d(v::ViewerContext& v, const P2D& p)
  */
 void viewer_2d(v::ViewerContext& v, const P2DS& ps)
 {
-    for (auto& p : ps)
+    for (const P2D& p : ps)
         v.add_point(p[0], p[1]);
     v.update();
 }
 
 void viewer_2d(v::ViewerContext& v, const Ray2D& r, double d)
 {
-    auto point = r(d);
+    const P2D point = r(d);
     v.add_line(r.origin()[0], r.origin()[1], point[0], point[1])
      .update();
 }
@@ -67,7 +67,7 @@ void viewer_2d(v::ViewerContext& v, const Disk& d)
  */
 void viewer_2d(v::ViewerContext& v, const GridMesh2D& gm)
 {
-    for (auto node : gm)
+    for (const P2D& node : gm)
         v.add_point(node[0], node[1]);
     v.update();
 }
@@ -78,14 +78,14 @@ void viewer_2d(v::ViewerContext& v, const MIA& mia)
     {
     	for (std::size_t l = 0; l < mia.height(); ++l)
     	{
-    		const auto p = mia.nodeInWorld(k, l);
+    		const P2D p = mia.nodeInWorld(k, l);
     		v.add_point(p[0], p[1]);
     		
     		for (std::size_t nk = std::min(0ul, k-1); nk <= std::min(k+1, mia.width()-1); ++nk)
     		{
     			for (std::size_t nl = std::min(0ul, l-1); nl <= std::min(l+1, mia.height()-1); ++nl)
     			{
-    				auto n = mia.nodeInWorld(nk,nl);
+    				const P2D n = mia.nodeInWorld(nk,nl);
     				if ((n-p).norm() < mia.diameter()*1.1)
     				{
     					v.add_line(p[0], p[1], n[0], n[1]);

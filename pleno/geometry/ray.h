@@ -19,6 +19,9 @@ public:
     Ray_(const Vector& o = Vector::Zero(),
          const Vector& d = Vector::Zero(),
          const RGBA& c = {0.0, 0.0, 0.0, 255.0});
+         
+    Ray_(const Ray_& o);
+    Ray_(Ray_&& o);
 
     ~Ray_();
     

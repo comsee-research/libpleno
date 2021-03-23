@@ -45,3 +45,11 @@ void generate_image(
 	bool blur = true
 );
 
+void generate_image(
+	Image& raw,
+	const CameraModel_t& model,
+	const Plate& scene,
+	std::size_t nrays,
+	bool vignetting = true
+);
+

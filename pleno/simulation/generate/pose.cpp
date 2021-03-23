@@ -19,9 +19,9 @@ bool is_pose_valid(
 	BAPObservations obs;
 
     //All the nodes is at least projected once in a microimage
-    for(const auto& node : grid)
+    for(const P3D& node : grid)
     {
-        P3D pcam = to_coordinate_system_of(pose, node); //CAMERA
+        const P3D pcam = to_coordinate_system_of(pose, node); //CAMERA
         
         if( pcam[2] < 0. or not model.project(pcam, obs) or obs.size() < 2)
         {

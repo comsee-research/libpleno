@@ -14,7 +14,7 @@ inline void export_radii(const std::vector<std::vector<P2D>>& data)
 	
 	for(int type = 0; type < int(data.size()); ++type)
 	{
-		for(const auto& d: data[type])
+		for(const P2D& d: data[type])
 		{
 			std::ostringstream oss;
 			

@@ -68,7 +68,7 @@ void compute_radii(
 		{
 			Viewer::pop();	
 					
-	 		const auto& c = centers.nodeInWorld(k,l); //col,row
+	 		const P2D c = centers.nodeInWorld(k,l); //col,row
 			const int t = centers.type(I,k,l); //k=col, l=row
 			
 			//crop image aroud the center

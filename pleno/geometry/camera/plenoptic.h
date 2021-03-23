@@ -82,21 +82,23 @@ public:
     double mlaperture() const;
  
     PrincipalPoint pp() const;
-	PrincipalPoint mlpp(std::size_t k, std::size_t l) const;
+	PrincipalPoint mlpp(std::size_t k, std::size_t l) const; //k,l in MLA space
 	
 	std::size_t I() const;
+
+	double d(std::size_t k = 0, std::size_t l = 0) const;
+	double D(std::size_t k = 0, std::size_t l = 0) const;
 	
-	double d() const;
-	double D() const;
+	double focal_plane(std::size_t i, std::size_t k = 0, std::size_t l = 0) const;
 	
-	double focal_plane(std::size_t i) const;
+	bool multifocus() const;
     	
 //Project
 	bool project(const P3D& /*p3d_cam*/, P2D& /*pixel*/) const override final;
     
-	bool project(const P3D& p3d_cam, std::size_t k, std::size_t l, P3D& bap) const;	
-	bool project(const P3D& p3d_cam, std::size_t k, std::size_t l, P2D& pixel) const;
-	bool project(const P3D& p3d_cam, std::size_t k, std::size_t l, double& rho) const;
+	bool project(const P3D& p3d_cam, std::size_t k, std::size_t l, P3D& bap) const;	//k,l in MLA space
+	bool project(const P3D& p3d_cam, std::size_t k, std::size_t l, P2D& pixel) const; //k,l in MLA space
+	bool project(const P3D& p3d_cam, std::size_t k, std::size_t l, double& rho) const; //k,l in MLA space
 	
 	bool project(const P3D& p3d_cam, CBObservations& observations) const;
 	bool project(const P3D& p3d_cam, BAPObservations& observations) const;
@@ -104,8 +106,8 @@ public:
 //Raytrace		
     bool raytrace(const P2D& /*pixel*/, Ray3D& /*ray*/) const override final;
     
-    bool raytrace(const P2D& pixel, std::size_t k, std::size_t l, Ray3D& ray) const;
-    bool raytrace(const P2D& pixel, std::size_t k, std::size_t l, std::size_t n, Rays3D& rays) const;
+    bool raytrace(const P2D& pixel, std::size_t k, std::size_t l, Ray3D& ray) const; //k,l in MLA space
+    bool raytrace(const P2D& pixel, std::size_t k, std::size_t l, std::size_t n, Rays3D& rays) const; //k,l in MLA space
 		
 //Space convertion	(Micro-Images Space / Micro-Lenses Space)
 	void mi2ml(P2D& pij) const;
@@ -119,18 +121,19 @@ public:
 	template<typename Observations> void ml2mi(Observations& obs) const;
 	
 //Space convertion (obj, mla, virtual)
-	double v2mla(double x) const;
-	double mla2v(double x) const;
+	double v2mla(double x, std::size_t k = 0, std::size_t l = 0) const;
+	double mla2v(double x, std::size_t k = 0, std::size_t l = 0) const;
 	
-	double obj2mla(double x) const;
-	double mla2obj(double x) const;
+	double obj2mla(double x, std::size_t k = 0, std::size_t l = 0) const;
+	double mla2obj(double x, std::size_t k = 0, std::size_t l = 0) const;
 	
-	double v2obj(double x) const;
-	double obj2v(double x) const;
+	double v2obj(double x, std::size_t k = 0, std::size_t l = 0) const;
+	double obj2v(double x, std::size_t k = 0, std::size_t l = 0) const;
 
 protected:
 //Helper functions
 	bool is_on_disk(const P2D& p, double disk_diameter) const;
+	bool is_inside_mi(const P2D& p, std::size_t k, std::size_t l) const;
     bool hit_main_lens(const Ray3D& ray) const;
     
 //Helper projection function	
