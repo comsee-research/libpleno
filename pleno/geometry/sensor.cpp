@@ -1,7 +1,5 @@
 #include "sensor.h"
 
-#include <libv/geometry/plane_equation.hpp>
-
 Sensor::Sensor(size_t w, size_t h, double s)
 : scale_{s}, width_{w}, height_{h}
 {}
@@ -51,19 +49,21 @@ size_t& Sensor::height()
 }
           
 // the plane coefficients
-Eigen::Matrix<double, 4, 1> Sensor::plane() const
+PlaneCoefficients Sensor::plane() const
 {
-    return v::plane_from_3_points(P3D{0.0, 0.0, 0.0},
-                                  P3D{double(width_), 0.0, 0.0},
-                                  P3D{double(width_), double(height_), 0.0});
+    return plane_from_3_points(	P3D{0.0, 0.0, 0.0},
+    							P3D{double(width_), 0.0, 0.0},
+                                P3D{double(width_), double(height_), 0.0}
+    );
 };
 
 // the plane coefficients in WORLD coordinate system
-Eigen::Matrix<double, 4, 1> Sensor::planeInWorld() const
+PlaneCoefficients Sensor::planeInWorld() const
 {
-    return v::plane_from_3_points(from_coordinate_system_of(pose_, P3D{0.0, 0.0, 0.0}),
-                                  from_coordinate_system_of(pose_, P3D{double(width_), 0.0, 0.0}),
-                                  from_coordinate_system_of(pose_, P3D{double(width_), double(height_), 0.0}));
+    return plane_from_3_points(from_coordinate_system_of(pose_, P3D{0.0, 0.0, 0.0}),
+                               from_coordinate_system_of(pose_, P3D{double(width_), 0.0, 0.0}),
+                               from_coordinate_system_of(pose_, P3D{double(width_), double(height_), 0.0})
+   	);
 };
 
 template<typename T>

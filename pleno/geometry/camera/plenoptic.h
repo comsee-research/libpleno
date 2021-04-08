@@ -41,9 +41,9 @@ public:
 	
 //Ctor/Dtor
 	PlenopticCamera() {}
-	virtual ~PlenopticCamera() override {}
+	~PlenopticCamera() override {}
 	
-	virtual void init(
+	void init(
 		const Sensor& sensor, 
 		const MicroImagesArray& mia, 
 		const InternalParameters& params, 

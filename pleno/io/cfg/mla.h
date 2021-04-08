@@ -1,8 +1,6 @@
 #pragma once
 
-#include <libv/core/serialization/serializable_properties.hpp> //V_DEFINE_PROPERTIES
-#include <libv/core/serialization/contiguous_containers.hpp> //support for std::vector
-#include <libv/core/serialization/eigen.hpp>
+#include "io/archive.h"
 
 #include "types.h"
 #include "geometry/pose.h"

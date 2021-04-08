@@ -3,6 +3,8 @@
 #include "types.h"
 
 #include "geometry/pose.h"
+#include "geometry/plane.h"
+
 #include "io/cfg/sensor.h"
 
 class Sensor
@@ -13,6 +15,8 @@ class Sensor
     size_t height_; // height of the sensor (pixel)
 
 public:
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    
     Sensor(size_t w, size_t h, double s);
     Sensor(const SensorConfig& config = {});
     ~Sensor();
@@ -28,12 +32,11 @@ public:
 
     size_t height() const;
     size_t& height();
-
-
+    
     // the plane equation coefficients
-    Eigen::Matrix<double, 4, 1> plane() const;
+    PlaneCoefficients plane() const;
     // the plane equation coefficients in WORLD coordinate system
-    Eigen::Matrix<double, 4, 1> planeInWorld() const;
+    PlaneCoefficients planeInWorld() const;
 
 	template<typename T>
     T pxl2metric(const T& p) const;

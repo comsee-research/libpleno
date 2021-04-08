@@ -5,8 +5,6 @@
 #include <opencv2/opencv.hpp> //cv::Mat
 #include <array>
 
-#include "geometry/pose.h"
-
 //helper type
 template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
 template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
@@ -15,55 +13,53 @@ template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
 template<class T>
 using AlignedVector = std::vector<T, Eigen::aligned_allocator<T>>;
 
-using P2D 	= Eigen::Vector2d;
+template <std::size_t N>
+using PnD = Eigen::Matrix<double, static_cast<int>(N), 1>;
+template <std::size_t N>
+using PnDS = AlignedVector<PnD<N>>;
+
+using P2D 	= PnD<2ul>; //Eigen::Vector2d;
 using P2DS 	= AlignedVector<P2D>;
-using P3D 	= Eigen::Vector3d;
+using P3D 	= PnD<3ul>; //Eigen::Vector3d;
 using P3DS 	= AlignedVector<P3D>;
-using P4D 	= Eigen::Vector4d;
+using P4D 	= PnD<4ul>; //Eigen::Vector4d;
 using P4DS 	= AlignedVector<P4D>;
 
-template <std::size_t N>
-using PnD = Eigen::Matrix<double, N, 1>;
-
-template <std::size_t N>
-using PnDS = AlignedVector<Eigen::Matrix<double, N, 1>>;
 
 template<std::size_t N> class Pose_;
-using Poses 	= AlignedVector<Pose_<3u>>;
-using Poses3D 	= AlignedVector<Pose_<3u>>;
-using Poses2D 	= AlignedVector<Pose_<2u>>;
+using Poses 	= AlignedVector<Pose_<3ul>>;
+using Poses3D 	= AlignedVector<Pose_<3ul>>;
+using Poses2D 	= AlignedVector<Pose_<2ul>>;
 
-/* Holder for rotation */
-template<std::size_t N> struct Rotation_ {
-	typename Pose_<N>::Matrix * R;
-};
-using Rotation2D 	= Rotation_<2u>;
-using Rotation3D	= Rotation_<3u>;
-using Rotation 		= Rotation_<3u>;
+template<std::size_t N>
+using Rotation_ 	= Eigen::Matrix<double, static_cast<int>(N), static_cast<int>(N)>;
 
-/* Holder for translation */
-template<std::size_t N> struct Translation_ {
-	typename Pose_<N>::Vector * t;
-};
-using Translation2D	= Translation_<2u>;
-using Translation3D	= Translation_<3u>;
-using Translation	= Translation_<3u>;
+using Rotation 		= Rotation_<3ul>;
+using Rotation3D	= Rotation_<3ul>;
+using Rotation2D 	= Rotation_<2ul>;
+
+template<std::size_t N> 
+using Translation_ 	= Eigen::Matrix<double, static_cast<int>(N), 1>;
+
+using Translation	= Translation_<3ul>;
+using Translation3D	= Translation_<3ul>;
+using Translation2D	= Translation_<2ul>;
 
 template<std::size_t N> class Ray_;
-using Rays 		= AlignedVector<Ray_<3u>>;
-using Rays3D 	= AlignedVector<Ray_<3u>>;
-using Rays2D 	= AlignedVector<Ray_<2u>>;
+using Rays 		= AlignedVector<Ray_<3ul>>;
+using Rays3D 	= AlignedVector<Ray_<3ul>>;
+using Rays2D 	= AlignedVector<Ray_<2ul>>;
 
-using Quad   = std::array<P3D, 4u>;
-using Quad3D = std::array<P3D, 4u>;
-using Quad2D = std::array<P2D, 4u>;
+using Quad   = std::array<P3D, 4ul>;
+using Quad3D = std::array<P3D, 4ul>;
+using Quad2D = std::array<P2D, 4ul>;
 
 struct Corner {
 	enum : std::size_t {
-		TL = 0u, 
-		TR = 1u,
-		BR = 2u,
-		BL = 3u
+		TL = 0ul, 
+		TR = 1ul,
+		BR = 2ul,
+		BL = 3ul
 	};
 };
 
@@ -71,17 +67,17 @@ using Real = double;
 using Index = int;
 
 struct Depth 		{ Real z = 0.; };
+struct InverseDepth { Real z = 0.; };
 struct VirtualDepth { Real v = 0.; };
 
 struct IndexPair {
-	std::size_t k;
-	std::size_t l;
+	std::size_t k, l;
 	
-	IndexPair(std::size_t k_ = 0u, std::size_t l_ = 0u) : k{k_}, l{l_} {}
+	IndexPair(std::size_t k_ = 0ul, std::size_t l_ = 0ul) : k{k_}, l{l_} {}
 };
 
 using Image 				= cv::Mat;
-using Images 				= AlignedVector<cv::Mat>;
+using Images 				= AlignedVector<Image>;
 struct ImageWithInfo 		{ Image img; Real fnumber; Index frame = -1; };
 
 struct LineCoefficients 	{ Real m; Real c; };
@@ -91,12 +87,12 @@ struct CircleCoefficients 	{ Real x0; Real y0; Real r; };
 struct Peak 				{ Real angle; Real magnitude; };
 using Peaks 				= AlignedVector<Peak>;
 
-struct CalibrationPose 		{ Pose pose; Index frame; };
+struct CalibrationPose;
 using CalibrationPoses 		= AlignedVector<CalibrationPose>;
 
 #include "processing/tools/rmse.h"
 
-struct PoseWithError 		{ Pose pose; RMSE rmse; };
+struct PoseWithError;
 using PosesWithError 		= AlignedVector<PoseWithError>;
 
 struct FocalLength 			{ Real f; };

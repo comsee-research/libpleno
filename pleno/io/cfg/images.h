@@ -1,7 +1,6 @@
 #pragma once
 
-#include <libv/core/serialization/serializable_properties.hpp>
-#include <libv/core/serialization/contiguous_containers.hpp> //support for std::vector
+#include "io/archive.h"
 
 V_DEFINE_PROPERTIES(ImageWithInfoConfig)
 (
@@ -14,7 +13,7 @@ using ImagesWithInfoConfig = std::vector<ImageWithInfoConfig>;
 
 V_DEFINE_PROPERTIES(MetaDataImageConfig)
 (
-	V_DEFINE_PROPERTY(debayer, bool(true), "Is image already debayered?")
+	V_DEFINE_PROPERTY(debayered, bool(true), "Is image already debayered?")
 	V_DEFINE_PROPERTY(rgb, bool(true), "Is image in RGB format?")
 	V_DEFINE_PROPERTY(format, std::size_t(8), "Image format (8-bits, 16-bits, 32-bits, 64-bits)")
 )

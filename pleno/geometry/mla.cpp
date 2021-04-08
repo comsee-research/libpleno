@@ -77,4 +77,22 @@ int MicroLensesArray::type(std::size_t k, std::size_t l) const
 	
 	if (geometry() == HexagonalRowsAligned) return lens_type(I(), k ,l);
 	else return lens_type(I(), l, k);
-} 	
+}
+
+// the plane coefficients
+PlaneCoefficients MicroLensesArray::plane() const
+{
+    return plane_from_3_points(P3D{0.0, 0.0, 0.0},
+                               P3D{double(width()), 0.0, 0.0},
+                               P3D{double(width()), double(height()), 0.0}
+    );
+};
+
+// the plane coefficients in WORLD coordinate system
+PlaneCoefficients MicroLensesArray::planeInWorld() const
+{
+    return plane_from_3_points(from_coordinate_system_of(pose(), P3D{0.0, 0.0, 0.0}),
+                               from_coordinate_system_of(pose(), P3D{double(width()), 0.0, 0.0}),
+                               from_coordinate_system_of(pose(), P3D{double(width()), double(height()), 0.0})
+    );
+};	

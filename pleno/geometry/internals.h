@@ -2,11 +2,8 @@
 
 #include <iostream>
 
-#include <libv/core/serialization/archives/base.hpp> //OutputArchive, InputArchive
-#include <libv/core/serialization/contiguous_containers.hpp> //support for std::vector
-
+#include "io/archive.h"
 #include "io/printer.h"
-
 
 struct InternalParameters {
 	double m;
@@ -19,7 +16,7 @@ struct InternalParameters {
 	
 	double N; 				//f-number
 	double scale; 			//pixel2metric
-	std::size_t I = 3u;		//number of micro-lenses type
+	std::size_t I = 3ul;		//number of micro-lenses type
 	
 	double kappa = 1.; 		//blur proportionality coefficient
 	

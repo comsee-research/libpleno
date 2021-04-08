@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include <libv/geometry/rotation.hpp>
+#include "processing/tools/rotation.h"
 
 #include "io/printer.h"
 
@@ -44,7 +44,7 @@ void generate_pose(Pose& pose, double min, double max)
     
     pose.translation() = Eigen::Vector3d{ dist_txy(gen), dist_txy(gen), dist_tz(gen) };
     
-    v::apply_rotation(
+    apply_rotation(
     	pose.rotation(), 
     	Eigen::Vector3d{ 0.3 * dist_R(gen), 0.3 * dist_R(gen), 0.3 * dist_R(gen) }
     );

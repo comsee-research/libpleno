@@ -20,7 +20,9 @@ public:
     void apply_depth(P3D& p) const;
     void apply_depth(P3DS& ps) const;
 #endif
-public: 	
+public: 
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+		
 	Eigen::Vector3d& radial() { return radial_; }
 	const Eigen::Vector3d& radial() const { return radial_; }
 	

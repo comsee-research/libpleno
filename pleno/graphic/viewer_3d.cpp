@@ -370,17 +370,22 @@ void viewer_3d(v::ViewerContext& v, const GridMesh3D& gm)
 void viewer_3d(v::ViewerContext& v, const Plate& plate)
 {
     v.add_opengl([&plate](){
-        double transparency_value = 0.6;
+    	constexpr double scale = 0.25; // mm 
+        constexpr double transparency_value = 0.6;
         glPointSize(5.0);
 
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_DEPTH_TEST);
+        
+        glBegin(GL_LINES);
+        	draw_axis(plate.pose(), 20.);
+        glEnd();
 		
         glBegin(GL_POINTS);
-            for (int row = 0; row < plate.height(); ++row)
+            for (double row = 0.; row < plate.height(); row+=scale) 
             {
-                for (int col = 0; col < plate.width(); ++col)
+                for (double col = 0.; col < plate.width(); col+=scale)
                 {
                     const auto& color = plate.get_color(col, row);
                     const P3D& point = from_coordinate_system_of(plate.pose(), P3D{double(col), double(row), 0.0});

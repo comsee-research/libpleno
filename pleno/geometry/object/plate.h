@@ -1,10 +1,10 @@
 #pragma once
 
-#include <libv/geometry/plane_equation.hpp>
-
 #include "types.h" //Image, PnD, RGBA
 
 #include "geometry/pose.h" //Pose
+#include "geometry/plane.h" //PlaneCoefficients
+
 #include "io/cfg/scene.h" //PlateConfig
 
 struct Plate {
@@ -16,9 +16,11 @@ private:
 	
 	double scale_; //mm per pixel 
 	
-	Image texture_;
+	Image texture_; //CV_32FC3, getRectSubPix not working with 64F...
 
 public:
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	
 	Plate(const PlateConfig& config) : 	
 		pose_{config.pose()}, 
 		width_{config.width()}, height_{config.height()}, scale_{config.scale()}
@@ -34,11 +36,14 @@ public:
 			width() 	= txtr.cols;
 		}
 		
+		Image txture;
+		txtr.convertTo(txture, CV_32FC3, 1./255.);
+		
 		//rescale image with scale
 		int wpixel = static_cast<int>(width() / scale());
 		int hpixel = static_cast<int>(height() / scale());
 	
-		cv::resize(txtr, texture_, cv::Size{wpixel, hpixel}, 0, 0, cv::INTER_LINEAR);
+		cv::resize(txture, texture_, cv::Size{wpixel, hpixel}, 0, 0, cv::INTER_LINEAR);
 		
 		PRINT_DEBUG("Resize texture info: (" << texture().cols << ", " << texture().rows << ", " << texture().channels() << ")");
 	}
@@ -63,7 +68,7 @@ public:
 	bool is_inside(const P3D& pw) const 
 	{
 		const P3D p = to_coordinate_system_of(pose(), pw); //PLATE FRAME
-		return (p.z() == 0. and p.x() > 0. and p.x() < width() and p.y() > 0. and p.y() < height());
+		return (/*.z() == 0. and */ p.x() > 0. and p.x() < width() and p.y() > 0. and p.y() < height());
 	}
 	
 	RGBA get_color(double x, double y) const //x, y in mm
@@ -72,31 +77,33 @@ public:
 		const double v = y / scale(); 
 		cv::Mat patch;
     	cv::getRectSubPix(texture(), cv::Size{1,1}, cv::Point2d{u,v}, patch);
-    	
-    	const auto& pixel = patch.at<cv::Vec3b>(0,0); //BGR?
+    
+    	const cv::Vec3f pixel = patch.at<cv::Vec3f>(0,0); //BGR?
     	
     	return RGBA{
-    		static_cast<double>(pixel[2]), 
-    		static_cast<double>(pixel[1]), 
-    		static_cast<double>(pixel[0]), 
+    		static_cast<double>(pixel[2]) * 255., 
+    		static_cast<double>(pixel[1]) * 255., 
+    		static_cast<double>(pixel[0]) * 255., 
     		255.
     	};
 	}
 	
 	// the plane coefficients
-	Eigen::Matrix<double, 4, 1> plane() const
+	PlaneCoefficients plane() const
 	{
-		return v::plane_from_3_points(P3D{0.0, 0.0, 0.0},
-		                              P3D{width(), 0.0, 0.0},
-		                              P3D{width(), height(), 0.0});
+		return plane_from_3_points(P3D{0.0, 0.0, 0.0},
+		                           P3D{width(), 0.0, 0.0},
+		                           P3D{width(), height(), 0.0}
+		);
 	};
 
 	// the plane coefficients in WORLD coordinate system
-	Eigen::Matrix<double, 4, 1> planeInWorld() const
+	PlaneCoefficients planeInWorld() const
 	{
-		return v::plane_from_3_points(from_coordinate_system_of(pose(), P3D{0.0, 0.0, 0.0}),
-		                              from_coordinate_system_of(pose(), P3D{width(), 0.0, 0.0}),
-		                              from_coordinate_system_of(pose(), P3D{width(), height(), 0.0}));
+		return plane_from_3_points(from_coordinate_system_of(pose(), P3D{0., 0., 0.}),
+		                           from_coordinate_system_of(pose(), P3D{width(), 0., 0.}),
+		                           from_coordinate_system_of(pose(), P3D{0., height(), 0.})
+		);
 	};
 };
 

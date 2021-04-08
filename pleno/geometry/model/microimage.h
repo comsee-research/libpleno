@@ -49,9 +49,11 @@ namespace std {
 
 struct MicroImageModel
 {
+	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+	
     MicroImageModel(MicroImageType t = NONE, double width = 0., double height = 0.);
 
-    virtual ~MicroImageModel();
+    ~MicroImageModel();
 
     MicroImageType type;
     double w_, h_;

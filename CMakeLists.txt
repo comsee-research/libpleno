@@ -197,6 +197,11 @@ set(PLENO_GEOMETRY_SRC
 	pleno/geometry/mia.cpp
 	pleno/geometry/mla.cpp
 	#camera	
+		pleno/geometry/camera/camera.cpp
+		pleno/geometry/camera/unified.cpp
+		pleno/geometry/camera/orthographic.cpp
+		pleno/geometry/camera/pinhole.cpp
+		pleno/geometry/camera/thinlens.cpp
 		pleno/geometry/camera/plenoptic.cpp
 	#model
 		pleno/geometry/model/microimage.cpp	
@@ -205,8 +210,6 @@ set(PLENO_GEOMETRY_SRC
 set(PLENO_OPTIMIZATION_SRC
 	pleno/optimization/pose2d.cpp
 	pleno/optimization/pose3d.cpp
-	pleno/optimization/rotation3d.cpp
-	pleno/optimization/translation3d.cpp
 	pleno/optimization/grid3d.cpp
 	pleno/optimization/mia.cpp
 	pleno/optimization/mla.cpp

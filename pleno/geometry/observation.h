@@ -4,6 +4,8 @@
 
 #include "types.h"
 
+#include "io/archive.h"
+
 struct MicroImageCenterObservation;
 struct CheckerBoardObservation;
 struct BlurAwarePlenopticObservation;
@@ -11,7 +13,9 @@ struct BlurAwarePlenopticObservation;
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
-struct MicroImageCenterObservation{    
+struct MicroImageCenterObservation{
+EIGEN_MAKE_ALIGNED_OPERATOR_NEW    
+
     int k = -1, l = -1; //col,row
     
     double u = -1.0, v = -1.0;
@@ -30,6 +34,8 @@ void load(v::InputArchive& archive, MicroImageCenterObservation& m);
 //******************************************************************************
 //******************************************************************************
 struct CheckerBoardObservation {
+EIGEN_MAKE_ALIGNED_OPERATOR_NEW    
+
 	int k = -1, l = -1; //col,row
 	
 	double u = -1.0, v = -1.0;
@@ -53,6 +59,8 @@ std::ostream& operator<<(std::ostream& os, const CheckerBoardObservation& ob);
 //******************************************************************************
 //******************************************************************************
 struct BlurAwarePlenopticObservation {
+EIGEN_MAKE_ALIGNED_OPERATOR_NEW    
+
 	int k = -1, l = -1; //col,row
 	
 	double u = -1.0, v = -1.0, rho = -1.0;

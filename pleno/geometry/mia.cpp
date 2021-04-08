@@ -120,22 +120,22 @@ std::pair<std::size_t, std::size_t> MicroImagesArray::uv2kl(double u, double v) 
 	
 	if (geometry() == Orthogonal)
 	{
-		k = static_cast<std::size_t>(std::floor((u - p00[0]) / diameter()));
-		l = static_cast<std::size_t>(std::floor((v - p00[1]) / diameter()));
+		k = static_cast<std::size_t>(std::floor(0.5 + (u - p00[0]) / diameter()));
+		l = static_cast<std::size_t>(std::floor(0.5 + (v - p00[1]) / diameter()));
 	}
 	if (geometry() == HexagonalRowsAligned)
 	{
 		//find row
-		l = static_cast<std::size_t>(std::floor((v - p00[1]) / (diameter() * sin60)));
+		l = static_cast<std::size_t>(std::floor(0.5 + (v - p00[1]) / (diameter() * sin60)));
 		const auto p0l = nodeInWorld(0,l);
-		k = static_cast<std::size_t>(std::floor((u - p0l[0]) / diameter()));
+		k = static_cast<std::size_t>(std::floor(0.5 + (u - p0l[0]) / diameter()));
 	}
 	else if (geometry() == HexagonalColsAligned) 
 	{
 		//find col
-		k = static_cast<std::size_t>(std::floor((u - p00[0]) / (diameter() * sin60)));
+		k = static_cast<std::size_t>(std::floor(0.5 + (u - p00[0]) / (diameter() * sin60)));
 		const auto pk0 = nodeInWorld(k,0);
-		l = static_cast<std::size_t>(std::floor((v - pk0[1]) / diameter()));
+		l = static_cast<std::size_t>(std::floor(0.5 + (v - pk0[1]) / diameter()));
 	}
 	
 	return {k , l};

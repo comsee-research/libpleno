@@ -1,16 +1,20 @@
 #pragma once
 
 #include "types.h"
+
 #include "geometry/mesh.h"
+#include "geometry/plane.h"
 
 #include "cfg/mla.h"
 
 struct MicroLensesArray : public GridMesh3D {
 private:
-	std::size_t I_ = 3u; //number of micro-lens type
+	std::size_t I_ = 3ul; //number of micro-lens type
 	FocalLengths focals_;
 
 public:
+EIGEN_MAKE_ALIGNED_OPERATOR_NEW    
+
 	MicroLensesArray(const MLAConfig& config = {});
 	
 	void init(std::size_t I);
@@ -29,6 +33,11 @@ public:
 	double diameter() const;
 	
 	int type(std::size_t k, std::size_t l) const;
+	
+	// the plane equation coefficients
+    PlaneCoefficients plane() const;
+    // the plane equation coefficients in WORLD coordinate system
+    PlaneCoefficients planeInWorld() const;
 };
 
 using MLA 					= MicroLensesArray;

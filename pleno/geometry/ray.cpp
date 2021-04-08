@@ -5,12 +5,12 @@
 // Constructor
 template<std::size_t N>
 Ray_<N>::Ray_(
-	const typename Ray_<N>::Vector & o, 
-	const typename Ray_<N>::Vector & d, 
+	const PnD<N>& o, 
+	const PnD<N>& d, 
 	const RGBA& c
 ) : origin_(o), direction_(d), color_(c)
 {
- 	if( direction_ == Ray_<N>::Vector::Zero())
+ 	if( direction_ == PnD<N>::Zero())
  		direction_[N-1] = 1.;
  		
  	direction_.normalize();
@@ -35,14 +35,14 @@ Ray_<N>::Ray_(
 template<std::size_t N> Ray_<N>::~Ray_() {}
 
 template<std::size_t N>
-typename Ray_<N>::Vector & Ray_<N>::origin() { return origin_; }
+PnD<N>& Ray_<N>::origin() { return origin_; }
 template<std::size_t N>
-const typename Ray_<N>::Vector & Ray_<N>::origin() const { return origin_; }
+const PnD<N>& Ray_<N>::origin() const { return origin_; }
 
 template<std::size_t N>
-typename Ray_<N>::Vector & Ray_<N>::direction() { return direction_; }
+PnD<N>& Ray_<N>::direction() { return direction_; }
 template<std::size_t N>
-const typename Ray_<N>::Vector & Ray_<N>::direction() const { return direction_; }
+const PnD<N>& Ray_<N>::direction() const { return direction_; }
 
 template<std::size_t N> RGBA& Ray_<N>::color() { return color_; }
 template<std::size_t N> const RGBA& Ray_<N>::color() const { return color_; }
@@ -50,8 +50,8 @@ template<std::size_t N> const RGBA& Ray_<N>::color() const { return color_; }
 // Configure a ray according using 2 points
 // p1 is new origin
 template<std::size_t N>
-void Ray_<N>::config(const typename Ray_<N>::Vector& p1,
-                   const typename Ray_<N>::Vector& p2,
+void Ray_<N>::config(const PnD<N>& p1,
+                   const PnD<N>& p2,
                    const RGBA& c)
 {
     DEBUG_ASSERT((p1 != p2),"Ray::config: p1 == p2, no direction can be computed");
@@ -62,7 +62,7 @@ void Ray_<N>::config(const typename Ray_<N>::Vector& p1,
 
 // Return a point on a ray
 template<std::size_t N>
-typename Ray_<N>::Vector Ray_<N>::operator()(double t) const
+PnD<N> Ray_<N>::operator()(double t) const
 {
     return (direction_ * t + origin_);
 }
@@ -72,7 +72,7 @@ template class Ray_<3ul>;
 
 //------------------------------------------------------------------------------
 // Determine the t coefficient of a parametric line equation where its cross a plane
-double compute_t_coef(const Eigen::Matrix<double, 4, 1>& plane, const Ray3D& line)
+double compute_t_coef(const PlaneCoefficients& plane, const Ray3D& line)
 {                
 	DEBUG_ASSERT(
 		(line.direction()(0) != 0.0 and line.direction()(1) != 0.0 and line.direction()(2) != 0.0),
@@ -90,7 +90,7 @@ double compute_t_coef(const Eigen::Matrix<double, 4, 1>& plane, const Ray3D& lin
 }
 
 // Determine the intersection point between a plane and a line
-P3D line_plane_intersection(const Eigen::Matrix<double, 4, 1>& plane, const Ray3D& ray)
+P3D line_plane_intersection(const PlaneCoefficients& plane, const Ray3D& ray)
 {
     //TODO
     // if (RAYON !// AU PLAN)

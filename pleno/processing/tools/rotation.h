@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <libv/geometry/rotation.hpp> 
+
 /**
  *
  * Apply a rotation to a transformation.
@@ -23,10 +24,32 @@ using v::apply_rotation;
 using v::apply_small_rotation;
 using v::rotation_orthogonalize;
 
-//inline void apply_rotation(Eigen::Matrix3d& matrix, const Eigen::Vector3d& d)
-//{
-//  	v::apply_rotation(matrix, d);
-//}
+
+/**
+ * returns a rotation matrix given 3 angles (radian) according to lie algebra and Taylor expansions
+**/
+inline Eigen::Matrix3d rotation(const double a, const double b, const double g)
+{
+    double theta2 = a * a + b * b + g * g + std::numeric_limits<double>::epsilon();
+
+    double theta = std::sqrt(theta2);
+
+    const double factor = std::sin(theta) / theta2;
+    const double t = std::tan(0.5 * theta);
+
+    Eigen::Matrix3d matrix;
+    matrix <<
+    -(b * b + g * g)  *  t, a * b * t - g * theta, a * g * t + b * theta,
+     a * b * t + g * theta,  -(a * a + g * g) * t, b * g * t - a * theta,
+     a * g * t - b * theta, b * g * t + a * theta,  -(a * a + b * b) * t;
+
+    matrix *= factor;
+    matrix += Eigen::Matrix3d::Identity();
+
+    return matrix;
+}
+
+
 
 /**
  *

@@ -1,5 +1,7 @@
 #include "p3p.h"
 
+#include "geometry/pose.h"
+
 /**
 
 Solve the quartic equation \f$ ax^4+bx^3+cx^2+dx+e=0 \f$.

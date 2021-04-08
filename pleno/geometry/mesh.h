@@ -3,6 +3,8 @@
 #include "types.h"
 #include "geometry/pose.h"
 
+template<std::size_t N> class Pose_;
+
 // The geometry of the grid: Orthogonal, Hexagonal Rows Aligned, Hexagonal Cols Aligned
 enum Geometry: std::int8_t {Orthogonal = 0, HexagonalRowsAligned = 1, HexagonalColsAligned = 2};
 std::ostream& operator<<(std::ostream& o, const Geometry& geometry);
@@ -98,6 +100,6 @@ operator<<(std::ostream& o, const GridMesh_<Dim>& g)
     return o;
 }
 
-using GridMesh = GridMesh_<3ul>;
-using GridMesh3D = GridMesh_<3ul>;
-using GridMesh2D = GridMesh_<2ul>;
+using GridMesh = GridMesh_<3u>;
+using GridMesh3D = GridMesh_<3u>;
+using GridMesh2D = GridMesh_<2u>;

@@ -127,7 +127,7 @@ GridMesh_<Dim>::nodeInWorld(std::size_t col, std::size_t row) const
 	DEBUG_ASSERT(col < width() and row < height(), "GridMesh::node: wrong indexes ("<< col <<", "<< row <<")");
 
     //initalize the grid at the position of the first node
-    return from_coordinate_system_of(this->pose_, node(col, row));
+    return from_coordinate_system_of<Dim>(this->pose_, node(col, row));
 }
 template<std::size_t Dim>
 typename GridMesh_<Dim>::Node 

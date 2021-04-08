@@ -42,7 +42,7 @@ void generate_image(
 			{
 				for (int v = vmin; v < vmax; ++v) //row
 				{
-					const P2D pixel = {u, v};
+					const P2D pixel = {u-0.5, v-0.5};
 					if ((pixel - c).norm() > R) continue; //out of distance
 					
 					mask.at<cv::Vec3b>(v-vmin, u-umin) = cv::Vec3b{
@@ -113,9 +113,9 @@ void generate_image(
 	
 	const int W 	= static_cast<int>(sensor.width());
 	const int H 	= static_cast<int>(sensor.height());
-	const double R 	= mia.radius() + 1;
+	const double R 	= mia.radius();// + 1;
 	
-	raw = Image{H, W, CV_8UC3, cv::Scalar(0, 0, 0)};
+	Image rawd = Image{H, W, CV_64FC3, cv::Scalar(0., 0., 0.)};
 
 #pragma omp parallel for	
 	//for each micro-image
@@ -136,12 +136,13 @@ void generate_image(
 			{
 				for (int v = vmin; v < vmax; ++v) //row
 				{
-					const P2D pixel = {u, v};
+					//ADD SUBPIXEL
+					const P2D pixel = {u+0.5, v+0.5};
 					if ((pixel - c).norm() > R) continue; //out of distance
 					
-					const P2D kl =  model.mi2ml(k, l);
+					const P2D kl = model.mi2ml(k, l);
 					
-					RGBA color;
+					RGBA color{0., 0., 0., 0.};
 					
 					//raytrace
 					Rays3D rays; //in CAMERA frame
@@ -153,26 +154,29 @@ void generate_image(
 							P3D P = line_plane_intersection(scene.planeInWorld(), ray); //in CAMERA frame
 							if (scene.is_inside(P)) 
 							{
-								const P2D pp = to_coordinate_system_of(scene.pose(), P).head<2>(); //in PLATE frame
-													
+								const P2D pp = to_coordinate_system_of(scene.pose(), P).head<2>(); //in PLATE frame						
 								const RGBA lcolor = scene.get_color(pp.x(), pp.y());
 								
-								color.r += lcolor.r;
-								color.g += lcolor.g;
-								color.b += lcolor.b;
+								//NOTE: lcolor.a; should be between [0, 1]
+								color.r += lcolor.r * lcolor.a;
+								color.g += lcolor.g * lcolor.a;
+								color.b += lcolor.b * lcolor.a;
+								color.a += lcolor.a;
 							}	
 						}
 						
-						const std::size_t n = vignetting ? nrays+1 : rays.size();
+						const std::size_t n = vignetting ? (nrays+1) * 255 : color.a; //rays.size();
 						
-						raw.at<cv::Vec3b>(v, u) = cv::Vec3b{
-							static_cast<uchar>(color.b / n), 
-							static_cast<uchar>(color.g / n), 
-							static_cast<uchar>(color.r / n)
+						rawd.at<cv::Vec3d>(v, u) = cv::Vec3d{
+							static_cast<double>(color.b / n), 
+							static_cast<double>(color.g / n), 
+							static_cast<double>(color.r / n)
 						};	
 					}								
 				}
 			}	
 		}
-	}	
+	}
+	
+	rawd.convertTo(raw, CV_8UC3, 1.);	
 }

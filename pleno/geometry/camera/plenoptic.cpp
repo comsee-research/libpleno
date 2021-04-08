@@ -1,7 +1,6 @@
 #include "plenoptic.h"
 
-#include <random>
-
+#include "sampler.h"
 
 #include "processing/tools/rotation.h"
 
@@ -127,8 +126,8 @@ void PlenopticCamera::init(
 	//DISTANCE FOCUS
 	dist_focus_ = h;
 	//POSE
-	pose_.translation() = Pose::Vector::Zero();
-	pose_.rotation()	= Pose::Matrix::Identity();
+	pose_.translation() = Translation::Zero();
+	pose_.rotation()	= Rotation::Identity();
 	
 	//MAIN LENS
 	main_lens_.focal() 				= F;
@@ -485,6 +484,8 @@ bool PlenopticCamera::raytrace(
 	
 	//get ray
 	r.config(p, ckl);
+	const double cosTheta = 1.; //r.direction().z(); //normalized()
+	r.color().a = cosTheta * cosTheta * cosTheta * cosTheta;
 		
 //raytrace in main lens
 	return main_lens().raytrace(r, ray);
@@ -494,21 +495,16 @@ bool PlenopticCamera::raytrace(
 	const P2D& pixel, std::size_t k, std::size_t l, std::size_t n, Rays3D& rays
 ) const
 {	
-	static thread_local std::random_device rd;
-    static thread_local std::mt19937 mt(rd());
-
-    std::uniform_real_distribution<double> dist(0., 1.);
-	
 	rays.reserve(n+1);
 
 	//get focal plane
 	const double f = mla().f(k, l); //focal
 	const double ai = (f * d()) / (d() - f); //focus distance (in MLA space)
 	
-	const auto plane = v::plane_from_3_points(
+	const auto plane = plane_from_3_points(
 			from_coordinate_system_of(mla().pose(), P3D{0., 0., ai}),
 		    from_coordinate_system_of(mla().pose(), P3D{1., 0., ai}),
-		    from_coordinate_system_of(mla().pose(), P3D{1., 1., ai})
+		    from_coordinate_system_of(mla().pose(), P3D{0., 1., ai})
 	);
 	//configure chief ray from pixel to ml center
 	Ray3D r;
@@ -526,26 +522,31 @@ bool PlenopticCamera::raytrace(
 	const P3D ckl = mla().nodeInWorld(k,l); //CAMERA
 	
 	//get chief ray
-	r.config(p, ckl); // CAMERA
-	
-	Ray ray;
-	if (main_lens().raytrace(r, ray)) rays.emplace_back(ray);
-	
+	{
+		r.config(p, ckl); // CAMERA
+		const double cosTheta = 1.; //r.direction().z(); //normalized()
+		r.color().a = cosTheta * cosTheta * cosTheta * cosTheta;
+		
+		Ray ray;
+		if (main_lens().raytrace(r, ray)) rays.emplace_back(ray);
+	}
 	//get p'
 	const P3D p_prime = line_plane_intersection(plane, r); // CAMERA
 
 	for (std::size_t i = 0; i < n; ++i)
 	{
-		const double radius = mla().radius() * std::sqrt(dist(mt)); // dist(mt);
-		const double theta = dist(mt) * 2. * M_PI;
-		
 		// Get point on lens
-		P3D c = ckl_mla + P3D{radius * std::cos(theta), radius * std::sin(theta), 0.}; // MLA
+		const P2D c_ondisk = concentric_sample_disk(ckl_mla.head<2>(), mla().radius());
+		P3D c = P3D{c_ondisk.x(), c_ondisk.y(), 0.}; // MLA
 		c = from_coordinate_system_of(mla().pose(), c); // CAMERA
 		
 		r.config(p_prime, c); // CAMERA
+		
+		const double cosTheta = 1.; //r.direction().z(); //normalized()
+		r.color().a = cosTheta * cosTheta * cosTheta * cosTheta;
 					
 		//raytrace in main lens
+		Ray ray;
 		if (main_lens().raytrace(r, ray))
 		{
 			rays.emplace_back(ray);

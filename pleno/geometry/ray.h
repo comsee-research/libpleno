@@ -2,22 +2,23 @@
 
 #include "types.h"
 
+#include "io/archive.h"
+
+#include "geometry/plane.h"
+
 template<std::size_t N>
 class Ray_
-{
-public:
-	using Vector = Eigen::Matrix<double, N, 1>;
-
-private: 
-    Vector origin_;
-    Vector direction_;
+{ 
+    PnD<N> origin_;
+    PnD<N> direction_;
     RGBA color_;
 
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
+    
     //Constructor
-    Ray_(const Vector& o = Vector::Zero(),
-         const Vector& d = Vector::Zero(),
+    Ray_(const PnD<N>& o = PnD<N>::Zero(),
+         const PnD<N>& d = PnD<N>::Zero(),
          const RGBA& c = {0.0, 0.0, 0.0, 255.0});
          
     Ray_(const Ray_& o);
@@ -25,23 +26,23 @@ public:
 
     ~Ray_();
     
-	Vector & origin();
-	const Vector & origin() const;
+	PnD<N> & origin();
+	const PnD<N> & origin() const;
 	
-	Vector & direction();
-	const Vector & direction() const;
+	PnD<N> & direction();
+	const PnD<N> & direction() const;
 	
 	RGBA & color();
 	const RGBA & color() const;
 	
     // Configure a ray according using 2 points
     // p1 is new origin
-    void config(const Vector& p1,
-                const Vector& p2,
+    void config(const PnD<N>& p1,
+                const PnD<N>& p2,
                 const RGBA& c = {0.0, 0.0, 0.0, 255.0});
 
     // Return a point on a ray
-    Vector operator()(double t) const;
+    PnD<N> operator()(double t) const;
 };
 
 
@@ -76,10 +77,10 @@ using Ray2D = Ray_<2ul>;
 
 //------------------------------------------------------------------------------
 // Determine the t coefficient of a parametric line equation where its cross a plane
-double compute_t_coef(const Eigen::Matrix<double, 4, 1>& plane, const Ray3D& line);
+double compute_t_coef(const PlaneCoefficients& plane, const Ray3D& line);
 
 // Determine the intersection point between a plane and a line
-P3D line_plane_intersection(const Eigen::Matrix<double, 4, 1>& plane, const Ray3D& ray);
+P3D line_plane_intersection(const PlaneCoefficients& plane, const Ray3D& ray);
 
 // return the ditance between a point to a line
 double line_point_distance(const Ray3D& ray, const P3D& point);
