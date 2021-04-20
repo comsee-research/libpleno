@@ -50,4 +50,16 @@ inline P2D concentric_sample_disk(const P2D& origin = {0., 0.}, double scale = 1
     return P2D{origin.x() + radius * std::cos(theta), origin.y() + radius * std::sin(theta)};
 }
 
+inline P2D uniform_sample_rect(const P2D& origin = {0., 0.}, double scalex = 1., double scaley = 1.)
+{
+	static thread_local std::random_device rd;
+    static thread_local std::mt19937 mt(rd());
+
+    std::uniform_real_distribution<double> dist(0., 1.);
+    
+    const double x = scalex * dist(mt); 
+    const double y = scaley * dist(mt);
+	
+	return P2D{origin.x() + x, origin.y() + y};
+}
 

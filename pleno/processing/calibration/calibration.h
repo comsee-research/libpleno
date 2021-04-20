@@ -2,8 +2,9 @@
 
 #include "types.h"
 
-#include "geometry/camera/models.h"
+#include "geometry/camera/plenoptic.h"
 
+#include "geometry/distortions.h"
 #include "geometry/observation.h"
 #include "geometry/internals.h"
 
@@ -47,4 +48,13 @@ void calibration_relativeBlur(
 	InternalParameters& internals,     /* out */ 
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const std::vector<Image>& images
+);
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+void calibration_inverseDistortions(
+	Distortions& invdistortions,
+	const PlenopticCamera& mfpc,
+	const CheckerBoards& scene
 );

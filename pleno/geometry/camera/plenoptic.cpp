@@ -48,6 +48,9 @@ ThinLensCamera& PlenopticCamera::main_lens() { return main_lens_; }
 const Distortions& PlenopticCamera::main_lens_distortions() const { return distortions_; }
 Distortions& PlenopticCamera::main_lens_distortions() { return distortions_; }
 
+const Distortions& PlenopticCamera::main_lens_invdistortions() const { return invdistortions_; }
+Distortions& PlenopticCamera::main_lens_invdistortions() { return invdistortions_; }
+
 double PlenopticCamera::focal() const { return main_lens().focal(); }
 double& PlenopticCamera::focal() { return main_lens().focal(); }   
 
@@ -138,6 +141,9 @@ void PlenopticCamera::init(
 	//DISTORTIONS
 	distortions_.radial() 		<< 0., 0., 0.;
 	distortions_.tangential() 	<< 0., 0.;
+	
+	invdistortions_.radial() 		<< 0., 0., 0.;
+	invdistortions_.tangential() 	<< 0., 0.;
 	
 	/* 	
 		Init of d and D is kinda tricky: 
@@ -671,6 +677,7 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 		<< "\tmla = {" << std::endl << pcm.mla() << "}," << std::endl
 		<< "\tlens = {" << std::endl << pcm.main_lens() << "}," << std::endl
 		<< "\tdistortions = {" << std::endl << pcm.main_lens_distortions() << "}," << std::endl
+		<< "\tinvdistortions = {" << std::endl << pcm.main_lens_invdistortions() << "}," << std::endl
 		<< "\td = " << pcm.d() << "," << std::endl
 		<< "\tD = " << pcm.D() << "," << std::endl
 		<< "\tprincipal point = {" << pcm.pp().transpose() << "}";
@@ -730,6 +737,9 @@ void save(std::string path, const PlenopticCamera& pcm)
     config.distortions().radial() = pcm.main_lens_distortions().radial();
     config.distortions().tangential() = pcm.main_lens_distortions().tangential();
     
+    config.invdistortions().radial() = pcm.main_lens_invdistortions().radial();
+    config.invdistortions().tangential() = pcm.main_lens_invdistortions().tangential();
+    
     // Configuring the Focus distance
     config.dist_focus() = pcm.distance_focus();
     
@@ -773,6 +783,9 @@ void load(std::string path, PlenopticCamera& pcm)
     // Configuring the Distortions
     pcm.main_lens_distortions().radial() = config.distortions().radial(); 
     pcm.main_lens_distortions().tangential() = config.distortions().tangential(); 
+    
+    pcm.main_lens_invdistortions().radial() = config.invdistortions().radial(); 
+    pcm.main_lens_invdistortions().tangential() = config.invdistortions().tangential(); 
     
     // Configuring the Focus distance
     pcm.distance_focus() = config.dist_focus();

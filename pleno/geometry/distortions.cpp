@@ -4,8 +4,7 @@
 
 double Distortions::radius(const P2D& p) const
 {
-    //TODO: check performance over std::sqrt
-    return std::hypot(p[0], p[1]); 
+    return p.norm(); 
 }
 
 std::vector<double> Distortions::radius(const P2DS& ps) const
@@ -62,21 +61,18 @@ void Distortions::apply_depth(P3D& p) const
 
 void Distortions::apply_depth(P3DS& ps) const
 {
-    for(P3D& p : ps)
-    	apply_depth(p);
+    for(P3D& p : ps) apply_depth(p);
 }
 #endif
 
 void Distortions::apply_radial(P2DS& ps) const
 {
-    for(P2D& p : ps)
-    	apply_radial(p);
+    for(P2D& p : ps) apply_radial(p);
 }
 
 void Distortions::apply_tangential(P2DS& ps) const
 {
-    for(P2D& p : ps)
-    	apply_tangential(p);
+    for(P2D& p : ps) apply_tangential(p);
 }
 
 
@@ -114,30 +110,21 @@ void Distortions::apply(P3D& p) const
 */
 void Distortions::apply(P3DS& ps) const
 {
-    for(P3D& p : ps)
-    	apply(p);
-}
-
-/*
- * @Brief apply_distortions apply distortions to a point expressed in CAMERA
-**/
-void Distortions::unapply(P3D& /*p*/) const
-{
-    PRINT_WARN("Distortions::unapply not implemented yet");
+    for(P3D& p : ps) apply(p);
 }
 
 std::ostream& operator<<(std::ostream& o, const Distortions& dist)
 {
     const P3D& r = dist.radial();
     const P2D& t = dist.tangential();
-    
+	
+    o << "radial = {" << r[0] << ", " << r[1] << ", " << r[2] << "};\n";
+    o << "tangential = {" << t[0] << ", " << t[1] << "};\n";
+        
 #if defined(USE_DEPTH_DISTORTION) && USE_DEPTH_DISTORTION
     const auto& d = dist.depth();    
 	o << "depth = {" << d[0] << ", " << d[1] << "};\n";
 #endif
-	
-    o << "radial = {" << r[0] << ", " << r[1] << ", " << r[2] << "};\n";
-    o << "tangential = {" << t[0] << ", " << t[1] << "};\n";
 
     return o;
 }

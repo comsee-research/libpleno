@@ -227,6 +227,7 @@ set(PLENO_OPTIMIZATION_SRC
 		pleno/optimization/errors/radius.cpp
 		pleno/optimization/errors/blur.cpp
 		pleno/optimization/errors/extrinsics.cpp
+		pleno/optimization/errors/invdistortion.cpp
 )
 
 set(PLENO_IO_SRC
@@ -252,6 +253,7 @@ set(PLENO_PROCESSING_SRC
 	pleno/processing/calibration/plenoptic.cpp	
 	pleno/processing/calibration/extrinsics.cpp	
 	pleno/processing/calibration/blur.cpp	
+	pleno/processing/calibration/invdistortion.cpp
 #--Detection
 	pleno/processing/detection/mic.cpp
 	pleno/processing/detection/corners/corners.cpp

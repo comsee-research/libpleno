@@ -31,6 +31,7 @@ protected:
 	
 	ThinLensCamera main_lens_;	
     Distortions distortions_;
+    Distortions invdistortions_;
     
     InternalParameters params_;
     
@@ -62,6 +63,9 @@ public:
 
     const Distortions& main_lens_distortions() const;
           Distortions& main_lens_distortions();
+          
+    const Distortions& main_lens_invdistortions() const;
+          Distortions& main_lens_invdistortions();
        
  	const MicroLensesArray& mla() const;
           MicroLensesArray& mla();
