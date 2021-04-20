@@ -173,7 +173,7 @@ preprocess(
 	PRINT_INFO("=== Computing internal parameters");
 	InternalParameters params;
 	{
-		constexpr double lambda = 0.9931;
+		constexpr double lambda = 0.9938; //FIXME: lambda should be estimated from Eq.(28)
 		
 		params.m 		= coefs[0].m ; // Eq.(10)
 		params.scale	= pxl2metric;

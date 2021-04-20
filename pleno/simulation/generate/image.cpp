@@ -59,9 +59,8 @@ void generate_image(
 						P3D P = line_plane_intersection(scene.planeInWorld(), ray); //in CAMERA frame
 						if (scene.is_inside(P)) 
 						{
-							const P2D pp = to_coordinate_system_of(scene.pose(), P).head<2>(); //in PLATE frame
-												
-							RGBA color = scene.get_color(pp.x(), pp.y());
+							const P2D pp = to_coordinate_system_of(scene.pose(), P).head<2>(); //in PLATE frame			
+							const RGBA color = scene.get_color(pp.x(), pp.y());
 							
 							raw.at<cv::Vec3b>(v, u) = cv::Vec3b{
 								static_cast<uchar>(color.b), 
@@ -136,7 +135,7 @@ void generate_image(
 			{
 				for (int v = vmin; v < vmax; ++v) //row
 				{
-					//ADD SUBPIXEL
+					//CENTER SUBPIXEL
 					const P2D pixel = {u+0.5, v+0.5};
 					if ((pixel - c).norm() > R) continue; //out of distance
 					
@@ -157,15 +156,16 @@ void generate_image(
 								const P2D pp = to_coordinate_system_of(scene.pose(), P).head<2>(); //in PLATE frame						
 								const RGBA lcolor = scene.get_color(pp.x(), pp.y());
 								
-								//NOTE: lcolor.a; should be between [0, 1]
-								color.r += lcolor.r * lcolor.a;
-								color.g += lcolor.g * lcolor.a;
-								color.b += lcolor.b * lcolor.a;
-								color.a += lcolor.a;
+								const double alpha = ray.color().a; //NOTE: alpha should be between [0, 1]
+								
+								color.r += lcolor.r * alpha; //between [0, 255]
+								color.g += lcolor.g * alpha; //between [0, 255]
+								color.b += lcolor.b * alpha; //between [0, 255]
+								color.a += alpha; //between [0, 1]
 							}	
 						}
 						
-						const std::size_t n = vignetting ? (nrays+1) * 255 : color.a; //rays.size();
+						const std::size_t n = vignetting ? (nrays+1) : color.a;
 						
 						rawd.at<cv::Vec3d>(v, u) = cv::Vec3d{
 							static_cast<double>(color.b / n), 

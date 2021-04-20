@@ -717,8 +717,7 @@ void save(std::string path, const PlenopticCamera& pcm)
     config.mla().mesh().geometry() = pcm.mla().geometry();
     
     config.mla().focal_lengths().resize(pcm.I());
-    for (std::size_t i = 0; i < pcm.I(); ++i) 
-    	config.mla().focal_lengths()[i] = pcm.mla().f(i);
+    for (std::size_t i = 0; i < pcm.I(); ++i) config.mla().focal_lengths()[i] = pcm.mla().f(i);
 
 	// Configuring the Main Lens
     config.main_lens().pose().rotation() = pcm.main_lens().pose().rotation();
@@ -734,12 +733,15 @@ void save(std::string path, const PlenopticCamera& pcm)
     // Configuring the Focus distance
     config.dist_focus() = pcm.distance_focus();
     
-    // Configuring the Mode
+    // Configuring additional information
     config.mode() 	= pcm.mode();
     config.d() 		= pcm.d();
     config.D() 		= pcm.D();
     config.pp() 	= pcm.pp();
     config.Rxyz()	= pcm.mla().pose().rotation().eulerAngles(0,1,2);
+    
+    config.focal_planes().resize(pcm.I());
+    for (std::size_t i = 0; i < pcm.I(); ++i) config.focal_planes()[i] = pcm.focal_plane(i);
 
 	v::save(path, config);
 }
