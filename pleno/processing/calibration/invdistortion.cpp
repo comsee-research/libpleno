@@ -34,7 +34,8 @@ void optimize(
 		for (std::size_t i = 0; i < nsample; ++i)
 		{
 			//get point on checkerboard
-			P3D pcb; pcb << uniform_sample_rect(P2D{0.,0.}, cb.width(), cb.height()), 0.;	
+			const P3D maxp = cb.node(cb.width()-1, cb.height()-1);
+			P3D pcb; pcb << uniform_sample_rect(P2D{0.,0.}, maxp.x(), maxp.y()), 0.;	
 			const P3D pcam = to_coordinate_system_of(cb.pose(), pcb);
 			
 			//project point through main lens

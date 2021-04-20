@@ -512,8 +512,6 @@ bool PlenopticCamera::raytrace(
 		    from_coordinate_system_of(mla().pose(), P3D{1., 0., ai}),
 		    from_coordinate_system_of(mla().pose(), P3D{0., 1., ai})
 	);
-	//configure chief ray from pixel to ml center
-	Ray3D r;
 
 	//get pixel in camera coordinate	
 	P2D pix = pixel; //IMAGE UV
@@ -526,19 +524,35 @@ bool PlenopticCamera::raytrace(
 	//get ml center
 	const P3D ckl_mla = mla().node(k,l); //MLA
 	const P3D ckl = mla().nodeInWorld(k,l); //CAMERA
+
+	//configure chief ray from pixel to ml center
+	Ray3D r; r.config(p, ckl); // CAMERA
 	
-	//get chief ray
-	{
-		r.config(p, ckl); // CAMERA
+	//get p'
+	const P3D p_prime = line_plane_intersection(plane, r); // CAMERA
+	//unapply distortions
+	P3D p_prime_d = p_prime;
+	main_lens_invdistortions().apply(p_prime_d);
+	
+	const auto mlplane = main_lens().planeInWorld();
+	
+	//raytrace chief ray
+	{	
+		r.config(p_prime, ckl); // CAMERA
+		const P3D p_onlens = line_plane_intersection(mlplane, r);
+		r.config(p_prime_d, p_onlens);		
+		
 		const double cosTheta = 1.; //r.direction().z(); //normalized()
 		r.color().a = cosTheta * cosTheta * cosTheta * cosTheta;
 		
 		Ray ray;
-		if (main_lens().raytrace(r, ray)) rays.emplace_back(ray);
+		if (main_lens().raytrace(r, ray))
+		{		 	
+		 	rays.emplace_back(ray);
+		}
 	}
-	//get p'
-	const P3D p_prime = line_plane_intersection(plane, r); // CAMERA
-
+	
+	//raytrace rays on lens
 	for (std::size_t i = 0; i < n; ++i)
 	{
 		// Get point on lens
@@ -547,6 +561,9 @@ bool PlenopticCamera::raytrace(
 		c = from_coordinate_system_of(mla().pose(), c); // CAMERA
 		
 		r.config(p_prime, c); // CAMERA
+		const P3D p_onlens = line_plane_intersection(mlplane, r);
+				
+		r.config(p_prime_d, p_onlens);		
 		
 		const double cosTheta = 1.; //r.direction().z(); //normalized()
 		r.color().a = cosTheta * cosTheta * cosTheta * cosTheta;
