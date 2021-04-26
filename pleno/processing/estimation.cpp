@@ -26,6 +26,9 @@
 #include "io/printer.h"
 #include "processing/imgproc/improcess.h"
 
+#include "processing/tools/vector.h" //random_n_unique
+#include "processing/tools/rmse.h" //RMSE, MAE
+
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/fast_math.hpp>
 
@@ -212,4 +215,100 @@ estimation_line_fitting(
 	PRINT_DEBUG("Line: y = "<< m << " * x + " << c);	
 	
 	return {m,c};	
+}
+
+////////////////////////////////////////////////////////////////////////////////
+// Estimation on 3D points
+////////////////////////////////////////////////////////////////////////////////
+PlaneCoefficients
+estimation_plane_fitting(const P3DS& pts)
+{
+	// copy coordinates to  matrix in Eigen format
+	const std::size_t n = pts.size();
+	
+	Eigen::Matrix<double, 3, Eigen::Dynamic> coord(3, n);
+	for (std::size_t i = 0; i < n; ++i) coord.col(i) = pts[i];
+
+	// calculate centroid
+	P3D centroid(coord.row(0).mean(), coord.row(1).mean(), coord.row(2).mean());
+
+	// subtract centroid
+	coord.row(0).array() -= centroid(0); 
+	coord.row(1).array() -= centroid(1); 
+	coord.row(2).array() -= centroid(2);
+
+	// we only need the left-singular matrix here
+	//  http://math.stackexchange.com/questions/99299/best-fitting-plane-given-a-set-of-points
+	auto svd = coord.jacobiSvd(Eigen::ComputeThinU | Eigen::ComputeThinV);
+	P3D normal = svd.matrixU().rightCols<1>();
+	
+	PlaneCoefficients eq;
+	eq << normal.normalized(), 0.;
+	eq(3) = - compute_signed_distance(eq, centroid);
+	
+	//force normal to point in camera direction
+	if (eq(2) > 0.) eq.head<3>() *= -1.;
+	if (eq(3) > 0.) eq(3) *= -1.; 
+	
+	return eq;
+}
+
+PlaneCoefficients
+estimation_plane_ransac(
+	const P3DS& pts,
+	double threshold, //Threshold value to determine data points that are fit well by model.
+	std::size_t n, //Minimum number of data points required to estimate model parameters.
+	std::size_t k, //Maximum number of iterations allowed in the algorithm.
+	std::size_t d //Number of close data points required to assert that a model fits well to data.
+)
+{
+	auto dist = [](const PlaneCoefficients& model, const P3D& p) -> double {
+		return (model(0) * p.x() + model(1) * p.y() + model(2) * p.z() - model(3)) / model.head<3>().norm();
+	};
+
+	auto eval = [&dist](const PlaneCoefficients& model, const P3DS& data) -> RMSE {
+		RMSE rmse{0., 0};
+		for (const auto& p : data) rmse.add(dist(model, p));			
+		return rmse;
+	};
+	
+	double err = 1e27;
+	PlaneCoefficients model;
+	
+	P3DS data{pts};
+		
+	for (std::size_t i = 0; i < k; ++i)
+	{		
+		//n randomly selected values from data
+		P3DS inliers; inliers.reserve(data.size());
+		auto ndata = random_n_unique(data.begin(), data.end(), n);	
+		inliers.insert(inliers.begin(), data.begin(), ndata);
+		
+		//model parameters fitted to inliers
+		PlaneCoefficients tmodel = estimation_plane_fitting(inliers);
+		
+		//for every point in data not in inliers
+		for (auto it = ndata; it != data.end(); ++it)
+		{
+			if (dist(tmodel, *it) < threshold) inliers.emplace_back(*it);
+		}	
+		
+		//if the number of inliers is > d
+		if (inliers.size() > d) // This implies that we may have found a good model, now test how good it is.
+		{
+			//model parameters fitted to all points
+        	PlaneCoefficients bmodel = estimation_plane_fitting(inliers);
+        	
+        	//measure of how well the new model fits these points
+        	RMSE rmse = eval(bmodel, inliers); const double error = rmse.get();
+        	
+        	if (error < err) //if better model, save it
+        	{
+        		model = bmodel;
+        		err = error;
+        	}
+		}				
+	}	
+	
+	return model;
 }

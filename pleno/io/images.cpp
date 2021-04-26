@@ -9,8 +9,10 @@ void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInf
 	
 	for(const auto& cfg : cfgs)
 	{
-		Image img, tmp = cv::imread(cfg.path(), cv::IMREAD_UNCHANGED);
-		
+		Image tmp = cv::imread(cfg.path(), cv::IMREAD_UNCHANGED);
+		if (tmp.empty()) { PRINT_ERR("Cannot read image at: " << cfg.path()); continue; }
+	
+		Image img;	
 		if (not debayered) debayering(tmp, img);
 		else img = tmp;
 		
@@ -29,6 +31,7 @@ void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInf
 void load(const ImageWithInfoConfig& cfg, ImageWithInfo& image, bool debayered)
 {
 	Image img, tmp = cv::imread(cfg.path(), cv::IMREAD_UNCHANGED);
+	if (tmp.empty()) { PRINT_ERR("Cannot read image at: " << cfg.path()); return; }
 	
 	if (not debayered) debayering(tmp, img);
 	else img = tmp;

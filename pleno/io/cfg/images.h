@@ -15,7 +15,7 @@ V_DEFINE_PROPERTIES(MetaDataImageConfig)
 (
 	V_DEFINE_PROPERTY(debayered, bool(true), "Is image already debayered?")
 	V_DEFINE_PROPERTY(rgb, bool(true), "Is image in RGB format?")
-	V_DEFINE_PROPERTY(format, std::size_t(8), "Image format (8-bits, 16-bits, 32-bits, 64-bits)")
+	V_DEFINE_PROPERTY(format, std::size_t(8ul), "Image format (8-bits, 16-bits, 32-bits, 64-bits)")
 )
 
 V_DEFINE_PROPERTIES(ImagesConfig)

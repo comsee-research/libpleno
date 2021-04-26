@@ -18,13 +18,26 @@ using PnD = Eigen::Matrix<double, static_cast<int>(N), 1>;
 template <std::size_t N>
 using PnDS = AlignedVector<PnD<N>>;
 
-using P2D 	= PnD<2ul>; //Eigen::Vector2d;
-using P2DS 	= AlignedVector<P2D>;
-using P3D 	= PnD<3ul>; //Eigen::Vector3d;
-using P3DS 	= AlignedVector<P3D>;
-using P4D 	= PnD<4ul>; //Eigen::Vector4d;
-using P4DS 	= AlignedVector<P4D>;
+using P2D 		= PnD<2ul>; //Eigen::Vector2d;
+using P2DS 		= AlignedVector<P2D>;
 
+using Pixel		= PnD<2ul>; //Eigen::Vector2d;
+using Pixels	= AlignedVector<Pixel>; //Eigen::Vector2d;
+
+using P3D 		= PnD<3ul>; //Eigen::Vector3d;
+using P3DS 		= AlignedVector<P3D>;
+
+using Point 	= PnD<3ul>;
+using Points	= AlignedVector<Point>;
+
+using P4D 		= PnD<4ul>; //Eigen::Vector4d;
+using P4DS 		= AlignedVector<P4D>;
+
+using HomogeneousPoint = PnD<4ul>;
+using HomogeneousPoints = AlignedVector<HomogeneousPoint>;
+
+using Vector = Eigen::Matrix<double, Eigen::Dynamic, 1>;
+using Matrix = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
 
 template<std::size_t N> class Pose_;
 using Poses 	= AlignedVector<Pose_<3ul>>;
@@ -97,7 +110,5 @@ using PosesWithError 		= AlignedVector<PoseWithError>;
 
 struct FocalLength 			{ Real f; };
 using FocalLengths 			= AlignedVector<FocalLength>;
-
-struct RGBA					{ Real r = 0., g = 0., b = 0., a = 255.; };
 
 struct BlurProportionalityCoefficient { Real kappa; };

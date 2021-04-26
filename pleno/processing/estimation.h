@@ -5,6 +5,9 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/fast_math.hpp>
 
+#include "geometry/plane.h"
+
+
 ////////////////////////////////////////////////////////////////////////////////
 // Micro-image estimation of properties
 ////////////////////////////////////////////////////////////////////////////////
@@ -41,5 +44,21 @@ estimation_line_fitting(
 	cv::DistanceTypes dist= cv::DIST_L1 //dist in cv:: { DIST_USER, DIST_L1, DIST_L2, DIST_C, DIST_L12, DIST_FAIR, DIST_WELSCH, DIST_HUBER }
 );
 
+////////////////////////////////////////////////////////////////////////////////
+// Estimation on 3D points
+////////////////////////////////////////////////////////////////////////////////
+PlaneCoefficients 
+estimation_plane_fitting(
+	const P3DS& pts
+);
+
+PlaneCoefficients
+estimation_plane_ransac(
+	const P3DS& pts,
+	double threshold, //Threshold value to determine data points that are fit well by model.
+	std::size_t n = 50ul, //Minimum number of data points required to estimate model parameters.
+	std::size_t k = 100ul, //Maximum number of iterations allowed in the algorithm.
+	std::size_t d = 50ul //Number of close data points required to assert that a model fits well to data.
+);
 
 

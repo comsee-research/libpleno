@@ -10,10 +10,10 @@ template<class BidirectIterator>
 BidirectIterator random_n_unique(BidirectIterator begin, BidirectIterator end, std::size_t num_random) 
 {
 #if SAME_SEED 
-    std::mt19937 mt;
+    static thread_local std::mt19937 mt;
 #else
-    std::random_device rd;
-    std::mt19937 mt(rd());
+    static thread_local std::random_device rd;
+    static thread_local std::mt19937 mt(rd());
 #endif
     std::size_t left = std::distance(begin, end);
     while (num_random--) 

@@ -5,6 +5,7 @@
 #include "io/archive.h"
 
 #include "geometry/plane.h"
+#include "geometry/rgba.h"
 
 template<std::size_t N>
 class Ray_

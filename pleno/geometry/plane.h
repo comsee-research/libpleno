@@ -2,7 +2,7 @@
 
 #include "types.h"
 
-using PlaneCoefficients = Eigen::Matrix<double, 4, 1>;
+using PlaneCoefficients = Eigen::Matrix<double, 4, 1>; //Coefficients (a,b,c,d) such as ax + by + cz = d 
 
 /**
 	Compute the signed distance between the plane and the point with a²+b²+c²=1
