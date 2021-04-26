@@ -474,8 +474,15 @@ bool PlenopticCamera::raytrace(
 	const P2D& pixel, std::size_t k, std::size_t l, Ray3D& ray
 ) const
 {	
-//configure ray from pixel to ml center
-	Ray3D r;
+	//get focal plane
+	const double f = mla().f(k, l); //focal
+	const double ai = (f * d()) / (d() - f); //focus distance (in MLA space)
+	
+	const auto plane = plane_from_3_points(
+			from_coordinate_system_of(mla().pose(), P3D{0., 0., ai}),
+		    from_coordinate_system_of(mla().pose(), P3D{1., 0., ai}),
+		    from_coordinate_system_of(mla().pose(), P3D{0., 1., ai})
+	);
 
 	//get pixel in camera coordinate	
 	P2D pix = pixel; //IMAGE UV
@@ -488,8 +495,25 @@ bool PlenopticCamera::raytrace(
 	//get ml center
 	const P3D ckl = mla().nodeInWorld(k,l); //CAMERA
 	
-	//get ray
-	r.config(p, ckl);
+	//configure chief ray from pixel to ml center
+	Ray3D r; r.config(p, ckl); // CAMERA
+	
+	//get p'
+	const P3D p_prime = line_plane_intersection(plane, r); // CAMERA
+	
+	//unapply distortions
+	P3D p_prime_d = p_prime;
+	main_lens_invdistortions().apply(p_prime_d);
+	
+	//get main lens plane 
+	const auto mlplane = main_lens().planeInWorld();
+	
+	r.config(p_prime, ckl); // CAMERA
+	const P3D p_onlens = line_plane_intersection(mlplane, r);
+	
+	//re-configure ray
+	r.config(p_prime_d, p_onlens);		
+	
 	const double cosTheta = 1.; //r.direction().z(); //normalized()
 	r.color().a = cosTheta * cosTheta * cosTheta * cosTheta;
 		
