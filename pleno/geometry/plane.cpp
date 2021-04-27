@@ -44,21 +44,26 @@ Plane::Plane()
 	coeff_ << 0., 0., 1., 0.; //unit normal vector
 	origin_ << 0., 0., 0.; //origin
 }
+
 Plane::Plane(const PlaneCoefficients& coeffs) 
-	: coeff_{coeffs}, origin_{coeffs.head<3>() * coeffs(3) / coeffs.head<3>().squaredNorm()} 
+	: coeff_(coeffs), origin_(coeffs.head<3>() * coeffs(3) / coeffs.head<3>().squaredNorm()) 
 {
 }
+
 Plane::Plane(const PlaneCoefficients& coeffs, const P3D& o) 
-	: coeff_{coeffs}, origin_{o} 
+	: coeff_(coeffs), origin_(o) 
 {
 }
+
 Plane::Plane(const P3D& p1, const P3D& p2, const P3D& p3) 
-	: coeff_{plane_from_3_points(p1,p2,p3)}, origin_{(p1 + p2 + p2) / 3.} 
+	: coeff_(plane_from_3_points(p1,p2,p3)), origin_((p1 + p2 + p2) / 3.) 
 {
 }
 	
-Plane::Plane(const Plane& o) : coeff_{o.coeff_}, origin_{o.origin_} {}
-Plane::Plane(Plane&& o) : coeff_{std::move(o.coeff_)}, origin_{std::move(o.origin_)} {}
+Plane::Plane(const Plane& o) : coeff_(o.coeff_), origin_(o.origin_) {}
+Plane::Plane(Plane&& o) : coeff_(std::move(o.coeff_)), origin_(std::move(o.origin_)) {}
+
+Plane::~Plane() {}
 	
 const PlaneCoefficients& Plane::coeff() const { return coeff_; }
 PlaneCoefficients& Plane::coeff() { return coeff_; }
@@ -105,15 +110,15 @@ P3D Plane::position() const
 void save(v::OutputArchive& archive, const Plane& plane)
 {
 	archive
-		("coeff", plane.coeff_)
-		("origin", plane.origin_);
+		("coeff", plane.coeff())
+		("origin", plane.origin());
 }
 
 void load(v::InputArchive& archive, Plane& plane)
 {
 	archive
-		("coeff", plane.coeff_)
-		("origin", plane.origin_);
+		("coeff", plane.coeff())
+		("origin", plane.origin());
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -123,5 +128,3 @@ std::ostream& operator<<(std::ostream& os, const Plane& plane)
 	os << plane.a() << " * x + " << plane.b() << " * y + " << plane.c() << " * z = " << plane.d();
 	return os; 
 }
-	
-	

@@ -29,6 +29,8 @@ class Plane
 	P3D origin_;
 
 public:
+EIGEN_MAKE_ALIGNED_OPERATOR_NEW 
+
 	Plane();
 	Plane(const PlaneCoefficients& coeffs);
 	Plane(const PlaneCoefficients& coeffs, const P3D& o);
@@ -36,6 +38,8 @@ public:
 	
 	Plane(const Plane& o);
 	Plane(Plane&& o);
+	
+	virtual ~Plane();
 	
 	const PlaneCoefficients& coeff() const;
 	PlaneCoefficients& coeff();
