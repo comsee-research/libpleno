@@ -47,12 +47,12 @@ estimation_line_fitting(
 ////////////////////////////////////////////////////////////////////////////////
 // Estimation on 3D points
 ////////////////////////////////////////////////////////////////////////////////
-PlaneCoefficients 
+Plane 
 estimation_plane_fitting(
 	const P3DS& pts
 );
 
-PlaneCoefficients
+Plane
 estimation_plane_ransac(
 	const P3DS& pts,
 	double threshold, //Threshold value to determine data points that are fit well by model.

@@ -220,7 +220,7 @@ estimation_line_fitting(
 ////////////////////////////////////////////////////////////////////////////////
 // Estimation on 3D points
 ////////////////////////////////////////////////////////////////////////////////
-PlaneCoefficients
+Plane
 estimation_plane_fitting(const P3DS& pts)
 {
 	// copy coordinates to  matrix in Eigen format
@@ -250,10 +250,10 @@ estimation_plane_fitting(const P3DS& pts)
 	if (eq(2) > 0.) eq.head<3>() *= -1.;
 	if (eq(3) > 0.) eq(3) *= -1.; 
 	
-	return eq;
+	return Plane{eq, centroid};
 }
 
-PlaneCoefficients
+Plane
 estimation_plane_ransac(
 	const P3DS& pts,
 	double threshold, //Threshold value to determine data points that are fit well by model.
@@ -274,6 +274,7 @@ estimation_plane_ransac(
 	
 	double err = 1e27;
 	PlaneCoefficients model;
+	P3D origin;
 	
 	P3DS data{pts};
 		
@@ -285,30 +286,31 @@ estimation_plane_ransac(
 		inliers.insert(inliers.begin(), data.begin(), ndata);
 		
 		//model parameters fitted to inliers
-		PlaneCoefficients tmodel = estimation_plane_fitting(inliers);
+		Plane tmodel = estimation_plane_fitting(inliers);
 		
 		//for every point in data not in inliers
 		for (auto it = ndata; it != data.end(); ++it)
 		{
-			if (dist(tmodel, *it) < threshold) inliers.emplace_back(*it);
+			if (dist(tmodel.coeff(), *it) < threshold) inliers.emplace_back(*it);
 		}	
 		
 		//if the number of inliers is > d
 		if (inliers.size() > d) // This implies that we may have found a good model, now test how good it is.
 		{
 			//model parameters fitted to all points
-        	PlaneCoefficients bmodel = estimation_plane_fitting(inliers);
+        	Plane bmodel = estimation_plane_fitting(inliers);
         	
         	//measure of how well the new model fits these points
-        	RMSE rmse = eval(bmodel, inliers); const double error = rmse.get();
+        	RMSE rmse = eval(bmodel.coeff(), inliers); const double error = rmse.get();
         	
         	if (error < err) //if better model, save it
         	{
-        		model = bmodel;
+        		model = bmodel.coeff();
+        		origin =  bmodel.origin();
         		err = error;
         	}
 		}				
 	}	
 	
-	return model;
+	return Plane{model, origin};
 }
