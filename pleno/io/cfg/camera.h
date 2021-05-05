@@ -20,7 +20,7 @@ V_DEFINE_PROPERTIES(PlenopticCameraConfig)
     
     V_DEFINE_PROPERTY(main_lens, ThinLensConfig(), "Main Lens configuration")    
     V_DEFINE_PROPERTY(distortions, DistortionConfig(), "Distortions coefficients (radial and tangential)")
-    V_DEFINE_PROPERTY(invdistortions, DistortionConfig(), "Inverse Distortions coefficients (radial and tangential)")
+    V_DEFINE_PROPERTY(distortions_inverse, DistortionConfig(), "Inverse Distortions coefficients (radial and tangential)")
     
     V_DEFINE_PROPERTY(dist_focus, double(1e8), "Focus distance (in mm). Warn: inf ~ 1e8")
     V_DEFINE_PROPERTY(I, std::size_t(3ul), "Number of micro-lenses types (0: act as pinholes array)")

@@ -45,8 +45,8 @@ void optimize(
 	using Solver_t = std::variant<std::monostate, SolverBAP, SolverCorner>;
 	
 	Solver_t vsolver;
-		if(useRadius) vsolver.emplace<SolverBAP>(1e-4, 1000, 1.0 - 1e-8);
-		else vsolver.emplace<SolverCorner>(1e-4, 1000, 1.0 - 1e-8);  
+		if(useRadius) vsolver.emplace<SolverBAP>(1e-4, 150, 1.0 - 1e-12);
+		else vsolver.emplace<SolverCorner>(1e-4, 150, 1.0 - 1e-12);  
 
 	//split observations according to frame index
 	std::unordered_map<Index /* frame index */, BAPObservations> obs;
@@ -132,7 +132,7 @@ void calibration_ExtrinsicsPlenopticCamera(
 		}
 		
 		v::save(
-			"poses-"+std::to_string(getpid())+".js", 
+			"extrinsics-poses-"+std::to_string(getpid())+".js", 
 			cfg_poses
 		);
 	}		
@@ -143,11 +143,13 @@ void calibration_ExtrinsicsPlenopticCamera(
 	
 	if (pictures.size() > 0)
 	{
+		if (yes_no_question("Do you want to graphically check the results"))
+		{
 		FORCE_GUI(true);
-		PRINT_INFO("=== Graphically checking the parameters");
-		display(model, poses, grid, features, {}, pictures);
-		
-		wait();	
+			PRINT_INFO("=== Graphically checking the parameters");
+			display(model, poses, grid, features, {}, pictures);
 		FORCE_GUI(false);
+		}
+		wait();	
 	}
 }

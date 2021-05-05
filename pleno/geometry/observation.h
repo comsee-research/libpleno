@@ -24,6 +24,9 @@ EIGEN_MAKE_ALIGNED_OPERATOR_NEW
     
     double& operator[](std::size_t i) { assert(i < 2); return (i == 0) ? u : v; }
 	double operator[](std::size_t i) const { assert(i < 2); return (i == 0) ? u : v; }
+	
+	double norm() const { return std::sqrt(u*u + v*v); }
+	P2D operator-(const MicroImageCenterObservation& o) const { return P2D{u - o.u, v - o.v}; }
 };
 
 std::ostream& operator<<(std::ostream& os, const MicroImageCenterObservation& ob);
@@ -47,6 +50,9 @@ EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	
     double& operator[](std::size_t i) { assert(i < 2); return (i == 0) ? u : v; }
 	double operator[](std::size_t i) const { assert(i < 2); return (i == 0) ? u : v; }
+	
+	double norm() const { return std::sqrt(u*u + v*v); }
+	P2D operator-(const CheckerBoardObservation& o) const { return P2D{u - o.u, v - o.v}; }
 	
 	operator BlurAwarePlenopticObservation() const;
 };
@@ -72,6 +78,9 @@ EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	
 	double& operator[](std::size_t i) { assert(i < 3); return (i == 0) ? u : (i == 1) ? v : rho; }
 	double operator[](std::size_t i) const { assert(i < 3); return (i == 0) ? u : (i == 1) ? v : rho; }
+	
+	double norm() const { return std::sqrt(u*u + v*v + rho*rho); }
+	P3D operator-(const BlurAwarePlenopticObservation& o) const { return P3D{u - o.u, v - o.v, rho - o.rho}; }
 	
 	operator CheckerBoardObservation() const;
 };

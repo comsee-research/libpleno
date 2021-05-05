@@ -41,8 +41,8 @@ struct NeighbourSearch {
 			
 			auto comp = [&ref, &acc](const auto& p1, const auto& p2)
 			{
-				const double d1 = std::hypot(acc(p1)[0] - ref[0], acc(p1)[1] - ref[1]);
-				const double d2 = std::hypot(acc(p2)[0] - ref[0], acc(p2)[1] - ref[1]);
+				const double d1 = (acc(p1) - ref).norm();// std::hypot(acc(p1)[0] - ref[0], acc(p1)[1] - ref[1]);
+				const double d2 = (acc(p2) - ref).norm();// std::hypot(acc(p2)[0] - ref[0], acc(p2)[1] - ref[1]);
 				return f(d1, d2);// ou f((t1 - point).norm(),(t2 - point).norm());
 			};
 			
@@ -63,21 +63,21 @@ struct NeighbourSearch {
 	}
 	
 	
-	template<typename Points, typename Accessor>
-	static P2D find(const Points& pts, const P2D& ref, Accessor acc = return_same)
+	template<typename Points, typename Accessor, typename Point = decltype(Accessor{}.operator()(typename Points::value_type{}))>
+	static Point find(const Points& pts, const Point& ref, Accessor acc = return_same)
 	{
-		P2D neighbors;
+		Point neighbors;
 
 		auto comp = [&ref, &acc](const auto& p1, const auto& p2)
 		{
-			const double d1 = std::hypot(acc(p1)[0] - ref[0], acc(p1)[1] - ref[1]);
-			const double d2 = std::hypot(acc(p2)[0] - ref[0], acc(p2)[1] - ref[1]);
+			const double d1 = (acc(p1) - ref).norm();// std::hypot(acc(p1)[0] - ref[0], acc(p1)[1] - ref[1]);
+			const double d2 = (acc(p2) - ref).norm();// std::hypot(acc(p2)[0] - ref[0], acc(p2)[1] - ref[1]);
 			return f(d1, d2);// ou f((t1 - point).norm(),(t2 - point).norm());
 		};
 		
 		auto min_it = std::min_element(std::begin(pts), std::end(pts), comp);
 
-		return P2D{acc(*min_it)};
+		return Point{acc(*min_it)};
 	};
 
 };

@@ -230,7 +230,7 @@ estimation_plane_fitting(const P3DS& pts)
 	for (std::size_t i = 0; i < n; ++i) coord.col(i) = pts[i];
 
 	// calculate centroid
-	P3D centroid(coord.row(0).mean(), coord.row(1).mean(), coord.row(2).mean());
+	const P3D centroid = P3D{coord.row(0).mean(), coord.row(1).mean(), coord.row(2).mean()};
 
 	// subtract centroid
 	coord.row(0).array() -= centroid(0); 
@@ -277,12 +277,12 @@ estimation_plane_ransac(
 	P3D origin;
 	
 	P3DS data{pts};
+	P3DS inliers; inliers.reserve(data.size());
 		
 	for (std::size_t i = 0; i < k; ++i)
 	{		
 		//n randomly selected values from data
-		P3DS inliers; inliers.reserve(data.size());
-		auto ndata = random_n_unique(data.begin(), data.end(), n);	
+		const auto& ndata = random_n_unique(data.begin(), data.end(), n);	
 		inliers.insert(inliers.begin(), data.begin(), ndata);
 		
 		//model parameters fitted to inliers
@@ -291,26 +291,34 @@ estimation_plane_ransac(
 		//for every point in data not in inliers
 		for (auto it = ndata; it != data.end(); ++it)
 		{
-			if (dist(tmodel.coeff(), *it) < threshold) inliers.emplace_back(*it);
+			if (dist(tmodel.coeff(), *it) < threshold) inliers.emplace_back(P3D{*it});
 		}	
+		
+		PRINT_DEBUG("Iteration ("<<i<<"): inliers = " << inliers.size() << " / " << data.size());
 		
 		//if the number of inliers is > d
 		if (inliers.size() > d) // This implies that we may have found a good model, now test how good it is.
 		{
 			//model parameters fitted to all points
-        	Plane bmodel = estimation_plane_fitting(inliers);
+        	const Plane bmodel = estimation_plane_fitting(inliers);
         	
         	//measure of how well the new model fits these points
-        	RMSE rmse = eval(bmodel.coeff(), inliers); const double error = rmse.get();
-        	
+        	const RMSE rmse = eval(bmodel.coeff(), inliers); 
+        	const double error = rmse.get(); DEBUG_VAR(error);
+        	        	
         	if (error < err) //if better model, save it
         	{
-        		model = bmodel.coeff();
-        		origin =  bmodel.origin();
-        		err = error;
+        		model 	<< bmodel.coeff();
+        		origin 	<< bmodel.origin();
+        		err 	= error;
         	}
-		}				
-	}	
+		}	
+		
+		inliers.resize(0);			
+	}
+	
+	data.clear();
+	inliers.clear();	
 	
 	return Plane{model, origin};
 }

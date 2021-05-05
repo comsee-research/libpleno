@@ -778,8 +778,8 @@ void save(std::string path, const PlenopticCamera& pcm)
     config.distortions().radial() = pcm.main_lens_distortions().radial();
     config.distortions().tangential() = pcm.main_lens_distortions().tangential();
     
-    config.invdistortions().radial() = pcm.main_lens_invdistortions().radial();
-    config.invdistortions().tangential() = pcm.main_lens_invdistortions().tangential();
+    config.distortions_inverse().radial() = pcm.main_lens_invdistortions().radial();
+    config.distortions_inverse().tangential() = pcm.main_lens_invdistortions().tangential();
     
     // Configuring the Focus distance
     config.dist_focus() = pcm.distance_focus();
@@ -825,8 +825,8 @@ void load(std::string path, PlenopticCamera& pcm)
     pcm.main_lens_distortions().radial() = config.distortions().radial(); 
     pcm.main_lens_distortions().tangential() = config.distortions().tangential(); 
     
-    pcm.main_lens_invdistortions().radial() = config.invdistortions().radial(); 
-    pcm.main_lens_invdistortions().tangential() = config.invdistortions().tangential(); 
+    pcm.main_lens_invdistortions().radial() = config.distortions_inverse().radial(); 
+    pcm.main_lens_invdistortions().tangential() = config.distortions_inverse().tangential(); 
     
     // Configuring the Focus distance
     pcm.distance_focus() = config.dist_focus();

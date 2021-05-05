@@ -15,14 +15,14 @@ BidirectIterator random_n_unique(BidirectIterator begin, BidirectIterator end, s
     static thread_local std::random_device rd;
     static thread_local std::mt19937 mt(rd());
 #endif
-    std::size_t left = std::distance(begin, end);
+    std::size_t left = std::distance(begin, end)-1;
     while (num_random--) 
     {
     	std::uniform_int_distribution<> dis(0, left);
     	
         BidirectIterator r = begin;
         std::advance(r, dis(mt));
-        std::swap(*begin, *r);
+        std::iter_swap(begin, r);
         ++begin;
         --left;
     }
