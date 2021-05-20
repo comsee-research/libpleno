@@ -5,13 +5,19 @@
 
 class Distortions
 {
+public:
+	enum DepthDistortionModel : std::uint16_t { 
+		NO_DDM = 0, 
+		HEINZE_DDM = 1, ZELLER_DDM = 2, //radially dependent
+		OFFSET_DDM = 3, LINEAR_DDM = 4, AFFINE_DDM = 5, QUADRATIC_DDM = 6 //only depth dependent
+	};
+
 private:
     Eigen::Vector3d radial_; //3 components
     Eigen::Vector2d tangential_; //2 components
-        
-#if defined(USE_DEPTH_DISTORTION) && USE_DEPTH_DISTORTION
     Eigen::Vector3d depth_; //3 components
-#endif
+    
+    DepthDistortionModel ddm_ = DepthDistortionModel::NO_DDM;
     
 public: 
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
@@ -31,13 +37,15 @@ public:
     void apply_tangential(P2DS& ps) const;
 
 //Depth distortions
-#if defined(USE_DEPTH_DISTORTION) && USE_DEPTH_DISTORTION	
+	DepthDistortionModel& model() { return ddm_; }
+	DepthDistortionModel model() const { return ddm_; }
+
 	Eigen::Vector3d& depth() { return depth_; }
 	const Eigen::Vector3d& depth() const { return depth_; }
    
     void apply_depth(P3D& p) const;
     void apply_depth(P3DS& ps) const;
-#endif		
+    
     inline double radius(const P2D& p) const;
     std::vector<double> radius(const P2DS& ps) const;
   

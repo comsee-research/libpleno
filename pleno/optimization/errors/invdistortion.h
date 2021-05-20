@@ -7,8 +7,8 @@
 #include "types.h"
 
 struct InverseDistortionCostError
-{		
-	using ErrorType = Eigen::Matrix<double, 2, 1>; //euclidiean distance
+{	
+	using ErrorType = Eigen::Matrix<double, 3, 1>; //euclidiean distance
 	
 	const Distortions& distortions;
 	const P3D ref; //original point

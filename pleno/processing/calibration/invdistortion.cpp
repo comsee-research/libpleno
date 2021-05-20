@@ -77,6 +77,7 @@ void calibration_inverseDistortions(
 	
 	invdistortions.radial() = dists.radial();
 	invdistortions.tangential() = dists.tangential();
+	invdistortions.depth() = dists.depth();
 
 	wait();
 }

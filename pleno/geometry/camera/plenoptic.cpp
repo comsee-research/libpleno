@@ -141,9 +141,11 @@ void PlenopticCamera::init(
 	//DISTORTIONS
 	distortions_.radial() 		<< 0., 0., 0.;
 	distortions_.tangential() 	<< 0., 0.;
+	distortions_.depth() 		<< 0., 0., 0.;
 	
 	invdistortions_.radial() 		<< 0., 0., 0.;
 	invdistortions_.tangential() 	<< 0., 0.;
+	invdistortions_.depth() 		<< 0., 0., 0.;
 	
 	/* 	
 		Init of d and D is kinda tricky: 
@@ -152,7 +154,7 @@ void PlenopticCamera::init(
 				- but when the main lens focus distance is at infinity
 				- the main lens focuses on the TCP (i.e., v = 2)
 				- or when h decrease, D increase,
-				- so in most cases, we will still have F > D
+				- so in most cases, we will still have F < D
 	*/
 	double d = 0., D = 0.;
 	const double m = std::fabs(params_.m);
@@ -612,8 +614,31 @@ bool PlenopticCamera::raytrace(
 double PlenopticCamera::v2mla(double x, std::size_t k, std::size_t l) const { return -x * d(k,l); }
 double PlenopticCamera::mla2v(double x, std::size_t k, std::size_t l) const { return -x / d(k,l); }
 
-double PlenopticCamera::obj2mla(double x, std::size_t k, std::size_t l) const { return D(k,l) - (focal() * x) / (x - focal()); }
-double PlenopticCamera::mla2obj(double x, std::size_t k, std::size_t l) const { return (focal() * (D(k,l)-x)) / (D(k,l) - x - focal()); }
+double PlenopticCamera::obj2mla(double x, std::size_t k, std::size_t l) const //{ return D(k,l) - (focal() * x) / (x - focal()); }
+{
+	const double z = - (focal() * x) / (x - focal());
+	
+	//apply distortions 
+	P3D delta = mla().nodeInWorld(k,l); //CAMERA
+	delta.z() = z;
+	
+	main_lens_distortions().apply_depth(delta);
+	
+	return D(k,l) + (z + delta.z());  
+}
+
+double PlenopticCamera::mla2obj(double x, std::size_t k, std::size_t l) const //{ return (focal() * (D(k,l)-x)) / (D(k,l) -x - focal()); }
+{ 
+	const double z = x - D(k,l);
+	
+	//unapply distortions
+	P3D delta = mla().nodeInWorld(k,l); //CAMERA
+	delta.z() = z;
+	
+	main_lens_invdistortions().apply_depth(delta);	
+	
+	return (focal() * (z + delta.z())) / (z + delta.z() + focal()); 
+}
 
 double PlenopticCamera::v2obj(double x, std::size_t k, std::size_t l) const { return mla2obj(v2mla(x, k, l), k, l); }
 double PlenopticCamera::obj2v(double x, std::size_t k, std::size_t l) const { return mla2v(obj2mla(x, k, l), k, l); }
@@ -730,8 +755,8 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 		os << pcm.mla().f(i) << "}," << std::endl;
 		
 		os << "\tfocal_plane = {"; 
-		i = 0; for(; i < pcm.I()-1; ++i) os << pcm.focal_plane(i) <<", ";
-		os << pcm.focal_plane(i) << "}" << std::endl;
+		i = 0; for(; i < pcm.I()-1; ++i) os << pcm.focal_plane(i) <<" ("<< pcm.obj2v(pcm.focal_plane(i)) << "), ";
+		os << pcm.focal_plane(i) <<" ("<< pcm.obj2v(pcm.focal_plane(i)) << ")}" << std::endl;
 	}
 		
 	return os;
@@ -777,9 +802,13 @@ void save(std::string path, const PlenopticCamera& pcm)
     // Configuring the Distortions
     config.distortions().radial() = pcm.main_lens_distortions().radial();
     config.distortions().tangential() = pcm.main_lens_distortions().tangential();
+    config.distortions().depth() = pcm.main_lens_distortions().depth();
+    config.distortions().model() = pcm.main_lens_distortions().model();
     
     config.distortions_inverse().radial() = pcm.main_lens_invdistortions().radial();
     config.distortions_inverse().tangential() = pcm.main_lens_invdistortions().tangential();
+    config.distortions_inverse().depth() = pcm.main_lens_invdistortions().depth();
+    config.distortions_inverse().model() = pcm.main_lens_invdistortions().model();
     
     // Configuring the Focus distance
     config.dist_focus() = pcm.distance_focus();
@@ -824,9 +853,13 @@ void load(std::string path, PlenopticCamera& pcm)
     // Configuring the Distortions
     pcm.main_lens_distortions().radial() = config.distortions().radial(); 
     pcm.main_lens_distortions().tangential() = config.distortions().tangential(); 
+    pcm.main_lens_distortions().depth() = config.distortions().depth(); 
+    pcm.main_lens_distortions().model() = Distortions::DepthDistortionModel(config.distortions().model()); 
     
     pcm.main_lens_invdistortions().radial() = config.distortions_inverse().radial(); 
     pcm.main_lens_invdistortions().tangential() = config.distortions_inverse().tangential(); 
+    pcm.main_lens_invdistortions().depth() = config.distortions_inverse().depth(); 
+    pcm.main_lens_invdistortions().model() = Distortions::DepthDistortionModel(config.distortions_inverse().model()); 
     
     // Configuring the Focus distance
     pcm.distance_focus() = config.dist_focus();

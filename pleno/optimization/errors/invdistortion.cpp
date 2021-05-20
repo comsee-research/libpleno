@@ -15,7 +15,7 @@ bool InverseDistortionCostError::operator()(
 	invdistortions.apply(target);
 	
 	//compute distance
-	error = (ref - target).head<2>();
+	error = (ref - target).head<3>();
 
     return true;
 }
