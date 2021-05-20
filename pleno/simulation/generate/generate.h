@@ -14,7 +14,7 @@ void generate_poses(
 	CalibrationPoses& poses, /* out */
 	const CameraModel_t& model, 
 	const CheckerBoard& grid, 
-	std::size_t n
+	std::size_t n, double min = 100., double max = 2000.
 );
 
 void generate_pose(Pose& pose, double min = 100., double max = 2000.);

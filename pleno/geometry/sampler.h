@@ -63,3 +63,56 @@ inline P2D uniform_sample_rect(const P2D& origin = {0., 0.}, double scalex = 1.,
 	return P2D{origin.x() + x, origin.y() + y};
 }
 
+
+inline P3D uniform_sample_sphere(const P3D& origin = {0., 0., 0.}, double scale = 1.)
+{
+	static thread_local std::random_device rd;
+    static thread_local std::mt19937 mt(rd());
+
+    std::uniform_real_distribution<double> dist(0., 1.);
+    
+	const double theta = dist(mt) * 2. * M_PI;
+	const double phi = std::acos(1. - 2. * dist(mt));
+	
+	const double x = scale * std::sin(phi) * std::cos(theta);
+	const double y = scale * std::sin(phi) * std::sin(theta);
+	const double z = scale * std::cos(phi);
+	
+	return P3D{origin.x() + x, origin.y() + y, origin.z() + z};
+}
+
+inline P3D uniform_sample_hemisphere(const P3D& origin = {0., 0., 0.}, double scale = 1.)
+{
+	static thread_local std::random_device rd;
+    static thread_local std::mt19937 mt(rd());
+
+    std::uniform_real_distribution<double> dist(0., 1.);
+    
+	const double theta = dist(mt) * 2. * M_PI;
+	const double phi = std::acos(1. - 2. * dist(mt));
+	
+	const double x = scale * std::sin(phi) * std::cos(theta);
+	const double y = scale * std::sin(phi) * std::sin(theta);
+	const double z = scale * std::fabs(std::cos(phi));
+	
+	return P3D{origin.x() + x, origin.y() + y, origin.z() + z};
+}
+
+inline P3D uniform_sample_insphere(const P3D& origin = {0., 0., 0.}, double scale = 1.)
+{
+	static thread_local std::random_device rd;
+    static thread_local std::mt19937 mt(rd());
+
+    std::uniform_real_distribution<double> dist(0., 1.);
+    
+	const double theta = dist(mt) * 2. * M_PI;
+	const double phi = std::acos(1. - 2. * dist(mt));
+	
+	const double x = std::sin(phi) * std::cos(theta);
+	const double y = std::sin(phi) * std::sin(theta);
+	const double z = std::cos(phi);
+		
+    const double radius = scale * std::sqrt(dist(mt)); // dist(mt);
+	
+	return P3D{origin.x() + radius * x, origin.y() + radius * y, origin.z() + radius * z};
+}

@@ -2,6 +2,8 @@
 
 #include <random>
 
+#include "geometry/sampler.h"
+
 #include "processing/tools/rotation.h"
 
 #include "io/printer.h"
@@ -37,16 +39,15 @@ void generate_pose(Pose& pose, double min, double max)
 	std::random_device rd;
     std::mt19937 gen(rd());
     
-    std::uniform_real_distribution<double> dist_tz(-min, -max);
+    std::uniform_real_distribution<double> dist_tz(min, max);    
+    P3D p = uniform_sample_hemisphere(); 
+        
+    pose.translation() = - p * dist_tz(gen);
     
-    std::normal_distribution<double> dist_txy(0, 500);
     std::normal_distribution<double> dist_R(0.,1.);
-    
-    pose.translation() = Eigen::Vector3d{ dist_txy(gen), dist_txy(gen), dist_tz(gen) };
-    
     apply_rotation(
     	pose.rotation(), 
-    	Eigen::Vector3d{ 0.3 * dist_R(gen), 0.3 * dist_R(gen), 0.3 * dist_R(gen) }
+    	Eigen::Vector3d{0.1 * dist_R(gen), 0.1 * dist_R(gen), 0.1 * dist_R(gen)}
     );
 }
 
@@ -54,7 +55,7 @@ void generate_poses(
 	CalibrationPoses& poses, /* out */
 	const CameraModel_t& model, 
 	const CheckerBoard& grid, 
-	std::size_t n
+	std::size_t n, double min, double max
 )
 {
 	PRINT_INFO("=== Generating n = " << n << " poses");
@@ -68,10 +69,11 @@ void generate_poses(
 		Pose p;
 		do
 		{
-			generate_pose(p);
+			generate_pose(p, min, max);
 		}
-		while(not is_pose_valid(p, model, grid));
-		poses[f] = CalibrationPose{p, int(f)};
+		while((not is_pose_valid(p, model, grid)) or std::fabs(p.translation().z()) < min);
+		poses[f] = CalibrationPose{p, static_cast<int>(f)};
+		DEBUG_VAR(f); DEBUG_VAR(p);
 	}
 }
 
