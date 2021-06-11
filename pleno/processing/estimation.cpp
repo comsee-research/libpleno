@@ -27,7 +27,7 @@
 #include "processing/imgproc/improcess.h"
 
 #include "processing/tools/vector.h" //random_n_unique
-#include "processing/tools/rmse.h" //RMSE, MAE
+#include "processing/tools/error.h" //RMSE, MAE
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/fast_math.hpp>

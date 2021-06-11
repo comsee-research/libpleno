@@ -40,7 +40,7 @@ void optimize(
 	const MICObservations& centers /* c_{k,l} */
 )
 {	
-	const bool useRadius = (model.I() > 0u); 
+	const bool useRadius = (model.multifocus()); 
 	
 	using SolverBAP = lma::Solver<CornerReprojectionError, BlurRadiusReprojectionError, MicroImageCenterReprojectionError>;
 	using SolverCorner = lma::Solver<CornerReprojectionError, MicroImageCenterReprojectionError>;
@@ -115,7 +115,7 @@ void calibration_PlenopticCamera(
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const MICObservations& micenters, /* c_{k,l} */
-	const std::vector<Image>& pictures /* for GUI only */
+	const IndexedImages& pictures /* for GUI only */
 )
 {
 	BAPObservations features;
@@ -127,8 +127,7 @@ void calibration_PlenopticCamera(
 	PRINT_INFO("=== Init Extrinsics Parameters");	
 	init_extrinsics(
 		features, poses,
-		model, grid, observations,
-		/*pictures*/ {}
+		model, grid, observations
 	);
 	clear();
 	

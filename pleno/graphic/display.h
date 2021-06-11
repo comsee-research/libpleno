@@ -206,7 +206,7 @@ inline void display(
 	const CheckerBoard & grid,
 	const Observations& observations,
 	const MICObservations& centers,
-	const std::vector<Image>& pictures
+	const IndexedImages& pictures
 )
 {
 	const bool usePictures = (pictures.size() > 0u);
@@ -245,6 +245,11 @@ inline void display(
 //For each frame 
 	for(auto & [f, ob] : obs)
 	{
+		if (usePictures)
+		{
+			try { pictures.at(f); }
+			catch (std::out_of_range&) { continue; }
+		}
 		PRINT_DEBUG("Display information of frame f = " << f);
 		
 		for(const auto& [p,f] : poses) if(f == ob[0].frame) model.pose() = p;
@@ -254,10 +259,11 @@ inline void display(
 		{
 			RENDER_DEBUG_2D(
 				Viewer::context().layer(Viewer::layer()).name("Frame f = "+std::to_string(f)), 
-				pictures[f]
+				pictures.at(f)
 			);
+		
+			Viewer::update();
 		}
-		Viewer::update();
 		
 		//get theorical reprojection
 		Observations tbaps; int cluster = 0;

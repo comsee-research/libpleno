@@ -20,7 +20,7 @@ struct CornerReprojectionError
 	using CameraModel_t = PlenopticCamera;	
 	
 	const CameraModel_t& pcm;
-	const CheckerBoard &checkerboard;
+	const CheckerBoard& checkerboard;
     const CBObservation observation;
 
     bool operator()( 

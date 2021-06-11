@@ -6,6 +6,7 @@
 void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInfo>& images, bool debayered)
 {
 	images.reserve(cfgs.size());
+	int f_ = 0;
 	
 	for(const auto& cfg : cfgs)
 	{
@@ -21,7 +22,7 @@ void load(const std::vector<ImageWithInfoConfig>& cfgs, std::vector<ImageWithInf
 			ImageWithInfo{ 
 				std::move(img),
 				cfg.fnumber(),
-				cfg.frame()
+				(cfg.frame() != -1 ? cfg.frame() : f_++)
 			}
 		);	
 	}

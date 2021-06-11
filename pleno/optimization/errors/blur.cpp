@@ -23,6 +23,9 @@ bool RelativeBlurCostError::operator()(
 	error[0] = cost;
 
 #if 0
+	DEBUG_VAR(rho_r);
+	DEBUG_VAR(sigma_r);
+	
 	const int ksize = fref.cols;
 	Image kernelX = cv::getGaussianKernel(ksize, sigma_r, CV_64F);
 	Image kernelY = cv::getGaussianKernel(ksize, sigma_r, CV_64F);

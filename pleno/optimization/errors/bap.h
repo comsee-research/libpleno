@@ -20,7 +20,7 @@ struct BlurAwarePlenopticReprojectionError
 	
 	const PlenopticCamera& pcm;
 	const CheckerBoard &checkerboard;
-    const BAPObservation& observation;
+    const BAPObservation observation;
 
     bool operator()( 
     	const Pose& camera_pose,

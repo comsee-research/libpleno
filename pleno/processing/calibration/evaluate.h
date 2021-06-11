@@ -10,7 +10,7 @@
 #include "geometry/camera/plenoptic.h"
 #include "geometry/object/checkerboard.h"
 
-#include "processing/tools/rmse.h"
+#include "processing/tools/error.h"
 
 #include "io/printer.h"
 
@@ -59,7 +59,7 @@ RMSE compute_rmse_radius(
 )
 {
 	RMSE rmse;
-	if (model.I()>0u and std::is_same_v<Observations, BAPObservations>) {
+	if (model.multifocus() and std::is_same_v<Observations, BAPObservations>) {
 		for(const auto& o : ob)
 		{	
 			const double p = reproject_radius(model, model.pose(), grid, o);
@@ -87,7 +87,7 @@ void evaluate_rmse(
 	std::ofstream ofs;
 	
 	//Split observations according to frame
-	std::unordered_map<int /* frame index */, Observations> obs;
+	std::unordered_map<Index /* frame index */, Observations> obs;
 	for (const auto& ob : observations)
 		obs[ob.frame].push_back(ob);
 		

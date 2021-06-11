@@ -21,7 +21,7 @@ void optimize(
 	//IN
 	const InternalParameters& internals,
 	const BAPObservations& observations, /*  (u,v,rho) */
-	const std::vector<Image>& images
+	const IndexedImages& images
 )
 {	
 	constexpr int W = 9u;
@@ -38,6 +38,9 @@ void optimize(
 	//for each frame
 	for(auto & [frame, baps]: obs)
 	{ 
+		try { images.at(frame); }
+		catch (std::out_of_range&) { continue; }
+	
 		//split observations according to cluster index
 		std::unordered_map<Index /* cluster index */, BAPObservations> clusters;
 		for(const auto& ob : baps)
@@ -54,7 +57,7 @@ void optimize(
 				auto current = obs_.begin()+i;
 
 				std::for_each( current+1, obs_.end(), 
-					[lhs=*current, I=internals.I, &W, img=images[frame], &kappa, &solver](const auto &rhs) -> void {
+					[lhs=*current, I=internals.I, &W, img=images.at(frame), &kappa, &solver](const auto &rhs) -> void {
 						//check type
 						if (lens_type(I, lhs.k, lhs.l) != lens_type(I, rhs.k, rhs.l)) //k,l in mia space
 						{
@@ -99,7 +102,7 @@ void optimize(
 void calibration_relativeBlur(
 	InternalParameters& internals,     
 	const BAPObservations& observations, /*  (u,v,rho) */
-	const std::vector<Image>& images
+	const IndexedImages& images
 )
 {
 //1) Init Parameters

@@ -27,7 +27,7 @@ void calibration_PlenopticCamera(
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
 	const MICObservations& centers, /* c_{k,l} */
-	const std::vector<Image>& pictures /* for GUI only */
+	const IndexedImages& pictures /* for GUI only */
 );
 
 //******************************************************************************
@@ -38,7 +38,7 @@ void calibration_ExtrinsicsPlenopticCamera(
 	const PlenopticCamera& model, /* in */   
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho) */
-	const std::vector<Image>& pictures /* for GUI only */
+	const IndexedImages& pictures /* for GUI only */
 );
 
 //******************************************************************************
@@ -47,7 +47,7 @@ void calibration_ExtrinsicsPlenopticCamera(
 void calibration_relativeBlur(
 	InternalParameters& internals,     /* out */ 
 	const BAPObservations& observations, /*  (u,v,rho) */
-	const std::vector<Image>& images
+	const IndexedImages& images
 );
 
 //******************************************************************************

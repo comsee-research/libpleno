@@ -199,8 +199,8 @@ preprocess(
 		for (std::size_t i = 0; i < I; ++i) N += (std::fabs(params.m) / ( params.dc / 2.0 - std::fabs(params.q[i])));
 		N = N / I;
 		
-		PRINT_DEBUG("Estimated N must be near the fnumber respecting the matching principle.");
-		DEBUG_VAR(fmatchingnumber-N);
+		PRINT_WARN("Estimated N must be near the fnumber respecting the matching principle.");
+		PRINT_WARN("N = " << N << ", diff = " << (fmatchingnumber-N));
 		
 		params.N = fmatchingnumber;
 		params.I = I_;

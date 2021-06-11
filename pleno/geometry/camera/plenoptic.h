@@ -16,6 +16,8 @@
 
 #include "geometry/observation.h"
 
+#include "processing/tools/functions.h"
+
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -37,6 +39,8 @@ protected:
     
     double dist_focus_;
     
+    QuadraticFunction scaling_;
+    
 public:
 	EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	
@@ -57,6 +61,9 @@ public:
     
     double distance_focus() const;
     double& distance_focus();
+    
+    const QuadraticFunction& scaling() const;
+    	  QuadraticFunction& scaling();
     
     const ThinLensCamera& main_lens() const;
           ThinLensCamera& main_lens();

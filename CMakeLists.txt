@@ -299,7 +299,7 @@ include_directories(${CMAKE_SOURCE_DIR}/pleno/io)
 include_directories(${CMAKE_SOURCE_DIR}/pleno/processing)
 include_directories(${CMAKE_SOURCE_DIR}/pleno/simulation)
 
-file(GLOB_RECURSE PLENO_HEADERS "pleno/*.h")
+file(GLOB_RECURSE PLENO_HEADERS "pleno/*.h" "pleno/*.hpp")
 
 # MacOS and Windows deal with shared/dynamic library differently. For
 # simplicity, we only authorize static library in those cases.

@@ -91,6 +91,7 @@ struct IndexPair {
 
 using Image 				= cv::Mat;
 using Images 				= AlignedVector<Image>;
+using IndexedImages			= std::unordered_map<Index, Image>;
 struct ImageWithInfo 		{ Image img; Real fnumber; Index frame = -1; };
 
 struct LineCoefficients 	{ Real m; Real c; };
@@ -103,7 +104,7 @@ using Peaks 				= AlignedVector<Peak>;
 struct CalibrationPose;
 using CalibrationPoses 		= AlignedVector<CalibrationPose>;
 
-#include "processing/tools/rmse.h"
+#include "processing/tools/error.h"
 
 struct PoseWithError;
 using PosesWithError 		= AlignedVector<PoseWithError>;

@@ -4,7 +4,7 @@
 
 #include "types.h"
 
-#include "processing/tools/rmse.h"
+#include "processing/tools/error.h"
 #include "io/archive.h"
 
 template<std::size_t N> class Ray_;

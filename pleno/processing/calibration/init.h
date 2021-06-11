@@ -13,7 +13,7 @@
 #include "graphic/gui.h"
 #include "graphic/display.h"
 
-#include "processing/tools/rmse.h"
+#include "processing/tools/error.h"
 
 
 #include "link.h"
@@ -217,7 +217,7 @@ void init_extrinsics(
 	const CheckerBoard & grid,
 	const Observations& observations,
 	//GUI
-	const std::vector<Image>& pictures /* for GUI only */
+	const IndexedImages& pictures = IndexedImages{}/* for GUI only */
 )
 {
 	const bool usePictures = (pictures.size() > 0u);
@@ -237,7 +237,7 @@ void init_extrinsics(
 	Viewer::stash();
 	//For each frame 
 	for(auto & [f, ob] : obs)
-	{
+	{		
 		Viewer::pop();
 		Viewer::stash();
 		//Estimate barycenters
@@ -245,15 +245,18 @@ void init_extrinsics(
 		Observations barycenters = compute_barycenters(ob); //IMAGE UV
 		
 		GUI(
-			PRINT_DEBUG("[GUI] Display information of frame f = " << f);
 			if (usePictures)
 			{	
+				try { pictures.at(f); }
+				catch (std::out_of_range&) { break; }
+		
 				RENDER_DEBUG_2D(
 					Viewer::context().layer(Viewer::layer()).name("Frame f = "+std::to_string(f)), 
-					pictures[f]
+					pictures.at(f)
 				);	
 				Viewer::update();
 			}
+			PRINT_DEBUG("[GUI] Display information of frame f = " << f);
 			display(f, ob);
 			display(f, barycenters, tag::Barycenters{});	
 		);

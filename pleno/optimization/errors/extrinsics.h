@@ -14,7 +14,7 @@ struct ExtrinsicsCornerReprojectionError
 	
 	const PlenopticCamera& pcm;
 	const CheckerBoard &checkerboard;
-    const CBObservation& observation;
+    const CBObservation observation;
 
     bool operator()( 
     	const Pose& camera_pose,
@@ -40,7 +40,7 @@ struct ExtrinsicsBlurAwarePlenopticReprojectionError
 	
 	const PlenopticCamera& pcm;
 	const CheckerBoard &checkerboard;
-    const BAPObservation& observation;
+    const BAPObservation observation;
 
     bool operator()( 
     	const Pose& camera_pose,

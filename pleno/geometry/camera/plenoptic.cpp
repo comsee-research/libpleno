@@ -30,6 +30,9 @@ PlenopticCamera::mode() const
     else { return Unfocused; }
 }
 
+const QuadraticFunction& PlenopticCamera::scaling() const { return scaling_; }
+QuadraticFunction& PlenopticCamera::scaling() { return scaling_; }
+
 const MicroLensesArray& PlenopticCamera::mla() const { return mla_; }
 MicroLensesArray& PlenopticCamera::mla() { return mla_; }
 
@@ -73,8 +76,8 @@ double PlenopticCamera::D(std::size_t k, std::size_t l) const
 
 double PlenopticCamera::focal_plane(std::size_t i, std::size_t k, std::size_t l) const 
 { 
-	if (not multifocus()) return v2obj(2., k, l); 
-	else return mla2obj((mla().f(i) * d(k,l)) / (d(k,l) - mla().f(i))); 
+	if (not multifocus()) return scaling()(v2obj(2., k, l)); 
+	else return scaling()(mla2obj((mla().f(i) * d(k,l)) / (d(k,l) - mla().f(i)))); 
 }
 
 bool PlenopticCamera::multifocus() const { return I() > 0; }
@@ -147,6 +150,11 @@ void PlenopticCamera::init(
 	invdistortions_.tangential() 	<< 0., 0.;
 	invdistortions_.depth() 		<< 0., 0., 0.;
 	
+	//SCALING
+	scaling_.a = 0.; //coef z²
+	scaling_.b = 1.; //coef z
+	scaling_.c = 0.; //coef 1
+		
 	/* 	
 		Init of d and D is kinda tricky: 
 			- In Keplerian configuration, F < D whatever the focus distance.
@@ -476,16 +484,6 @@ bool PlenopticCamera::raytrace(
 	const P2D& pixel, std::size_t k, std::size_t l, Ray3D& ray
 ) const
 {	
-	//get focal plane
-	const double f = mla().f(k, l); //focal
-	const double ai = (f * d()) / (d() - f); //focus distance (in MLA space)
-	
-	const auto plane = plane_from_3_points(
-			from_coordinate_system_of(mla().pose(), P3D{0., 0., ai}),
-		    from_coordinate_system_of(mla().pose(), P3D{1., 0., ai}),
-		    from_coordinate_system_of(mla().pose(), P3D{0., 1., ai})
-	);
-
 	//get pixel in camera coordinate	
 	P2D pix = pixel; //IMAGE UV
 	uv2xy(pix); //IMAGE XY		
@@ -501,7 +499,25 @@ bool PlenopticCamera::raytrace(
 	Ray3D r; r.config(p, ckl); // CAMERA
 	
 	//get p'
-	const P3D p_prime = line_plane_intersection(plane, r); // CAMERA
+	P3D p_prime;
+	
+	if (multifocus()) 
+	{
+		//get focal plane
+		const double f = mla().f(k, l); //focal
+		const double ai = (f * d()) / (d() - f); //focus distance (in MLA space)
+		
+		const auto plane = plane_from_3_points(
+				from_coordinate_system_of(mla().pose(), P3D{0., 0., ai}),
+				from_coordinate_system_of(mla().pose(), P3D{1., 0., ai}),
+				from_coordinate_system_of(mla().pose(), P3D{0., 1., ai})
+		);
+		p_prime = line_plane_intersection(plane, r); // CAMERA
+	}
+	else 
+	{
+		p_prime = p;
+	}
 	
 	//unapply distortions
 	P3D p_prime_d = p_prime;
@@ -529,16 +545,6 @@ bool PlenopticCamera::raytrace(
 {	
 	rays.reserve(n+1);
 
-	//get focal plane
-	const double f = mla().f(k, l); //focal
-	const double ai = (f * d()) / (d() - f); //focus distance (in MLA space)
-	
-	const auto plane = plane_from_3_points(
-			from_coordinate_system_of(mla().pose(), P3D{0., 0., ai}),
-		    from_coordinate_system_of(mla().pose(), P3D{1., 0., ai}),
-		    from_coordinate_system_of(mla().pose(), P3D{0., 1., ai})
-	);
-
 	//get pixel in camera coordinate	
 	P2D pix = pixel; //IMAGE UV
 	uv2xy(pix); //IMAGE XY		
@@ -555,7 +561,25 @@ bool PlenopticCamera::raytrace(
 	Ray3D r; r.config(p, ckl); // CAMERA
 	
 	//get p'
-	const P3D p_prime = line_plane_intersection(plane, r); // CAMERA
+	P3D p_prime;
+	if (multifocus()) 
+	{
+		//get focal plane
+		const double f = mla().f(k, l); //focal
+		const double ai = (f * d()) / (d() - f); //focus distance (in MLA space)
+		
+		const auto plane = plane_from_3_points(
+				from_coordinate_system_of(mla().pose(), P3D{0., 0., ai}),
+				from_coordinate_system_of(mla().pose(), P3D{1., 0., ai}),
+				from_coordinate_system_of(mla().pose(), P3D{0., 1., ai})
+		);
+		p_prime = line_plane_intersection(plane, r); // CAMERA
+	}
+	else //raytrace only from pixel
+	{
+		p_prime = p;
+	}
+	
 	//unapply distortions
 	P3D p_prime_d = p_prime;
 	main_lens_invdistortions().apply(p_prime_d);
@@ -634,10 +658,11 @@ double PlenopticCamera::mla2obj(double x, std::size_t k, std::size_t l) const //
 	//unapply distortions
 	P3D delta = mla().nodeInWorld(k,l); //CAMERA
 	delta.z() = z;
-	
 	main_lens_invdistortions().apply_depth(delta);	
 	
-	return (focal() * (z + delta.z())) / (z + delta.z() + focal()); 
+	return scaling()(
+		(focal() * (z + delta.z())) / (z + delta.z() + focal())
+	); 
 }
 
 double PlenopticCamera::v2obj(double x, std::size_t k, std::size_t l) const { return mla2obj(v2mla(x, k, l), k, l); }
@@ -737,6 +762,7 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 		<< "\tinternal configuration = " << pcm.mode() << "," << std::endl
 		<< "\th = " << pcm.distance_focus() << "," << std::endl
 		<< "\tI = " << pcm.I() << "," << std::endl
+		<< "\tscaling = " << pcm.scaling().a << " * z² + " << pcm.scaling().b <<" * z + "<< pcm.scaling().c << "," << std::endl
 		<< "\tpose = {" << std::endl << pcm.pose() << "}," << std::endl
 		<< "\tsensor = {" << std::endl << pcm.sensor() << "}," << std::endl
 		<< "\tmia = {" << std::endl << pcm.mia() << "}," << std::endl
@@ -746,17 +772,21 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera& pcm)
 		<< "\tinvdistortions = {" << std::endl << pcm.main_lens_invdistortions() << "}," << std::endl
 		<< "\td = " << pcm.d() << "," << std::endl
 		<< "\tD = " << pcm.D() << "," << std::endl
-		<< "\tprincipal point = {" << pcm.pp().transpose() << "}";
+		<< "\tprincipal point = {" << pcm.pp().transpose() << "}," << std::endl;
 	
 	if (pcm.multifocus())
 	{
-		os << ","<< std::endl << "\tf = {"; 
+		os << "\tf = {"; 
 		std::size_t i = 0; for(; i < pcm.I()-1; ++i) os << pcm.mla().f(i) <<", ";
 		os << pcm.mla().f(i) << "}," << std::endl;
 		
 		os << "\tfocal_plane = {"; 
 		i = 0; for(; i < pcm.I()-1; ++i) os << pcm.focal_plane(i) <<" ("<< pcm.obj2v(pcm.focal_plane(i)) << "), ";
 		os << pcm.focal_plane(i) <<" ("<< pcm.obj2v(pcm.focal_plane(i)) << ")}" << std::endl;
+	}
+	else
+	{
+		os << "\tfocal_plane = " << pcm.focal_plane(0) <<" ("<< pcm.obj2v(pcm.focal_plane(0)) << ")";
 	}
 		
 	return os;
@@ -813,6 +843,11 @@ void save(std::string path, const PlenopticCamera& pcm)
     // Configuring the Focus distance
     config.dist_focus() = pcm.distance_focus();
     
+    // Configuring the scaling function
+    config.scaling().a() = pcm.scaling().a;
+    config.scaling().b() = pcm.scaling().b;
+    config.scaling().c() = pcm.scaling().c;
+    
     // Configuring additional information
     config.mode() 	= pcm.mode();
     config.d() 		= pcm.d();
@@ -820,8 +855,15 @@ void save(std::string path, const PlenopticCamera& pcm)
     config.pp() 	= pcm.pp();
     config.Rxyz()	= pcm.mla().pose().rotation().eulerAngles(0,1,2);
     
-    config.focal_planes().resize(pcm.I());
-    for (std::size_t i = 0; i < pcm.I(); ++i) config.focal_planes()[i] = pcm.focal_plane(i);
+    if (pcm.multifocus())
+    {
+    	config.focal_planes().resize(pcm.I());
+    	for (std::size_t i = 0; i < pcm.I(); ++i) config.focal_planes()[i] = pcm.focal_plane(i);
+    }
+    else
+    {
+    	config.focal_planes().push_back(pcm.focal_plane(0));
+    }
 
 	v::save(path, config);
 }
@@ -863,6 +905,11 @@ void load(std::string path, PlenopticCamera& pcm)
     
     // Configuring the Focus distance
     pcm.distance_focus() = config.dist_focus();
+    
+    // Configuring the scaling function
+    pcm.scaling().a = config.scaling().a();
+    pcm.scaling().b = config.scaling().b();
+    pcm.scaling().c = config.scaling().c();
 }
 
 

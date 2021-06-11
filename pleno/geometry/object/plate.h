@@ -64,6 +64,16 @@ public:
 	Image& texture() { return texture_; }
 	const Image& texture() const { return texture_; }
 
+//helper
+	void rescale(double scl = 1.)
+	{
+		//rescale image with scale
+		int wpixel = static_cast<int>(scl * width() / scale());
+		int hpixel = static_cast<int>(scl * height() / scale());
+	
+		cv::resize(texture(), texture(), cv::Size{wpixel, hpixel}, 0, 0, cv::INTER_LINEAR);
+	}
+
 //functions
 	bool is_inside(const P3D& pw) const 
 	{

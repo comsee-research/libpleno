@@ -42,7 +42,7 @@ void generate_image(
 			{
 				for (int v = vmin; v < vmax; ++v) //row
 				{
-					const P2D pixel = {u-0.5, v-0.5};
+					const P2D pixel = {u+0.5, v+0.5};
 					if ((pixel - c).norm() > R) continue; //out of distance
 					
 					mask.at<cv::Vec3b>(v-vmin, u-umin) = cv::Vec3b{

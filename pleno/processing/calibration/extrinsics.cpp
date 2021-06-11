@@ -38,7 +38,7 @@ void optimize(
 	const BAPObservations& observations /*  (u,v,rho) */
 )
 {
-	const bool useRadius = (model.I() > 0u); 
+	const bool useRadius = (model.multifocus()); 
 	
 	using SolverBAP = lma::Solver<ExtrinsicsBlurAwarePlenopticReprojectionError>;
 	using SolverCorner = lma::Solver<ExtrinsicsCornerReprojectionError>;
@@ -81,7 +81,7 @@ void calibration_ExtrinsicsPlenopticCamera(
 	const PlenopticCamera& model, /* in */   
 	const CheckerBoard & grid,
 	const BAPObservations& observations, /*  (u,v,rho?) */
-	const std::vector<Image>& pictures /* for GUI only */
+	const IndexedImages& pictures /* for GUI only */
 )
 {
 	BAPObservations features;
@@ -91,8 +91,7 @@ void calibration_ExtrinsicsPlenopticCamera(
 	PRINT_INFO("=== Init Extrinsics Parameters");
 	init_extrinsics(
 		features, poses,
-		model, grid, observations,
-		{}//pictures
+		model, grid, observations
 	);
 
 //2) Sanitize Observations

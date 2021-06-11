@@ -7,6 +7,7 @@
 #include "cfg/sensor.h"
 #include "cfg/thinlens.h"
 #include "cfg/distortions.h"
+#include "cfg/functions.h"
 
 #include "geometry/camera/plenoptic.h"
 
@@ -24,6 +25,7 @@ V_DEFINE_PROPERTIES(PlenopticCameraConfig)
     
     V_DEFINE_PROPERTY(dist_focus, double(1e8), "Focus distance (in mm). Warn: inf ~ 1e8")
     V_DEFINE_PROPERTY(I, std::size_t(3ul), "Number of micro-lenses types (0: act as pinholes array)")
+    V_DEFINE_PROPERTY(scaling, QuadraticFunctionConfig(), "Depth scaling correction")
 
 //computed parameters
     V_DEFINE_PROPERTY(D, (double(-1.)), "Distance main-lens/MLA (in mm)")

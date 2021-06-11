@@ -128,8 +128,8 @@ void display_data(const std::vector<P2D>& pts, const LineCoefficients& coefs, Im
 	const double ymax = 0.1;
 	
 	const auto & [m,c] = coefs;
-	const double cscaled = rows * (1. - (c - ymin) / (ymax - ymin) + ymin ); 
-	const double endscaled = rows * (1. - ((m * xmax + c) - ymin) / (ymax - ymin) + ymin);
+	const double cscaled = rows * (1. - ((c - ymin) / (ymax - ymin) + ymin)); 
+	const double endscaled = rows * (1. - (((m * xmax + c) - ymin) / (ymax - ymin) + ymin));
 	
 	out = Image::zeros(rows, cols, CV_8UC3);
 	
@@ -183,7 +183,7 @@ void display_all_data(const std::vector<std::vector<P2D>>& data, const std::vect
 	i=0;
 	for(const auto & [m,c] : coefs)
 	{		
-		const double cscaled = rows * (1. - ((c - ymin) / (ymax - ymin) + ymin) ); 
+		const double cscaled = rows * (1. - ((c - ymin) / (ymax - ymin) + ymin)); 
 		const double endscaled = rows * (1. - (((m * xmax + c) - ymin) / (ymax - ymin) + ymin));
 		DEBUG_VAR(endscaled);
 	

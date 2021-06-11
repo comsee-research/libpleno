@@ -13,9 +13,9 @@ public:
 	};
 
 private:
-    Eigen::Vector3d radial_; //3 components
-    Eigen::Vector2d tangential_; //2 components
-    Eigen::Vector3d depth_; //3 components
+    Eigen::Vector3d radial_ 	= Eigen::Vector3d::Zero(); //3 components
+    Eigen::Vector2d tangential_	= Eigen::Vector2d::Zero(); //2 components
+    Eigen::Vector3d depth_		= Eigen::Vector3d::Zero(); //3 components
     
     DepthDistortionModel ddm_ = DepthDistortionModel::NO_DDM;
     
