@@ -20,7 +20,9 @@ struct InternalParameters {
 	
 	double kappa = 1.; 		//blur proportionality coefficient
 	
-	double radius(int t) const { 
+	double radius(int t) const {
+		if (I == 0ul or t == -1) return 0.5 * dc / scale;
+		 
 		DEBUG_ASSERT((std::size_t(t) < I), "Can't access type = " << t << "/" << I); 
 		return (m / N + q[t]) / scale; 
 	}

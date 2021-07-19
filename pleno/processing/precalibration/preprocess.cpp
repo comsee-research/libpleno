@@ -53,7 +53,7 @@ void compute_radii(
     	 
 /////////////////////////////////////Compute radii///////////////////////////////////////////////////
 	PRINT_INFO("Computing radius of each micro-image");
-	constexpr int roiborder = 1;
+	constexpr int roiborder = 2; //FIXME
 	const int roiw = std::floor(centers.diameter()) - roiborder;
 	const int roih = roiw;
 	
@@ -131,7 +131,7 @@ preprocess(
 )
 {
 	const std::size_t I = (I_ == 0) ? 1 : I_;
-	const double sgn = (mode == PlenopticCamera::Mode::Galilean) ? -1.0 : 1.0;
+	const double sgn = (mode == PlenopticCamera::Mode::Keplerian) ? 1.0 : -1.0;
 	
 	std::vector<std::vector<P2D>> data(I);
 	for (auto& d: data) d.reserve(grid.size()*imgs.size());

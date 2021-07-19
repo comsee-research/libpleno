@@ -335,6 +335,28 @@ void viewer_3d(v::ViewerContext& v, const P3DS& ps, double scale)
 }
 
 /**
+ * @Brief viewer_3d draw some points using OpenGL
+ */
+void viewer_3d(v::ViewerContext& v, const PointsConstellation& points, double scale)
+{
+    v.add_opengl([&points, scale](){
+        double transparency_value = 0.6;
+        glColor4f(1.0,0.0,0.0, transparency_value);
+        glPointSize(scale);
+
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_DEPTH_TEST);
+
+        glBegin(GL_POINTS);
+            for (const P3D& p : points.constellation)
+                glAddPoint(p);
+        glEnd();
+
+    });
+}
+
+/**
  * @Brief viewer_3d draw a grid using OpenGL
  */
 void viewer_3d(v::ViewerContext& v, const GridMesh3D& gm)

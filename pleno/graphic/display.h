@@ -16,6 +16,7 @@
 #include "geometry/reprojection.h"
 
 #include "geometry/object/checkerboard.h"
+#include "geometry/object/constellation.h"
 
 inline void display(const CheckerBoard& checkboard)
 {
@@ -112,6 +113,36 @@ inline void display(const Poses& poses)
 		Viewer::update(Viewer::Mode::m3D);
 	}
 }
+
+inline void display(const CalibrationPose& p)
+{
+	RENDER_DEBUG_3D(
+		Viewer::context(Viewer::Mode::m3D).layer(Viewer::layer(Viewer::Mode::m3D)).name("Pose ("+std::to_string(p.frame)+")"), 
+		p.pose,
+		35.0
+	);
+	Viewer::update(Viewer::Mode::m3D);
+}
+
+inline void display(const Pose& p)
+{
+	RENDER_DEBUG_3D(
+		Viewer::context(Viewer::Mode::m3D).layer(Viewer::layer(Viewer::Mode::m3D)).name("Pose (#-1)"), 
+		p,
+		35.0
+	);
+	Viewer::update(Viewer::Mode::m3D);
+}
+
+inline void display(const PointsConstellation& p)
+{
+	RENDER_DEBUG_3D(
+		Viewer::context(Viewer::Mode::m3D).layer(Viewer::layer(Viewer::Mode::m3D)).name("Constellation"), 
+		p
+	);
+	Viewer::update(Viewer::Mode::m3D);
+}
+
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------

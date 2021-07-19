@@ -23,7 +23,7 @@ static void contrast_strech(const Image& input, Image& output, int threshold)
     }
 }
 
-static void impreprocess(const Image& raw, Image& preprocessed)
+static void impreprocess(const Image& raw, Image& preprocessed, std::size_t I)
 {
 /////////////////////////////////////Grayscale conversion///////////////////////////////////////////
     PRINT_INFO("Grayscale conversion");
@@ -55,17 +55,19 @@ static void impreprocess(const Image& raw, Image& preprocessed)
 //////////////////////////////////////////Eroding image/////////////////////////////////////////////
     PRINT_INFO("Eroding image");
     //Image eroded_image;
-    erode(preprocessed, preprocessed, 3); // raytrix
+    erode(preprocessed, preprocessed, (I>0) ? 3 /* raytrix */ : 1 /* Lytro */);
     
     RENDER_DEBUG_2D(Viewer::context().layer(Viewer::layer()++).name("Preprocessing::erroded"), preprocessed);
 #endif
 }
 
-MICObservations detection_mic(const Image& raw)
+MICObservations detection_mic(const Image& raw, std::size_t I)
 {
+	constexpr std::size_t margin = 2ul; //pixel 
+
 ////////////////////////////////////////Preprocessing///////////////////////////////////////////////
 	Image preprocessed;
-	impreprocess(raw /* in */, preprocessed /* out */);
+	impreprocess(raw /* in */, preprocessed /* out */, I);
 
 ////////////////////////////////////////Detecting contours//////////////////////////////////////////
     PRINT_INFO("Detecting contours");
@@ -82,12 +84,15 @@ MICObservations detection_mic(const Image& raw)
     centers.reserve(unsorted_centers.size());
     
     for (const auto& c : unsorted_centers)
+    {
+    	if (c.x < margin or c.y < margin or c.x >= raw.cols-margin or c.y >= raw.rows-margin) continue;
+    	
         centers.emplace_back(
         	MICObservation{
  				-1, -1, // k,l
  				c.x, c.y //u,v
         	}
         );
-
+	}
     return centers;
 }

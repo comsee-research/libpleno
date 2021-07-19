@@ -6,6 +6,8 @@
 
 #include "types.h"
 
+#define FORCE_REGULAR_GRID 0
+
 namespace ttt
 {
     template<>

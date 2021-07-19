@@ -102,6 +102,8 @@ public:
 	
 	double focal_plane(std::size_t i, std::size_t k = 0, std::size_t l = 0) const;
 	
+	bool unfocused() const;
+	bool focused() const;
 	bool multifocus() const;
     	
 //Project

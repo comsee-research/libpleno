@@ -18,7 +18,32 @@ void libv_wrapper(v::ViewerContext& v, const Image& input, int col, int row)
  */
 void viewer_2d(v::ViewerContext& v, const Image& input, int col, int row)
 {
-    libv_wrapper(v, input, col, row);
+    constexpr int maxw = 4080;
+    constexpr int maxh = 3068;
+    
+    //fragment image for viewer if too big
+    if (input.cols >  maxw or input.rows > maxh)
+    {
+    	const int cropfactor = std::max(
+    		static_cast<int>(input.cols / maxw) + 1,
+    		static_cast<int>(input.rows / maxh) + 1
+    	);
+    	const int stepw = static_cast<int>(input.cols / cropfactor);
+    	const int steph = static_cast<int>(input.rows / cropfactor);
+    	
+    	for (int i = 0; i < cropfactor; ++i)
+    	{
+    		for (int j = 0; j < cropfactor; ++j)
+    		{
+    			cv::Rect roi(i * stepw, j * steph, stepw, steph);
+    			const Image iroi = input(roi);
+    			
+    			libv_wrapper(v, iroi, col + i * stepw, row + j * steph);   			
+    		}
+    	}
+    }    
+    else libv_wrapper(v, input, col, row);
+    
     v.update();
 }
 

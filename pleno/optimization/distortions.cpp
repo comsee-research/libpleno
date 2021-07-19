@@ -13,10 +13,12 @@ namespace lma
 		
 		d.tangential()[0] += delta[3];
 		d.tangential()[1] += delta[4];
-	 
+		
+#if defined(USE_DEPTH_DISTORTIONS) && USE_DEPTH_DISTORTIONS	 
 		d.depth()[0] += delta[5];
 		d.depth()[1] += delta[6];
 		d.depth()[2] += delta[7];
+#endif
 	}
 
 	void apply_small_increment(Distortions& d, double h, const v::core::numeric_tag<0>&, const lma::Adl&)
@@ -40,7 +42,7 @@ namespace lma
 	{ 	
 		d.tangential()[1] += h; 
 	}
-
+#if defined(USE_DEPTH_DISTORTIONS) && USE_DEPTH_DISTORTIONS
 	void apply_small_increment(Distortions& d, double h, const v::core::numeric_tag<5>&, const lma::Adl&)
 	{ 
 		d.depth()[0] += h; 
@@ -53,5 +55,5 @@ namespace lma
 	{ 
 		d.depth()[2] += h; 
 	}
-
+#endif
 }

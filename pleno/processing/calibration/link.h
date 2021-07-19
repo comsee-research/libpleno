@@ -1,6 +1,8 @@
 #pragma once
 
 #include "types.h"
+#include "unused.h"
+
 
 #include <unordered_map>
 #include <vector>
@@ -104,7 +106,8 @@ void get_4_corners(const Observations& observations, Observations& corners) /* t
 	corners[Corner::BR][0] = br[0]; corners[Corner::BR][1] = br[1];
 	
 	//---top-left
-	P2D tl = FNS::find(obs, P2D{maxx, maxy}, accessor);
+	//P2D tl = FNS::find(obs, P2D{maxx, maxy}, accessor);
+	P2D tl = FNS::find(obs, br, accessor); UNUSED(maxx); UNUSED(maxy);
 	corners[Corner::TL][0] = tl[0]; corners[Corner::TL][1] = tl[1];
 	
 	//---top-right    

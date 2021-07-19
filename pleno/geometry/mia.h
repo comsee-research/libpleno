@@ -42,6 +42,7 @@ EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	double radius() const;
 	double diameter() const;
 	
+	//k,l are expressed in MIA space
 	int type(std::size_t I, std::size_t k, std::size_t l) const;
 	
 	MicroImage mi(const Image& scene, std::size_t k, std::size_t l, std::size_t I = 3ul) const;

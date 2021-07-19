@@ -80,29 +80,38 @@ BAPObservations compute_bapfeatures(const InputObservations_t& cbos, const MIA& 
 {	
 	BAPObservations bapobs;
 	bapobs.reserve(cbos.size());
-
-	std::unordered_map<Index /* cluster */, InputObservations_t> observations;
 	
-	PRINT_INFO("=== Splitting observations according to cluster");
-	for (const auto& ob : cbos)
-		observations[ob.cluster].push_back(ob);			
-			
-//For each cluster, compute virtual depth	
-	PRINT_INFO("=== Computing virtual depth for each cluster");
-	for (auto & [c, obs] : observations)
+	if (params.I == 0ul) 
 	{
-		if (obs.size() < 2) 
-		{
-			PRINT_ERR("No enought observations to compute virtual depth of cluster ("<<c<<")");
-			continue;
-		}
-		PRINT_DEBUG("Estimate virtualdepth of cluster ("<<c<<")");	
-		double v = compute_virtualdepth(obs, mia, params);
-			
-		PRINT_DEBUG("Update observations");
-		update_observations(obs, bapobs, v, mia, params);
+		std::transform(
+			cbos.begin(), cbos.end(), std::back_inserter(bapobs),
+			[&](const auto& o) -> BAPObservation { return static_cast<BAPObservation>(o); }
+		);
 	}
-	
+	else
+	{
+		std::unordered_map<Index /* cluster */, InputObservations_t> observations;
+		
+		PRINT_INFO("=== Splitting observations according to cluster");
+		for (const auto& ob : cbos)
+			observations[ob.cluster].push_back(ob);			
+				
+	//For each cluster, compute virtual depth	
+		PRINT_INFO("=== Computing virtual depth for each cluster");
+		for (auto & [c, obs] : observations)
+		{
+			if (obs.size() < 2) 
+			{
+				PRINT_ERR("No enought observations to compute virtual depth of cluster ("<<c<<")");
+				continue;
+			}
+			PRINT_DEBUG("Estimate virtualdepth of cluster ("<<c<<")");	
+			double v = compute_virtualdepth(obs, mia, params);
+				
+			PRINT_DEBUG("Update observations");
+			update_observations(obs, bapobs, v, mia, params);
+		}
+	}
 	bapobs.shrink_to_fit();
 	return bapobs;
 }

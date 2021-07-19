@@ -65,6 +65,7 @@ double MicroImagesArray::diameter() const
 	return (pitch()[0] + pitch()[1]) / 2.; 
 }
 
+//k,l are expressed in MIA space
 int MicroImagesArray::type(std::size_t I, std::size_t k, std::size_t l) const 
 { 
 	if (geometry() == HexagonalRowsAligned) return lens_type(I, k ,l);

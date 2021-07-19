@@ -279,7 +279,7 @@ set(PLENO_SIMULATION_SRC
 	pleno/simulation/generate/mic.cpp
 	pleno/simulation/generate/corner.cpp
 	pleno/simulation/generate/bapfeatures.cpp
-	pleno/simulation/generate/image.cpp
+	pleno/simulation/generate/image.cpp 
 )
 
 set(PLENO_SRC

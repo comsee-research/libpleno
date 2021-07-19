@@ -10,6 +10,7 @@
 #include "optimization/errors/mic.h" //MICReprojectionError
 #include "optimization/errors/corner.h" //CornerReprojectionError
 #include "optimization/errors/radius.h" //RadiusReprojectionError
+#include "optimization/errors/bap.h" //BlurAwarePlenopticReprojectionError
 
 //io
 #include "io/cfg/observations.h" // save and load
@@ -40,15 +41,15 @@ void optimize(
 	const MICObservations& centers /* c_{k,l} */
 )
 {	
-	const bool useRadius = (model.multifocus()); 
+	const bool useRadius = (model.focused()); 
 	
 	using SolverBAP = lma::Solver<CornerReprojectionError, BlurRadiusReprojectionError, MicroImageCenterReprojectionError>;
 	using SolverCorner = lma::Solver<CornerReprojectionError, MicroImageCenterReprojectionError>;
 	using Solver_t = std::variant<std::monostate, SolverBAP, SolverCorner>;
 	
 	Solver_t vsolver;
-		if(useRadius) vsolver.emplace<SolverBAP>(1e-4, 150, 1.0 - 1e-6);
-		else vsolver.emplace<SolverCorner>(1e-4, 150, 1.0 - 1e-6);  
+		if(useRadius) vsolver.emplace<SolverBAP>(-1., 65, 1.0 - 1e-6);
+		else vsolver.emplace<SolverCorner>(-1., 65, 1.0 - 1e-6);  
 	
 	//split observations according to frame index
 	std::unordered_map<Index /* frame index */, BAPObservations> obs;
@@ -88,18 +89,20 @@ void optimize(
 								&model.main_lens_distortions()
 							);
 						}
-					}
-				}
-				for (const auto& c : centers) {								
-					//ADD CENTER OBSERVATIONS
-					s.add(
-						MicroImageCenterReprojectionError{model, c},
-						&model.mla().pose(),
-						&model.mla(),
-						&model.sensor()
-					);
+					}	
 				}
 				
+				{
+					for (const auto& c : centers) {								
+						//ADD CENTER OBSERVATIONS
+						s.add(
+							MicroImageCenterReprojectionError{model, c},
+							&model.mla().pose(),
+							&model.mla(),
+							&model.sensor()
+						);
+					}
+				}
 				s.solve(lma::DENSE, lma::enable_verbose_output());
 			}
 		}, vsolver
@@ -129,6 +132,22 @@ void calibration_PlenopticCamera(
 		features, poses,
 		model, grid, observations
 	);
+	{
+		CalibrationPosesConfig cfg_poses;
+		cfg_poses.poses().resize(poses.size());
+		
+		int i=0;
+		for(const auto& [p, f] : poses) {
+			cfg_poses.poses()[i].pose() = p;
+			cfg_poses.poses()[i].frame() = f;
+			++i;
+		}
+		
+		v::save(
+			"initial-poses-"+std::to_string(getpid())+".js", 
+			cfg_poses
+		);
+	}
 	clear();
 	
 //2) Sanitize Observations
@@ -173,6 +192,8 @@ void calibration_PlenopticCamera(
 	PRINT_INFO("=== Run optimization");
 	auto initial_model = model;
 	auto initial_poses = poses;
+	
+	DEBUG_VAR(initial_model);
 	
 	optimize(poses, model, grid, features, centers);
 	

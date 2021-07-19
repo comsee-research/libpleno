@@ -18,7 +18,7 @@ bool is_pose_valid(
 )
 {
     bool is_validated = true;
-	BAPObservations obs;
+	CBObservations obs;
 
     //All the nodes is at least projected once in a microimage
     for(const P3D& node : grid)

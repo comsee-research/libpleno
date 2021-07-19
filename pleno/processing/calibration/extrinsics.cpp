@@ -23,6 +23,8 @@
 #include "link.h"
 #include "evaluate.h"
 
+#define USE_NORMALIZATION_PER_FRAME 0
+
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -38,15 +40,15 @@ void optimize(
 	const BAPObservations& observations /*  (u,v,rho) */
 )
 {
-	const bool useRadius = (model.multifocus()); 
+	const bool useRadius = (model.focused()); 
 	
 	using SolverBAP = lma::Solver<ExtrinsicsBlurAwarePlenopticReprojectionError>;
 	using SolverCorner = lma::Solver<ExtrinsicsCornerReprojectionError>;
 	using Solver_t = std::variant<std::monostate, SolverBAP, SolverCorner>;
 	
 	Solver_t vsolver;
-		if(useRadius) vsolver.emplace<SolverBAP>(1e-4, 150, 1.0 - 1e-12);
-		else vsolver.emplace<SolverCorner>(1e-4, 150, 1.0 - 1e-12);  
+		if(useRadius) vsolver.emplace<SolverBAP>(-1., 250, 1.0 - 1e-18);
+		else vsolver.emplace<SolverCorner>(-1., 250, 1.0 - 1e-18);  
 
 	//split observations according to frame index
 	std::unordered_map<Index /* frame index */, BAPObservations> obs;
@@ -64,9 +66,16 @@ void optimize(
 				>::type;
 				
 				for (auto & [p, frame] : poses) //for each frame with its pose
+				{
 					for (const auto& o : obs[frame]) //for each observation of this frame
-						s.add(Error_t{model, checkboard, o}, &p);
-						
+					{
+				#if defined(USE_NORMALIZATION_PER_FRAME) && USE_NORMALIZATION_PER_FRAME
+						s.add(Error_t{model, checkboard, o, obs[frame].size()}, &p);
+				#else
+						s.add(Error_t{model, checkboard, o /*, obs[frame].size()*/ }, &p);
+				#endif	
+					}
+				}
 				s.solve(lma::DENSE, lma::enable_verbose_output());
 			}
 		}, vsolver

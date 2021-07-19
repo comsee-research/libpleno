@@ -189,15 +189,16 @@ FORCE_GUI(false);
 CBObservations
 detection_corners(const Image& raw, const MIA& mia, const InternalParameters& params)
 {
-	constexpr int roipadding = 3;
-	const int roiw = std::ceil(mia.diameter()) + roipadding; //=28;
+	[[maybe_unused]] constexpr int roipaddingfactor = 1.13;
+	const int roiw = std::ceil(mia.diameter());// * roipaddingfactor); //=28;
     const int roih = roiw;
-
+	const int roipadding = 0.; //std::floor(roiw * (1. - 1. / 1.13));
+		
 #if 0 //USING CANNY EDGES    
 	constexpr int kernel_size = 3;
 	constexpr double ratio = 3.; //Canny recommended a upper:lower ratio between 2:1 and 3:1.
 #endif    
-    const double radius = std::fabs(params.radius(0));
+    const double radius = std::fabs(params.I == 0ul ? mia.radius() : params.radius(0));
     
     static const decltype(v::red) colors[] = {v::red, v::green, v::blue, v::purple, v::yellow, v::orange};
         
@@ -235,14 +236,14 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 	 				
 	 		const P2D c = mia.nodeInWorld(k,l); //col,row
 			const int t = mia.type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
-			const double r = std::fabs(params.radius(t)); //radius
+			const double r = std::fabs(params.I > 1ul ? mia.radius() : params.radius(t)); //radius
 			//crop image aroud the center
 			double X = c[0], Y = c[1]; 
  	
 	//1.1) EXTRACT ROI			
     		Image roi = extract_roi(img, X, Y, roiw, roih).clone(); //crop
  			cv::threshold(roi, roi, 100, 255, cv::THRESH_BINARY); //cv::THRESH_TOZERO); //
- 			trim(roi, r, -2.);
+ 			trim(roi, r, - 1.5 * mia.border());
  			
  	//1.2) COMPUTE MASK (only keeping internal edges)
 #if 0 //USING CANNY EDGES
@@ -255,7 +256,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
  			trim(mask, r, - 0.4 * r ); //set mask (kernel_size + 1.)  		
 #else //USING TRUNCATED ROI
  			Image mask = roi.clone();
- 			trim(mask, r, - 0.4 * r);
+ 			trim(mask, r, - 2.2 * mia.border());//trim(mask, r, - 0.4 * r);
 #endif    	
 	
  	//1.3) CARACTERIZE MICRO-IMAGE TYPE
@@ -301,7 +302,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 		
 		const P2D c = mia.nodeInWorld(k,l); //col,row
 		const int t = mia.type(params.I, k,l); //static_cast<int>(std::fmod(std::fmod(l,2)+k, 3)); //k=col, l=row
-		const double r = std::fabs(params.radius(t)); //radius
+		const double r = std::fabs(params.I > 1ul ? mia.radius() : params.radius(t)); //radius
 		
 		//crop image aroud the center
 		double X = c[0], Y = c[1]; 
@@ -313,7 +314,7 @@ detection_corners(const Image& raw, const MIA& mia, const InternalParameters& pa
 			
 	//2.2) COMPUTE MASK
 		Image mask{observation.rows, observation.cols, CV_8UC1, cv::Scalar{255}};
-		trim(mask, r, - 2. * mia.border());	
+		trim(mask, r, - 2. * mia.border());	//trim(mask, r, - 2. * mia.border());	
 		mask.convertTo(mask, CV_64FC1);
 		
 	//2.3) GENERATE MODEL 00

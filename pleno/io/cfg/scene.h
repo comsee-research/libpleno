@@ -22,9 +22,15 @@ V_DEFINE_PROPERTIES(PlateConfig)
     V_DEFINE_PROPERTY(texture, std::string(), "Path of the texture file (png)")
 )
 
+V_DEFINE_PROPERTIES(ConstellationConfig)
+(
+	V_DEFINE_PROPERTY(points, std::vector<P3D>(), "Calibration points constellation")
+)
+
 V_DEFINE_PROPERTIES(SceneConfig)
 (
     V_DEFINE_PROPERTY(checkerboards, std::vector<CheckerboardConfig>(), 0)
     V_DEFINE_PROPERTY(plates, std::vector<PlateConfig>(), 0)
+    V_DEFINE_PROPERTY(constellations, std::vector<ConstellationConfig>(), 0)
 )
 

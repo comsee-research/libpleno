@@ -32,6 +32,7 @@ EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 	double radius() const;
 	double diameter() const;
 	
+	//k,l are expressed in MLA space
 	int type(std::size_t k, std::size_t l) const;
 	
 	// the plane equation coefficients

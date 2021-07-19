@@ -19,15 +19,15 @@ PlenopticCamera::mode() const
     double d_ = D();
     
     //If we consider micro-lenses focal lengths, use f<d as definition for mode
-    if (I() > 0u)
+    if (focused())
     {
     	f_ = mla().f(0);
     	d_ = d();    
     }
-        
-    if ( f_ < d_ ) { return Keplerian; }
-	else if (f_ > d_) { return Galilean; }
-    else { return Unfocused; }
+    
+    if (unfocused()) { return Unfocused; }  
+    else if ( f_ < d_ ) { return Keplerian; }
+	else /* if (f_ > d_) */ { return Galilean; }
 }
 
 const QuadraticFunction& PlenopticCamera::scaling() const { return scaling_; }
@@ -66,7 +66,7 @@ std::size_t PlenopticCamera::I() const { return mla().I(); }
 
 double PlenopticCamera::d(std::size_t k, std::size_t l) const 
 { 
-	return std::fabs(D(k,l) + sensor().pose().translation().z()); 
+	return - sensor().pose().translation().z() - D(k,l); 
 }
 double PlenopticCamera::D(std::size_t k, std::size_t l) const 
 { 
@@ -76,11 +76,13 @@ double PlenopticCamera::D(std::size_t k, std::size_t l) const
 
 double PlenopticCamera::focal_plane(std::size_t i, std::size_t k, std::size_t l) const 
 { 
-	if (not multifocus()) return scaling()(v2obj(2., k, l)); 
-	else return scaling()(mla2obj((mla().f(i) * d(k,l)) / (d(k,l) - mla().f(i)))); 
+	if (not focused()) return scaling()(v2obj(std::max(2., (focal() - D(k,l)) / d(k,l) + 1e-6) , k, l)); 
+	else return scaling()(mla2obj((mla().f(i) * d(k,l)) / (d(k,l) - mla().f(i) + (focal() > D() ? -1. : 1. ) * 1e-24))); 
 }
 
-bool PlenopticCamera::multifocus() const { return I() > 0; }
+bool PlenopticCamera::focused() const { return I() > 0; }
+bool PlenopticCamera::multifocus() const { return I() > 1; }
+bool PlenopticCamera::unfocused() const { return (I() > 0) and (d() > mla().f(0)); }
 
 //******************************************************************************
 //******************************************************************************
@@ -306,7 +308,7 @@ bool PlenopticCamera::project_radius_through_micro_lens(
 	const P3D& p, std::size_t k, std::size_t l, double& radius
 ) const
 {
-	if (not multifocus()) 
+	if (not focused()) 
 	{
 		PRINT_ERR("PlenopticCamera::project_radius_through_micro_lens: Can't get radius when MLA is acting as a pinhole array.");
 		return false;
@@ -345,7 +347,7 @@ bool PlenopticCamera::project(
     P3D& bap
 ) const
 {
-	if (not multifocus()) 
+	if (not focused()) 
 	{
 		PRINT_ERR("PlenopticCamera::project: Can't get radius when MLA is acting as a pinholes array.");
 		return false;
@@ -389,7 +391,7 @@ bool PlenopticCamera::project(
     double& rho
 ) const
 {
-	if (not multifocus()) 
+	if (not focused()) 
 	{
 		PRINT_ERR("PlenopticCamera::project: Can't get radius when MLA is acting as a pinholes array.");
 		return false;
@@ -439,7 +441,7 @@ bool PlenopticCamera::project(
     BAPObservations& observations
 ) const
 {
-	if (not multifocus()) 
+	if (not focused()) 
 	{
 		PRINT_ERR("PlenopticCamera::project: Can't get radius when MLA is acting as a pinholes array.");
 		return false;
@@ -501,7 +503,7 @@ bool PlenopticCamera::raytrace(
 	//get p'
 	P3D p_prime;
 	
-	if (multifocus()) 
+	if (focused()) 
 	{
 		//get focal plane
 		const double f = mla().f(k, l); //focal
@@ -514,7 +516,7 @@ bool PlenopticCamera::raytrace(
 		);
 		p_prime = line_plane_intersection(plane, r); // CAMERA
 	}
-	else 
+	else //unfocused and pinholes array
 	{
 		p_prime = p;
 	}
@@ -562,7 +564,7 @@ bool PlenopticCamera::raytrace(
 	
 	//get p'
 	P3D p_prime;
-	if (multifocus()) 
+	if (focused() and not unfocused()) 
 	{
 		//get focal plane
 		const double f = mla().f(k, l); //focal
@@ -610,10 +612,23 @@ bool PlenopticCamera::raytrace(
 		P3D c = P3D{c_ondisk.x(), c_ondisk.y(), 0.}; // MLA
 		c = from_coordinate_system_of(mla().pose(), c); // CAMERA
 		
-		r.config(p_prime, c); // CAMERA
-		const P3D p_onlens = line_plane_intersection(mlplane, r);
-				
-		r.config(p_prime_d, p_onlens);		
+		if (not unfocused())
+		{
+			r.config(p_prime, c); // CAMERA
+			const P3D p_onlens = line_plane_intersection(mlplane, r);
+					
+			r.config(p_prime_d, p_onlens);		
+		}
+		else // unfocused, generate parallel rays
+		{
+			//change origin, keep direction of principal ray
+			r.config(p_prime, ckl); // CAMERA
+			r.origin() = c; //camera
+			
+			const P3D p_onlens = line_plane_intersection(mlplane, r);
+					
+			r.config(c, p_onlens);
+		}		
 		
 		const double cosTheta = 1.; //r.direction().z(); //normalized()
 		r.color().a = cosTheta * cosTheta * cosTheta * cosTheta;
@@ -741,7 +756,7 @@ template void PlenopticCamera::ml2mi(MICObservations& obs) const;
 template void PlenopticCamera::ml2mi(CBObservations& obs) const;
 template void PlenopticCamera::ml2mi(BAPObservations& obs) const;
 template void PlenopticCamera::ml2mi(MIObservations& obs) const;
-	
+
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -749,7 +764,7 @@ std::ostream& operator<<(std::ostream& os, const PlenopticCamera::Mode& mode)
 {
 	switch (mode)
 	{
-		case PlenopticCamera::Mode::Unfocused: os << "Unfocused (F = D --> f = d)"; break;
+		case PlenopticCamera::Mode::Unfocused: os << "Unfocused (f = d)"; break;
 		case PlenopticCamera::Mode::Keplerian: os << "Keplerian (f < d --> F < D)"; break;
 		case PlenopticCamera::Mode::Galilean: os << "Galilean (f > d)"; break;
 	}

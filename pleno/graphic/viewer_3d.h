@@ -11,6 +11,7 @@
 #include "geometry/camera/plenoptic.h"
 #include "geometry/object/checkerboard.h"
 #include "geometry/object/plate.h"
+#include "geometry/object/constellation.h"
 
 void viewer_3d(v::ViewerContext& v, const CheckerBoard& gm, double scale = 2.);
 
@@ -30,6 +31,7 @@ void viewer_3d(v::ViewerContext&, const Rays3D& rays);
 // Drawing some points
 void viewer_3d(v::ViewerContext&, const P3D& p, double = 1.0);
 void viewer_3d(v::ViewerContext&, const P3DS& ps, double = 1.0);
+void viewer_3d(v::ViewerContext& v, const PointsConstellation& points, double scale = 5.0);
 
 // Displaying a GridMesh3D
 void viewer_3d(v::ViewerContext&, const GridMesh3D& gm);

@@ -70,6 +70,7 @@ double MicroLensesArray::diameter() const
 	return (pitch()[0] + pitch()[1]) / 2.; 
 }
 
+//k,l are expressed in MLA space
 int MicroLensesArray::type(std::size_t k, std::size_t l) const 
 { 
 	k = width()-1 - k; 

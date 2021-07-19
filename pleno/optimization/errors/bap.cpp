@@ -4,12 +4,12 @@
 
 bool BlurAwarePlenopticReprojectionError::operator()(
 	const Pose& camera_pose,
-	const Pose& mla_pose,
+	const Pose& /* mla_pose */,
 	const MLA_t& /*mla*/,
-	const FocalLength& /*f*/,
-	const Sensor& sensor,
-	const ThinLensCamera& tcm, 
-	const Distortions& /*distortions*/,
+	const FocalLength& /*fml*/,
+	const Sensor& /* sensor */,
+	const ThinLensCamera& /* tcm */, 
+	const Distortions& /* distortions */,
 	ErrorType& error
 ) const
 {    
@@ -19,26 +19,23 @@ bool BlurAwarePlenopticReprojectionError::operator()(
 		pcm, camera_pose, checkerboard, observation
 	);
 	
-	error[0] = observation.u - prediction[0];
-	error[1] = observation.v - prediction[1];
-	error[2] =  /* 1e1 * */ (observation.rho - prediction[2]);
-
-	//PRINT_DEBUG("Reprojected radius = " << prediction[2] << " -- Theorical radius = " << observation.rho);
+	error[0] = (observation.u 	- prediction[0]);
+	error[1] = (observation.v 	- prediction[1]);
+	error[2] = (observation.rho - prediction[2]);
 
     // mla is behind the sensor
-    const double dist_sensor_mla = 1e2 * (mla_pose.translation().z() - sensor.pose().translation().z());
-    if (dist_sensor_mla < 0.0)
+    if (double d = 1e2 * pcm.d(observation.k, observation.l); d < 0.0)
     {
-        error[0] += std::expm1(-dist_sensor_mla);
-        error[1] += std::expm1(-dist_sensor_mla);
-        error[2] += std::expm1(-dist_sensor_mla);
+        error[0] += std::expm1(-d);
+        error[1] += std::expm1(-d);
+        error[2] += std::expm1(-d);
     }
 	// focal is negatif
-    if (tcm.focal() < 0.0) 
+    if (double f = pcm.focal(); f < 0.0)
     { 
-    	error[0] += std::expm1(-tcm.focal());  
-    	error[1] += std::expm1(-tcm.focal());
-    	error[2] += std::expm1(-tcm.focal());
+    	error[0] += std::expm1(-f);  
+    	error[1] += std::expm1(-f);
+    	error[2] += std::expm1(-f);
     }
     
     return true;

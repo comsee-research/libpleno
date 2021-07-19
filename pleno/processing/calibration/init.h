@@ -46,6 +46,8 @@ void init_extrinsics(
 	const std::vector<Image>& pictures /* for GUI only */
 );
 
+#define INIT_AT_FOCAL_LENGTH 0
+
 //******************************************************************************
 //******************************************************************************
 //******************************************************************************
@@ -117,7 +119,12 @@ PoseWithError estimate_pose(
 {
 	//Configure monocular camera 
 	PRINT_DEBUG("Configure monocular camera ");
-	const PinholeCamera monocular{model.focal(), model.sensor()};
+	Sensor film = Sensor{model.sensor().width(), model.sensor().height(), model.sensor().scale()};
+	film.pose() = model.sensor().pose();
+#if defined(INIT_AT_FOCAL_LENGTH) && INIT_AT_FOCAL_LENGTH
+	film.pose().translation().z() = - model.focal();
+#endif
+	const PinholeCamera monocular{model.focal(), film};
 	
 	//Compute pose candidates using p3p
 	PRINT_DEBUG("Compute pose candidates using p3p");
@@ -228,7 +235,13 @@ void init_extrinsics(
 		obs[ob.frame].push_back(ob);
 	
 	//Configure monocular camera
-	const PinholeCamera monocular(model.focal(), model.sensor());
+	Sensor film = Sensor{model.sensor().width(), model.sensor().height(), model.sensor().scale()};
+	film.pose() = model.sensor().pose();
+#if defined(INIT_AT_FOCAL_LENGTH) && INIT_AT_FOCAL_LENGTH
+	film.pose().translation().z() = - model.focal();
+#endif
+	
+	const PinholeCamera monocular{model.focal(), film};
 	
 	//CalibrationPoses poses;
 	poses.clear();
