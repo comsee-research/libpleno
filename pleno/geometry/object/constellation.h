@@ -10,7 +10,7 @@ struct PointsConstellation
 	
 	Points constellation;
 	
-	PointsConstellation(const ConstellationConfig& config)
+	PointsConstellation(const ConstellationConfig& config = {})
 		: constellation{config.points()} 
 	{}
 	
@@ -20,5 +20,12 @@ struct PointsConstellation
 	P3D		get(std::size_t i) const { assert(i < size()); return constellation[i]; }
 	
 	void 	add(const P3D& p) { constellation.push_back(p); }
-	void 	add(double x, double y, double z) { constellation.emplace_back(x,y,z); }				
+	void 	add(double x, double y, double z) { constellation.emplace_back(x,y,z); }	
+
+//iterator	
+	Points::iterator begin() { return constellation.begin(); }
+	Points::iterator end() { return constellation.end(); }
+	
+	Points::const_iterator begin() const { return constellation.cbegin(); }
+	Points::const_iterator end() const { return constellation.cend(); }		
 };

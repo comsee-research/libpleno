@@ -27,10 +27,15 @@ V_DEFINE_PROPERTIES(ConstellationConfig)
 	V_DEFINE_PROPERTY(points, std::vector<P3D>(), "Calibration points constellation")
 )
 
+using CheckerboardsConfig 	= std::vector<CheckerboardConfig>;
+using PlatesConfig 			= std::vector<PlateConfig>;
+using ConstellationsConfig 	= std::vector<ConstellationConfig>;
+
+
 V_DEFINE_PROPERTIES(SceneConfig)
 (
-    V_DEFINE_PROPERTY(checkerboards, std::vector<CheckerboardConfig>(), 0)
-    V_DEFINE_PROPERTY(plates, std::vector<PlateConfig>(), 0)
-    V_DEFINE_PROPERTY(constellations, std::vector<ConstellationConfig>(), 0)
+    V_DEFINE_PROPERTY(checkerboards, CheckerboardsConfig(), 0)
+    V_DEFINE_PROPERTY(plates, PlatesConfig(), 0)
+    V_DEFINE_PROPERTY(constellations, ConstellationsConfig(), 0)
 )
 

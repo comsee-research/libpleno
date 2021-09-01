@@ -134,11 +134,11 @@ inline void display(const Pose& p)
 	Viewer::update(Viewer::Mode::m3D);
 }
 
-inline void display(const PointsConstellation& p)
+inline void display(const PointsConstellation& p, double scale = 5.)
 {
 	RENDER_DEBUG_3D(
 		Viewer::context(Viewer::Mode::m3D).layer(Viewer::layer(Viewer::Mode::m3D)).name("Constellation"), 
-		p
+		p, scale
 	);
 	Viewer::update(Viewer::Mode::m3D);
 }

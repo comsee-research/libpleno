@@ -37,7 +37,7 @@ inline void clear()
 		PRINT_WARN("Clear viewer ? [y/n]");
 		char c;
 		std::cin >> c;
-		if(c == 'y') {Viewer::clear(); PRINT_DEBUG("Cleared !"); }	
+		if(c == 'y') {Viewer::clear_all(); PRINT_DEBUG("Cleared !"); }	
 		std::cin.clear();
 		while (std::cin.get() != '\n');
 	);

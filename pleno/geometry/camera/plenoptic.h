@@ -142,6 +142,9 @@ public:
 	
 	double v2obj(double x, std::size_t k = 0, std::size_t l = 0) const;
 	double obj2v(double x, std::size_t k = 0, std::size_t l = 0) const;
+	
+//Disparity at virtual depth v, indexes in MIA space
+	P2D disparity(std::size_t k, std::size_t l, std::size_t nk, std::size_t nl, double v) const;
 
 protected:
 //Helper functions

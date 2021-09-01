@@ -197,6 +197,7 @@ set(PLENO_GEOMETRY_SRC
 	pleno/geometry/mia.cpp
 	pleno/geometry/mla.cpp
 	pleno/geometry/plane.cpp
+	pleno/geometry/rgba.cpp
 	#camera	
 		pleno/geometry/camera/camera.cpp
 		pleno/geometry/camera/unified.cpp

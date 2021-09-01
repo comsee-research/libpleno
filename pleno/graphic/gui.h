@@ -52,6 +52,7 @@ public:
 
 	static void update(Mode m = m2D) { Viewer::context(m).layer(Viewer::layer(m)++).update().clear();}
 	static void clear(Mode m = m2D) {for(Layer l=0; l < _layer[m]; ++l) Viewer::context(m).layer(l).update().clear(); _layer[m] = 0;}
+	static void clear_all() {clear(Mode::m2D); clear(Mode::m3D);}
 
 	static void wait() { v::wait_viewers(); }
 	static void stop() { v::stop_viewers(); }

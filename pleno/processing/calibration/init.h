@@ -43,7 +43,7 @@ void init_extrinsics(
 	const CheckerBoard & grid,
 	const Observations& observations,
 	//GUI
-	const std::vector<Image>& pictures /* for GUI only */
+	const IndexedImages& pictures = IndexedImages{}/* for GUI only */
 );
 
 #define INIT_AT_FOCAL_LENGTH 0
@@ -224,7 +224,7 @@ void init_extrinsics(
 	const CheckerBoard & grid,
 	const Observations& observations,
 	//GUI
-	const IndexedImages& pictures = IndexedImages{}/* for GUI only */
+	const IndexedImages& pictures/* for GUI only */
 )
 {
 	const bool usePictures = (pictures.size() > 0u);

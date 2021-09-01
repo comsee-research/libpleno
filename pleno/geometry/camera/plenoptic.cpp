@@ -347,24 +347,25 @@ bool PlenopticCamera::project(
     P3D& bap
 ) const
 {
+	bap.setZero();
+	
+	P3D p; p.setZero();
+    const bool is_projected_through_main_lens = project_through_main_lens(p3d_cam, p);
+    
+    P2D pixel; pixel.setZero();
+	const bool is_projected_through_micro_lens = project_through_micro_lens(p, k, l, pixel);	
+
+	bap.head<2>() = pixel;
+	
 	if (not focused()) 
 	{
 		PRINT_ERR("PlenopticCamera::project: Can't get radius when MLA is acting as a pinholes array.");
 		return false;
 	}
 	
-	bap.setZero();
-	
-	P3D p; p.setZero();
-    const bool is_projected_through_main_lens = project_through_main_lens(p3d_cam, p);
-    
     double radius = 0.0;
     const bool is_radius_projected = project_radius_through_micro_lens(p, k, l, radius);
-
-    P2D pixel; pixel.setZero();
-	const bool is_projected_through_micro_lens = project_through_micro_lens(p, k, l, pixel);	
-
-	bap.head<2>() = pixel;
+    
     bap[2]		= radius;
 
     return is_projected_through_main_lens and is_radius_projected and is_projected_through_micro_lens;
@@ -756,6 +757,39 @@ template void PlenopticCamera::ml2mi(MICObservations& obs) const;
 template void PlenopticCamera::ml2mi(CBObservations& obs) const;
 template void PlenopticCamera::ml2mi(BAPObservations& obs) const;
 template void PlenopticCamera::ml2mi(MIObservations& obs) const;
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+P2D PlenopticCamera::disparity(
+	std::size_t k, std::size_t l, std::size_t nk, std::size_t nl, double v
+) const
+{
+	//mi k,l indexes are in mi space, convert to mla space to access micro-lenses
+	const P2D idxi = mi2ml(k, l);
+	const P2D idxj = mi2ml(nk, nl); 
+	
+#if 1 //TRUE DISPARITY	
+	const P2D deltac = (mia().nodeInWorld(k,l) - mia().nodeInWorld(nk, nl));
+	
+	const double D_ = (D(idxi(0), idxi(1)) + D(idxj(0), idxj(1))) / 2.;
+	const double d_ = (d(idxi(0), idxi(1)) + d(idxj(0), idxj(1))) / 2.;
+	
+	const double lambda = D_ / (D_ + d_);
+	
+	const P2D disp = (deltac) * (
+		((1. - lambda) * v + lambda) / (v)
+	); 
+#else
+	const P3D mli = mla().node(idxi(0), idxi(1)); 
+	const P3D mlj = mla().node(idxj(0), idxj(1));
+
+	const P2D deltaC = (mlj - mli).head<2>();
+	
+	const P2D disp = (deltaC) / (v * sensor().scale());
+#endif
+	return disp; //in pixel
+}
 
 //******************************************************************************
 //******************************************************************************

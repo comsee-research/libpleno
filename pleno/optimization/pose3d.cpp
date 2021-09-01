@@ -14,7 +14,7 @@ void apply_increment(Pose& p, const double delta[Size<Pose>::value], const lma::
     p.translation()[2] += delta[2];
     
     apply_rotation(p.rotation(), Eigen::Vector3d(delta[3], delta[4], delta[5]));
-    rotation_orthogonalize(p.rotation());
+    //rotation_orthogonalize(p.rotation());
 }
 
 void apply_small_increment(Pose& p, double h, const v::core::numeric_tag<0>&, const lma::Adl&)
