@@ -2,6 +2,8 @@
 
 ---
 
+The **libpleno** is an open-source C++ computer-vision library for plenoptic cameras modeling and processing. 
+
 Quick Start
 ===========
 
@@ -16,7 +18,7 @@ The libpleno library has a light dependency list:
  * [lma], a non-linear optimization library implementing the Levenberg Marquardt Algorithm,
  
 and was compiled on:
-  * Ubuntu 18.04.4 LTS, with Eigen 3.3.4, Boost 1.65.1, and OpenCV 3.2.0.
+  * Ubuntu 18.04.4 LTS, GCC 7.5.0, with Eigen 3.3.4, Boost 1.65.1, and OpenCV 3.2.0.
   
 ### Compilation & Installation 
 
@@ -32,9 +34,10 @@ sudo make install
 Applications
 ============
 
-
 Currently available applications using the libpleno:
- * [COMPOTE](https://github.com/comsee-research/compote) (Calibration Of Multi-focus PlenOpTic camEra), a set of tools to pre-calibrate and calibrate a multifocus plenoptic camera.
+ * [COMPOTE](https://github.com/comsee-research/compote) (Calibration Of Multi-focus PlenOpTic camEra), a set of tools to pre-calibrate and calibrate (multifocus) plenoptic cameras.
+ * [PRISM](https://github.com/comsee-research/prism) (Plenoptic Raw Image Simulator), a set of tools to generate and simulate raw images from (multifocus) plenoptic cameras.
+ * [BLADE](https://github.com/comsee-research/blade) (Blur Aware Depth Estimation with a plenoptic camera), a set of tools to estimate depth map from raw images obtained by (multifocus) plenoptic cameras.
  * ...
  
 Configuration file examples are given in the folder `./examples/config/` for the datasets `R12-A` (see below).
@@ -43,7 +46,8 @@ Observations for the dataset `R12-A` are also given in the folder `./examples/ob
 Datasets
 ========
 
-Datasets R12-A, R12-B and R12-C can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
+Datasets R12-A, R12-B, R12-C, R12-D and UPC-S can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
+Datasets R12-E, ES and ELP20 can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
 
 Citing
 ======

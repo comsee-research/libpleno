@@ -89,8 +89,8 @@ void optimize(
 								&model.main_lens_distortions()
 							);
 						}
-					}	
-				}
+					} //endfor each observation	
+				} //endfor each frame
 				
 				{
 					for (const auto& c : centers) {								
@@ -163,7 +163,7 @@ void calibration_PlenopticCamera(
 		),
 		centers.end()
 	);
-	centers.shrink_to_fit();
+	centers.shrink_to_fit(); DEBUG_VAR(centers.size());
 	
 	PRINT_DEBUG("Remove not affected features");
 	features.erase(
@@ -174,7 +174,7 @@ void calibration_PlenopticCamera(
 		),
 		features.end()
 	);
-	features.shrink_to_fit();
+	features.shrink_to_fit(); DEBUG_VAR(features.size());
 	
 	PRINT_DEBUG("Save linked observations");
 	ObservationsConfig cfg_obs;

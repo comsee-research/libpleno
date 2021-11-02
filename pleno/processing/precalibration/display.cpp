@@ -1,6 +1,7 @@
 #include "display.h"
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/imgproc.hpp>
 #include <opencv2/core/fast_math.hpp>
 
 #include "graphic/gui.h"
@@ -40,7 +41,7 @@ void hist_data(const std::vector<double>& data, Image& dst, double min, double m
     for (std::size_t i = 0; i < hist.size(); ++i)
     {
         const int h = rows - int(scale * hist[i]);
-        cv::rectangle(dst, cv::Point(i*binSize, h), cv::Point((i + 1)*binSize - 1, rows), (i % 2) ? cv::Scalar(0, 100, 255) : cv::Scalar(0, 0, 255), CV_FILLED);
+        cv::rectangle(dst, cv::Point(i*binSize, h), cv::Point((i + 1)*binSize - 1, rows), (i % 2) ? cv::Scalar(0, 100, 255) : cv::Scalar(0, 0, 255), cv::FILLED);
     }
 
 	const double rmean = mean(data);

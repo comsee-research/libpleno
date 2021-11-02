@@ -219,8 +219,8 @@ void PlenopticCamera::init(
 								-std::sin(theta_z),	std::cos(theta_z),		0.,
 								0.,					0.,						1.;
 														
-	mla_.pose().translation()[0] = t_x + sensor_.pose().translation()[0]; //set x coordinate
-	mla_.pose().translation()[1] = t_y + sensor_.pose().translation()[1]; //set y coordinate
+	mla_.pose().translation()[0] = -t_x + sensor_.pose().translation()[0]; //set x coordinate
+	mla_.pose().translation()[1] = -t_y + sensor_.pose().translation()[1]; //set y coordinate
 	mla_.pose().translation()[2] = -D; //set z coordinate
 	
 	//set focal lengths
