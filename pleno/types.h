@@ -98,6 +98,8 @@ struct IndexPair {
 	IndexPair(std::size_t k_ = 0ul, std::size_t l_ = 0ul) : k{k_}, l{l_} {}
 };
 
+using NeighborsIndexes 		= std::vector<IndexPair>;
+
 using Image 				= cv::Mat;
 using Images 				= AlignedVector<Image>;
 using IndexedImages			= std::unordered_map<Index, Image>;

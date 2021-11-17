@@ -198,19 +198,19 @@ set(PLENO_GEOMETRY_SRC
 	pleno/geometry/mla.cpp
 	pleno/geometry/plane.cpp
 	pleno/geometry/rgba.cpp
-	#camera	
-		pleno/geometry/camera/camera.cpp
-		pleno/geometry/camera/unified.cpp
-		pleno/geometry/camera/orthographic.cpp
-		pleno/geometry/camera/pinhole.cpp
-		pleno/geometry/camera/thinlens.cpp
-		pleno/geometry/camera/plenoptic.cpp
-	#model
-		pleno/geometry/model/microimage.cpp	
-	#depth	
-		pleno/geometry/depth/depthmap.cpp
-		pleno/geometry/depth/pointcloud.cpp
-		pleno/geometry/depth/depthimage.cpp
+#--Camera	
+	pleno/geometry/camera/camera.cpp
+	pleno/geometry/camera/unified.cpp
+	pleno/geometry/camera/orthographic.cpp
+	pleno/geometry/camera/pinhole.cpp
+	pleno/geometry/camera/thinlens.cpp
+	pleno/geometry/camera/plenoptic.cpp
+#--Model
+	pleno/geometry/model/microimage.cpp	
+#--Depth	
+	pleno/geometry/depth/depthmap.cpp
+	pleno/geometry/depth/pointcloud.cpp
+	pleno/geometry/depth/depthimage.cpp
 )
 
 set(PLENO_OPTIMIZATION_SRC
@@ -225,15 +225,17 @@ set(PLENO_OPTIMIZATION_SRC
 	pleno/optimization/sensor.cpp
 	pleno/optimization/homography.cpp
 	pleno/optimization/kappa.cpp
-	#errors
-		pleno/optimization/errors/grid.cpp
-		pleno/optimization/errors/mic.cpp
-		pleno/optimization/errors/bap.cpp
-		pleno/optimization/errors/corner.cpp
-		pleno/optimization/errors/radius.cpp
-		pleno/optimization/errors/blur.cpp
-		pleno/optimization/errors/extrinsics.cpp
-		pleno/optimization/errors/invdistortion.cpp
+	pleno/optimization/depth.cpp
+#--Errors
+	pleno/optimization/errors/grid.cpp
+	pleno/optimization/errors/mic.cpp
+	pleno/optimization/errors/bap.cpp
+	pleno/optimization/errors/corner.cpp
+	pleno/optimization/errors/radius.cpp
+	pleno/optimization/errors/blur.cpp
+	pleno/optimization/errors/extrinsics.cpp
+	pleno/optimization/errors/invdistortion.cpp
+	pleno/optimization/errors/disparity.cpp
 )
 
 set(PLENO_IO_SRC
@@ -252,8 +254,7 @@ set(PLENO_GRAPHIC_SRC
 
 set(PLENO_PROCESSING_SRC
 	pleno/processing/estimation.cpp
-	
-##---------------
+#--Tools
 	pleno/processing/tools/chrono.cpp	
 #--Precalibration
 	pleno/processing/precalibration/preprocess.cpp
@@ -282,11 +283,18 @@ set(PLENO_PROCESSING_SRC
 	pleno/processing/imgproc/trim.cpp
 	pleno/processing/imgproc/quality.cpp
 #--Depth
+	pleno/processing/depth/depth.cpp
+	pleno/processing/depth/filter.cpp
+	pleno/processing/depth/neighbors.cpp
+	pleno/processing/depth/pairing.cpp
+	pleno/processing/depth/search.cpp
 	pleno/processing/depth/initialization.cpp
+	pleno/processing/depth/compute.cpp
+	pleno/processing/depth/strategy.cpp
 )
 
 set(PLENO_SIMULATION_SRC
-	#generate
+#--Generate
 	pleno/simulation/generate/pose.cpp
 	pleno/simulation/generate/mic.cpp
 	pleno/simulation/generate/corner.cpp

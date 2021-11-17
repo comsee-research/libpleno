@@ -2,7 +2,7 @@
 
 #include <utility> //std::pair
 
-#include <pleno/types.h>
+#include "types.h"
 
 constexpr double auto_param_from_data = -1.;
 
