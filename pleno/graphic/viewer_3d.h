@@ -7,6 +7,9 @@
 #include "geometry/pose.h"
 #include "geometry/ray.h"
 #include "geometry/mesh.h"
+#include "geometry/plane.h"
+
+#include "geometry/depth/pointcloud.h"
 
 #include "geometry/camera/plenoptic.h"
 #include "geometry/object/checkerboard.h"
@@ -38,3 +41,9 @@ void viewer_3d(v::ViewerContext&, const GridMesh3D& gm);
 
 // Displaying a plate in 3D
 void viewer_3d(v::ViewerContext&, const Plate& plate);
+
+// Displaying a PointCloud in 3D
+void viewer_3d(v::ViewerContext&, const PointCloud& pc);
+
+// Displaying a Plane
+void viewer_3d(v::ViewerContext&, const Plane& plane);

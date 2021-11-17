@@ -253,6 +253,8 @@ set(PLENO_GRAPHIC_SRC
 set(PLENO_PROCESSING_SRC
 	pleno/processing/estimation.cpp
 	
+##---------------
+	pleno/processing/tools/chrono.cpp	
 #--Precalibration
 	pleno/processing/precalibration/preprocess.cpp
 	pleno/processing/precalibration/display.cpp
@@ -278,6 +280,7 @@ set(PLENO_PROCESSING_SRC
 	pleno/processing/imgproc/interp.cpp
 	pleno/processing/imgproc/morph.cpp
 	pleno/processing/imgproc/trim.cpp
+	pleno/processing/imgproc/quality.cpp
 #--Depth
 	pleno/processing/depth/initialization.cpp
 )
