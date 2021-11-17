@@ -207,6 +207,10 @@ set(PLENO_GEOMETRY_SRC
 		pleno/geometry/camera/plenoptic.cpp
 	#model
 		pleno/geometry/model/microimage.cpp	
+	#depth	
+		pleno/geometry/depth/depthmap.cpp
+		pleno/geometry/depth/pointcloud.cpp
+		pleno/geometry/depth/depthimage.cpp
 )
 
 set(PLENO_OPTIMIZATION_SRC
@@ -242,6 +246,7 @@ set(PLENO_GRAPHIC_SRC
 	pleno/graphic/viewer_2d.cpp
 	pleno/graphic/gui.cpp
 	pleno/graphic/draw.cpp
+	pleno/graphic/colormap.cpp
 )
 
 set(PLENO_PROCESSING_SRC
