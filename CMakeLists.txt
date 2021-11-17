@@ -239,6 +239,7 @@ set(PLENO_OPTIMIZATION_SRC
 set(PLENO_IO_SRC
 	pleno/io/printer.cpp
 	pleno/io/images.cpp
+	pleno/io/depths.cpp
 )
 
 set(PLENO_GRAPHIC_SRC
@@ -277,6 +278,8 @@ set(PLENO_PROCESSING_SRC
 	pleno/processing/imgproc/interp.cpp
 	pleno/processing/imgproc/morph.cpp
 	pleno/processing/imgproc/trim.cpp
+#--Depth
+	pleno/processing/depth/initialization.cpp
 )
 
 set(PLENO_SIMULATION_SRC
