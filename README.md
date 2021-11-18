@@ -46,19 +46,29 @@ Observations for the dataset `R12-A` are also given in the folder `./examples/ob
 Datasets
 ========
 
-Datasets R12-A, R12-B, R12-C, R12-D and UPC-S can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
-Datasets R12-E, ES and ELP20 can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
+* For calibration, datasets R12-A, R12-B, R12-C, R12-D and UPC-S can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
+* For depth estimation, datasets R12-E, ES and ELP20 can be downloaded [from here](https://github.com/comsee-research/plenoptic-datasets).
 
 Citing
 ======
 
 If you use libpleno in an academic context, please cite the following publication:
 
-	@inproceedings{Labussiere2020,
-		author = {Labussi{\`{e}}re, Mathieu and Teuli{\`{e}}re, C{\'{e}}line and Bernardin, Fr{\'{e}}d{\'{e}}ric and Ait-Aider, Omar},
-		booktitle = {2020 IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
-		title = {{Blur Aware Calibration of Multi-Focus Plenoptic Camera}},
-		year = {2020}
+	@inproceedings{labussiere2020blur,
+	  title 	=	{Blur Aware Calibration of Multi-Focus Plenoptic Camera},
+	  author	=	{Labussi{\`e}re, Mathieu and Teuli{\`e}re, C{\'e}line and Bernardin, Fr{\'e}d{\'e}ric and Ait-Aider, Omar},
+	  booktitle	=	{Proceedings of the IEEE/CVF Conference on Computer Vision and Pattern Recognition (CVPR)},
+	  pages		=	{2545--2554},
+	  year		=	{2020}
+	}
+	
+or 
+
+	@article{labussiere2021calibration
+	  title	    =	{Leveraging blur information for plenoptic camera calibration},
+	  author	=	{Labussi{\`e}re, Mathieu and Teuli{\`e}re, C{\'e}line and Bernardin, Fr{\'e}d{\'e}ric and Ait-Aider, Omar},
+	  journal	=	{arXiv preprint arXiv:2111.05226},
+	  year		=	{2021}
 	}
 
 
