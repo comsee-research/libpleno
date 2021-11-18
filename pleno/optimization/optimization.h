@@ -14,3 +14,4 @@
 #include "thinlens.h"
 #include "kappa.h"
 #include "depth.h"
+#include "functions.h"

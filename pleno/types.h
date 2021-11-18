@@ -83,13 +83,6 @@ struct Depth 		{ Real z = 0.; };
 struct InverseDepth { Real z = 0.; };
 struct VirtualDepth { Real v = 0.; };
 
-struct xyz 
-{
-	Real x = 0., y = 0., z = 0.;
-};
-
-using XYZs = AlignedVector<xyz>;
-
 enum Axis { X = 0, Y = 1, Z = 2, XY = 4, XZ = 5, YZ = 6, XYZ = 7 };
 
 struct IndexPair {

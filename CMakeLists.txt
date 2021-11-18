@@ -226,6 +226,7 @@ set(PLENO_OPTIMIZATION_SRC
 	pleno/optimization/homography.cpp
 	pleno/optimization/kappa.cpp
 	pleno/optimization/depth.cpp
+	pleno/optimization/functions.cpp
 #--Errors
 	pleno/optimization/errors/grid.cpp
 	pleno/optimization/errors/mic.cpp
@@ -236,6 +237,8 @@ set(PLENO_OPTIMIZATION_SRC
 	pleno/optimization/errors/extrinsics.cpp
 	pleno/optimization/errors/invdistortion.cpp
 	pleno/optimization/errors/disparity.cpp
+	pleno/optimization/errors/scaling.cpp
+	pleno/optimization/errors/lidarcamera.cpp
 )
 
 set(PLENO_IO_SRC
@@ -265,6 +268,8 @@ set(PLENO_PROCESSING_SRC
 	pleno/processing/calibration/extrinsics.cpp	
 	pleno/processing/calibration/blur.cpp	
 	pleno/processing/calibration/invdistortion.cpp
+	pleno/processing/calibration/scaling.cpp
+	pleno/processing/calibration/lidarcamera.cpp
 #--Detection
 	pleno/processing/detection/mic.cpp
 	pleno/processing/detection/corners/corners.cpp

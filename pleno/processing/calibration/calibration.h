@@ -7,8 +7,14 @@
 #include "geometry/distortions.h"
 #include "geometry/observation.h"
 #include "geometry/internals.h"
+#include "geometry/pose.h"
 
 #include "object/checkerboard.h"
+#include "object/constellation.h"
+
+#include "geometry/depth/depthmap.h"
+
+#include "processing/tools/functions.h"
 
 //******************************************************************************
 //******************************************************************************
@@ -58,3 +64,31 @@ void calibration_inverseDistortions(
 	const PlenopticCamera& mfpc,
 	const CheckerBoards& scene
 );
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+void calibration_LidarPlenopticCamera(                        
+	CalibrationPose& pose, /* out */                   
+	const PlenopticCamera& model, /* in */   
+	const PointsConstellation& constellation,
+	const BAPObservations& observations, /* (u,v,rho?) */
+	const Image& scene
+);
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
+template <typename ScalingFunction>
+void calibration_depthScaling(                        
+	ScalingFunction& scaling,  
+	const PlenopticCamera& mfpc, const CheckerBoard& scene,
+	const std::unordered_map<Index, DepthMap>& depthmaps,
+	const std::unordered_map<Index, BAPObservations>& observations
+);
+
+#include "scaling.hpp"
+
+//******************************************************************************
+//******************************************************************************
+//******************************************************************************
