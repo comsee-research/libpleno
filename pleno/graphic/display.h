@@ -373,7 +373,7 @@ GUI(
 	
 	const DepthMapImage dmi = DepthMapImage{dm, pcm};
 	
-	Image idm; cv::cvtColor(dmi.image, idm, CV_BGR2RGB);
+	Image idm; cv::cvtColor(dmi.image, idm, cv::COLOR_BGR2RGB);
 	RENDER_DEBUG_2D(
 		Viewer::context().layer(Viewer::layer()++)
 			.name(ss+"Depth Map"),
@@ -387,7 +387,7 @@ GUI(
 	cv::Mat legend;
 	cv::resize(dmi.colormap, legend, cv::Size(W, H), 0, 0, cv::INTER_AREA);
 	cv::imwrite("cm-legend.png", legend);
-	cv::cvtColor(legend, legend, CV_BGR2RGB);
+	cv::cvtColor(legend, legend, cv::COLOR_BGR2RGB);
 	
 	ss = (dm.is_virtual_depth()?"":" (mm)");
 	RENDER_DEBUG_2D(

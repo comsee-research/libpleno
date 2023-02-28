@@ -66,8 +66,12 @@ void optimize_depth(
 		{
 	 		solver.solve(lma::DENSE); //no verbose, lma::enable_verbose_output());
 		}
+		
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 		//Save results
 		hypothesis.cost = solver.final_cost;
+#pragma GCC diagnostic pop
 	//--------------------------------------------------------------------------
 	}, vfunctor);
 }

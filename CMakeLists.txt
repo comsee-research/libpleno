@@ -49,6 +49,8 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
   add_definitions(-O3)
 endif(NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
 
+add_definitions(-fconcepts)
+
 # For Windows
 if( MSVC )
 	add_definitions( /D _VARIADIC_MAX=10 ) # VS2012 does not support tuples correctly yet
@@ -104,12 +106,12 @@ find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN_INCLUDE_DIRS})
 set(EXTERNAL_LIBS ${EXTERNAL_LIBS} ${EIGEN})
 
-#find_path(EIGEN_INCLUDE_DIR Eigen/Core
-#	/usr/local/include/eigen3
-#	/usr/include/eigen3
-#)
+find_path(EIGEN_INCLUDE_DIR Eigen/Core
+	/usr/local/include/eigen3
+	/usr/include/eigen3
+)
 # Suppress Eigen's warning by adding it to the system's library
-#include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
+include_directories(SYSTEM "${EIGEN_INCLUDE_DIR}")
 
 #--------------------
 # DEPENDENCY: OpenCV

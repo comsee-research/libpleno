@@ -52,12 +52,12 @@ DepthMapImage::DepthMapImage(const DepthMap& dm, const PlenopticCamera& model, d
 				
 				cv::circle(
 					depthmap, cv::Point(center[0], center[1]), radius,
-					cv::Scalar(fdepth,fdepth,fdepth), CV_FILLED
+					cv::Scalar(fdepth,fdepth,fdepth), cv::FILLED
 				);
 				
 				cv::circle(
 					sdepthmap, cv::Point(center[0], center[1]), radius,
-					cv::Scalar(d,d,d), CV_FILLED
+					cv::Scalar(d,d,d), cv::FILLED
 				);	
 			}
 			else if (dm.is_refined_map())

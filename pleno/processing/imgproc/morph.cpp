@@ -24,7 +24,7 @@ std::vector<std::vector<cv::Point>> detect_shapes(Image& ioSource)
 {
     std::vector<std::vector<cv::Point>> contours;
     std::vector<cv::Vec4i> hierarchy;
-    cv::findContours(ioSource, contours, hierarchy, CV_RETR_TREE, CV_CHAIN_APPROX_NONE);
+    cv::findContours(ioSource, contours, hierarchy, cv::RETR_TREE, cv::CHAIN_APPROX_NONE);
 
     cv::RNG rng (12345);
     cv::Scalar color = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
