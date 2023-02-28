@@ -1,0 +1,6 @@
+/**
+
+\addtogroup serialization_eigen Serialization of Eigen types
+\ingroup serialization
+
+*/

@@ -1,0 +1,22 @@
+<svg viewBox="-1 -1 12 12" stroke-linecap="round" fill="none">
+  <path stroke="white" stroke-width="3" d="
+    M 0,2 H 10
+    M 0,4 H 10
+    M 0,6 H 10
+    M 0,8 H 10
+    M 2,0 V 10
+    M 4,0 V 10
+    M 6,0 V 10
+    M 8,0 V 10
+    "/>
+  <path stroke="black" d="
+    M 0,2 H 10
+    M 0,4 H 10
+    M 0,6 H 10
+    M 0,8 H 10
+    M 2,0 V 10
+    M 4,0 V 10
+    M 6,0 V 10
+    M 8,0 V 10
+    "/>
+</svg>

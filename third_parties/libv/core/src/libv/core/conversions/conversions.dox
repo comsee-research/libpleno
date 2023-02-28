@@ -1,0 +1,20 @@
+/**
+
+\addtogroup conversions Interoperability
+
+This module mainly consists in the \ref Wrapper class, which allows you to wrap the contents of a container in another kind of container.
+This way you can use containers and algorithms defined in other libraries along with those defined here.
+
+For example, to view a cv::Mat as an ImageRGBU8p you would write:
+\code
+cv::Mat image;
+Wrapper<ImageRGBU8p> wrapped_image = image;
+\endcode
+
+Conversely, to view an ImageRGBU8 as a cv::Mat you would write:
+\code
+ImageRGBU8 image;
+Wrapper<cv::Mat> wrapped_image = image;
+\endcode
+
+*/

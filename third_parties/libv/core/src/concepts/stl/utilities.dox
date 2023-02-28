@@ -1,0 +1,62 @@
+namespace std {
+
+/// Assignable Concept
+struct Assignable
+{
+  /// Copy constructor
+  /// \param other An object compatible with \e this.
+  /// \post \e this is a copy of \e other.
+  constructor(const this_type &other);
+
+  /// Assignment
+  /// \copydetails constructor(const this_type &)
+  /// \return \c *this so you can chain operations.
+  this_type &operator=(const this_type &other);
+};
+
+/// Default Constructible Concept
+struct DefaultConstructible
+{
+  /// Default constructor
+  constructor(void);
+};
+
+/// Equality Comparable Concept
+struct EqualityComparable
+{
+  /// Equality
+  /// \param other An object compatible with \e this.
+  /// \returns True if \e this is equal to \e other.
+  bool operator==(const X &other) const;
+
+  /// Inequality
+  /// \param other An object compatible with \e this.
+  /// \returns True if \e this is not equal to \e other.
+  bool operator!=(const X &other) const;
+};
+
+/// Less Than Comparable Concept
+struct LessThanComparable
+{
+  /// Less
+  /// \param other An object compatible with \e this.
+  /// \returns True if \e this is less than \e other.
+  bool operator<(const X &other) const;
+
+  /// Greater
+  /// \param other An object compatible with \e this.
+  /// \returns True if \e this is greater than \e other.
+  bool operator>(const X &other) const;
+
+  /// Less or equal
+  /// \param other An object compatible with \e this.
+  /// \returns True if \e this is not greater than \e other.
+  bool operator<=(const X &other) const;
+
+  /// Greater or equal
+  /// \param other An object compatible with \e this.
+  /// \returns True if \e this is not less than \e other.
+  bool operator>=(const X &other) const;
+};
+
+}

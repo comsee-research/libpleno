@@ -1,0 +1,11 @@
+<RCC><qresource>
+  <file>axes.svg</file>
+  <file>grid.svg</file>
+  <file>reticle.svg</file>
+  <file>visibility.svg</file>
+  <file>camera-photo.svg</file>
+  <file>camera-video.svg</file>
+  <file>zoom-fit-best.svg</file>
+  <file>zoom-original.svg</file>
+  <file>options.svg</file>
+</qresource></RCC>

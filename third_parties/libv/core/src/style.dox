@@ -1,0 +1,128 @@
+/**
+
+\page style Guide de style C++ à ISPR - Institut Pascal 
+\author Laurent Lequièvre (2010) Laurent Malaterre (2015)
+\brief ISPR : Imagerie, Systèmes de Perception, Robotique qui est une groupe de recherche au sein de l'institut Pascal
+\date 2011-11-23
+
+\section intro Un Guide de Style C++ à ISPR de l'Institut Pascal : Pourquoi ?
+
+Nous avons tous eu un jour des difficultés à rentrer dans le code d'un autre.
+Cette difficulté peut-être atténuée si tous les auteurs utilisent les mêmes règles dans leur code.
+Cette uniformité permet au lecteur qui bien souvent n'est pas l'auteur, d'être plus efficace car il dispose de repères et lui permettra une maintenance plus aisée.
+Bien évidemment cela n'enlève pas l'effort qu'il faut faire sur le fond.
+
+Il est donc important de mettre sur papier ces règles et que TOUS NOUS LES UTILISIONS.
+
+Le LASMEA demande de plus en plus à ses étudiants en thèse de produire un démonstrateur réaliste, prouvant le modèle théorique.
+Bien souvent, ce démonstrateur est utilisé d'une thèse à une autre, et donc repris par d'autres étudiants ou le service technique.
+Le fait de faire l'effort de structurer proprement son projet permet non seulement à son auteur d'y revenir dans le temps avec plus de facilité mais cela permet aussi de passer la main à d'autres collègues.
+
+Les habitudes sont bien ancrées, et bien souvent lorsque l'on démarre une activité on se dit que ce n'est pas la peine de faire cet effort de suite et que l'on aura le temps d'y revenir.
+Dans les fait, on y revient jamais et on se contente de ce que l'on a fait.
+
+On vous conseille donc de mettre en pratique ce guide de style dès le début.
+
+\section names Nommage
+
+Le respect de règles de nommage d'un code C++ est très important pour la lisibilité du code, mais aussi pour sa maintenance dans le temps.
+L'effort de nommage doit être fait dans tous les compartiments du code (nom de variables, de classes, de namespace, de constantes, de méthodes …).
+
+L'idée principale étant de donner un nom qui soit compréhensible rapidement par un autre lecteur que son créateur.
+
+Exemples :
+\code
+std::string nameOfSensor;			// BON
+QTcpServer *tcpServerCycab;		// BON
+int id_camera;				// BON – identifiant camera
+int nb_camera;				// BON – nombre total de camera
+
+int a1;						// MAUVAIS – Pas assez explicite
+int nerr;					// MAUVAIS – Ambigu (*)
+\endcode
+(*) Ici il y a ambiguïté entre numéro d'erreur ou nombre d'erreurs …
+
+\subsection vars Variables
+
+On peut utiliser deux méthodes de nommage :
+- Tout en minuscule avec le caractère '_' comme séparateur (id_camera),
+- Tout coller, commençant par une minuscule et avec la première lettre de chaque mot en majuscule (nameOfSensor).
+
+Il est à noter que les noms de variables doivent toujours commencer par une minuscule.
+
+\subsection attrs Variables de classe
+
+Les variables de classe utilisent la même convention que les variables.
+Si une variable de classe est 'private' à la classe, elle doit avoir un '_' après son nom.
+
+Exemple :
+\code
+class NetworkManager {
+...
+private:
+  QTcpSocket * socket_;
+  int timeOut_;
+};
+\endcode
+
+\subsection files Fichiers
+
+Les noms des fichiers sont toujours en minuscules et peuvent comporter le caractère '_' ou bien le tiret '-'.
+Si il s'agit de définir une classe, il faut alors donner au fichier le même nom que celui de la classe (en minuscules).
+
+Faire attention à ne pas donner comme nom de fichier un nom qui existe déjà dans \c /usr/include.
+
+Exemples :
+\code
+gps-lasmea.h
+network_manager.cpp
+\endcode
+
+\subsection types Types (classes, structs, typedefs, enums)
+
+Un nom de type commence toujours par une majuscule puis est suivi de caractères en minuscule.
+Il ne comporte pas de caractère '_'.
+Chaque nouveau mot dans le nom doit commencer aussi par une majuscule pour plus de lisibilité.
+
+Les noms de tous les types ( classes, structs, typedefs, enums ) doivent utiliser cette règle.
+
+Exemples :
+\code
+class Sensor { … }
+class NetworkManager { … }
+
+enum FrameType {
+
+  // Cycab
+  CycabGlobalStateDataFT = 10,
+  CycabGlobalStateRequestFT = 11,
+  CycabCommandDataFT = 20,
+  CycabCommandRequestFT = 21,
+
+  // Capteur Commun
+  GpsDataFT = 30,
+  GpsRequestFT = 31
+  // Odometry
+  // Camera
+};
+\endcode
+
+\subsection Constantes
+
+Les constantes doivent être en majuscules.
+Si le nom de celle-ci comporte plusieurs mots, on peut utiliser le caractère '_' pour les séparer.
+
+On déconseille l'utilisation du \c \#define pour utiliser une constante, car celui-ci remplace bêtement son contenu dans le code lors de la compilation du source.
+
+Il faut mieux utiliser me mot clé \c const, qui est plus orienté C++.
+
+Exemple :
+\code
+const float ANGLE_ROUE_MAX = 3.0;
+\endcode
+
+\subsection Namespaces
+
+Ils doivent être écrit en minuscules, avec la possibilité de séparer les mots par un caractère '_'.
+
+*/

@@ -1,0 +1,12 @@
+/**
+
+\addtogroup config Configuration and Parameters
+
+The macros and functions defined here allow you to use a class to hold the configurations of you application or a function's optional parameters.
+
+First, use the #V_ENABLE_PROPERTIES macro to add introspection capabilities to your class.
+You can then use the #V_DEFINE_PROPERTY macro to define each property.
+Finally, those properties can be loaded from a file or a property tree with load_properties().
+You can also initialize some properties with a chain of setters.
+
+*/

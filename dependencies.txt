@@ -1,0 +1,26 @@
+- cmake
+- g++
+
+- libopengl-dev
+- libopencv-dev, libopencv-contrib-dev
+- libeigen3-dev
+- libboost-all-dev
+
+- libv-core, libv-graphic, libv-geometry
+	- libboost-all-dev
+	- libopencv-dev
+	- libopengl-dev
+	- qt5-default, libqt5svg5-dev
+	- yaml-cpp
+	
+- lma
+	- libv-core
+	
+- libpleno
+	- libv-core, libv-graphic, libv-geometry
+	- libv-lma
+	- libopengl-dev
+	- libopencv-dev, libopencv-contrib-dev
+	- libeigen3-dev
+	- libboost-all-dev
+	- libomp-dev

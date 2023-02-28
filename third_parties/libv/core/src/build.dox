@@ -1,0 +1,60 @@
+/**
+
+\page build Building Libv
+\author Vadim Litvinov (2012) Laurent Malaterre (2015)
+\date 2015-07-29
+
+Libv is a general purpose computer vision library developed at Pascal Institute.
+This file will briefly describe the steps necessary to compile and setup the library on your system.
+
+\section required Required components
+
+Apart from obvious C++ compiler, Libv will need the following components to successfully
+build on your system:
+- CMake (version 2.6 or later);
+- Doxygen (only to build documentation, not needed for successful compilation).
+
+You have also created a Gitlab account and registered as developper at least in the libV project.
+
+\section install Building and installing an libV workspace from scratch
+
+To install the library on your system you will need to setup the building system using the following commands:
+\code
+mkdir [myArchi] // repertoire de base de l'archi, le nommage est libre
+cd [myArchi]
+git init
+git clone 'git@172.27.4.41:libv/libv.git' 'libs/libv'
+\endcode
+
+where:
+- [myArchi] - the directory where your project including the Libv source code is stored;
+- [myArchi]/[libs/libv] - the directory where the Libv source code is stored.
+
+After that you have to copy theses three root files and folder (ask to me or any user for that).
+- [myArchi]/CMakeLists.txt
+- [myArchi]/config.cmake
+- [myArchi]/bootstrap.desktop, file we have to set as executable (contextual menu -> permission)
+- [myArchi]/[apps/monapp]/... and the folder contents, this operation installs the 'tools.in' package and an example of personnal application architecture using libV.
+Theses three files are not versionned on git because their use depends on the project you want to build.
+
+Now you are about to make an automatic installation 
+- clic on 'bootstrap.desktop' which became 'Install to Hard Drive' ;-)
+- select where you want to install the [build] directory.
+- press ok and a term opens. Verify is the end of of the log seems to be ok.
+
+Then you can configure and build:
+\code
+. env.sh
+reconfigure
+rebuild
+\endcode
+
+Finally, if you want to test the library, you can ran the unitary test and examples as follows:
+\code
+rebuild tests
+rebuild examples
+\endcode
+
+Have fun!
+
+*/

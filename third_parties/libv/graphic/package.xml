@@ -1,0 +1,14 @@
+<package format="2">
+<name>libv-graphic</name>
+<version>0.0.0</version>
+<description>libv-graphic library</description>
+<maintainer email="nobody@uca.fr">none</maintainer>
+<license>LGPLv3</license>
+<url type="repository">http://git.ip.uca.fr/libv/libv</url>
+<buildtool_depend>catkin</buildtool_depend>
+<depend>libv-core</depend>
+<depend>rviz</depend>
+<export>
+<rviz plugin="${prefix}/rviz.xml"/>
+</export>
+</package>

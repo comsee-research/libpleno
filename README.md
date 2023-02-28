@@ -11,14 +11,18 @@ Quick Start
 
 The libpleno library has a light dependency list:
 
- * [Eigen] version 3, a modern C++ matrix and linear-algebra library,
- * [boost] version 1.54 and up, portable C++ source libraries,
- * [OpenCV] version 3.2, a collection of algorithms and sample code for various computer vision problems,
- * [libv], a general purpose computer vision library developed at Pascal Institute (used for graphic and serialization),
+ * [Eigen] version >=3, a modern C++ matrix and linear-algebra library,
+ * [boost] version >=1.54 and up, portable C++ source libraries,
+ * [OpenCV] version >=3.2, a collection of algorithms and sample code for various computer vision problems,
+ * [libv], a general purpose computer vision library developed at Pascal Institute (used for graphic and serialization), modules _core_, _build_, _geometry_ and _graphic_,
  * [lma], a non-linear optimization library implementing the Levenberg Marquardt Algorithm,
  
-and was compiled on:
-  * Ubuntu 18.04.4 LTS, GCC 7.5.0, with Eigen 3.3.4, Boost 1.65.1, and OpenCV 3.2.0.
+and was compiled and tested on:
+  * Ubuntu 18.04.4 LTS, GCC 7.5.0, with Eigen 3.3.4, Boost 1.65.1, and OpenCV 3.2.0,
+  * Ubuntu 20.04.5 LTS, GCC 9.4.0, with Eigen 3.3.7, Boost 1.71.0, and OpenCV 4.2.0.
+  
+Please see the file `dependencies.txt` for more detailled dependencies list. 
+Third-party libraries [libv] and [lma] can be found in the corresponding folder `./third_parties/`. You can install them from here (warning about ros, catkin and others can be ignored for installation).
   
 ### Compilation & Installation 
 

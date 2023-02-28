@@ -1,0 +1,42 @@
+/**
+
+\page whitespace Utiliser des tabulations plutôt que des espaces
+\author Alexis Wilhelm (2012)
+\date 2012-12-13
+
+Le guide de style exige qu'on indente le code avec deux espaces.
+Si comme moi tu trouves un tel code illisible, voici comment configurer ton dépôt.
+
+Dans le fichier <code>.git/info/attributes</code> (qu'il faudra sans doute créer), ajoute ceci :
+\code
+*.* text=auto filter=tabs2
+\endcode
+On informe ainsi Git qu'il doit appliquer un filtre à tous les fichiers chaque fois qu'ils arrivent dans le dépôt local depuis le dépôt distant ou qu'ils partent vers le dépôt distant depuis le dépôt local.
+\warning
+Ces filtres s'appliquent aussi aux fichiers binaires et peuvent les corrompre !
+Pour éviter les ennuis, il faudra ajouter :
+\code
+*.png binary -filter
+\endcode
+\note
+Tu peux aussi placer ce fichier dans <code>~/.config/git/attributes</code> pour qu'il s'applique à tous tes dépôts.
+
+Ce filtre doit remplacer les groupes de deux espaces par des tabulations dans les fichiers qui arrivent, et, à l'inverse, remplacer les tabulations par des groupes de deux espaces dans les fichiers qui partent.
+Sur Linux, les programmes \c expand et \c unexpand font exactement ça.
+Il faut donc dire à Git d'utiliser ces outils, en tapant dans un terminal :
+\code
+git config --global filter.tabs2.smudge 'unexpand --tabs=2 --first-only'
+git config --global filter.tabs2.clean 'expand --tabs=2 --initial'
+\endcode
+Dans ces commandes, \c tabs2 est le nom du filtre qu'on a défini dans <code>.git/info/attributes</code>, \c smudge est l'action à effectuer pour les fichiers qui arrivent, et \c clean est l'action à effectuer pour les fichiers qui partent.
+
+Enfin, pour appliquer ce filtre aux fichiers déjà présents, tape dans un terminal :
+\code
+git checkout HEAD -- **
+\endcode
+Tu peux maintenant utiliser des tabulations sans que personne ne vienne te le reprocher !
+
+\see \ref style
+\see man <a href="http://www.kernel.org/pub/software/scm/git/docs/gitattributes.html">gitattributes(5)</a>
+
+*/

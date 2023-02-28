@@ -1,0 +1,10 @@
+<package format="2">
+<name>libv-geometry</name>
+<version>0.0.0</version>
+<description>libv-geometry library</description>
+<maintainer email="nobody@uca.fr">none</maintainer>
+<license>LGPLv3</license>
+<url type="repository">http://git.ip.uca.fr/libv/libv</url>
+<buildtool_depend>catkin</buildtool_depend>
+<depend>libv-core</depend>
+</package>

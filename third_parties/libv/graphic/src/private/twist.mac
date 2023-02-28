@@ -1,0 +1,84 @@
+/*
+
+En supposant que le twist reste constant, on veut prédire la pose du robot dans t secondes.
+On veut intégrer le twist sur la durée t pour trouver la translation et la rotation pendant cette durée.
+Intégrer une matrice de transformation, c'est résoudre une équation différentielle.
+
+Ce fichier permet de vérifier les calculs.
+On peut l'exécuter avec : maxima <twist.mac
+
+Notations :
+	- Vélocité linéaire : v = (x, y, z) = twist.linear
+	- Axe de rotation (unitaire) : (a, b, c)
+	- Vitesse angulaire (positive) : A
+	- Vélocité angulaire : w = A . (a, b, c) = twist.angular
+	- Générateur infinitésimal de la transformation : M
+	- Transformation pendant t : m(t)
+	- Transformation pendant dt : dm = 1 + M . dt
+	- Pose initiale : p(0)
+	- Pose à la date t : p(t) = m(t) . p(0)
+	- Déplacement pendant dt : dp
+
+On a : p(t + dt) = p(t) + dp = dm . p(t)
+Donc : dp = (dm - 1) . p(t)
+Donc : dp / dt = M . p(t)
+
+C'est une équation différentielle en t dont la solution est : p(t) = exp(M . t) . p(0)
+Finalement, on identifie p(t) : m(t) = exp(M . t)
+
+Ce calcul est inspiré de http://www.reedbeta.com/blog/rotations-and-infinitesimal-generators/.
+
+*/
+
+load("diag")$
+display2d: false$
+orderless(a, b, c, x, y, z, A, t)$
+
+declare(x, real, y, real, z, real)$
+
+declare(A, real)$
+assume(A > 0)$
+
+declare(a, real, b, real, c, real)$
+simp_abc(_) := ratsubst(1, a^2 + b^2 + c^2, _)$
+
+declare(t, real)$
+assume(t > 0)$
+
+M: matrix([0, -c*A, b*A, x], [c*A, 0, -a*A, y], [-b*A, a*A, 0, z], [0, 0, 0, 0])$
+
+m: mat_function(exp, M * t)$
+
+simp_abc(%)$
+demoivre(%)$
+trigreduce(%)$
+trigsimp(%)$
+
+/*
+	On ne conserve que la partie réelle.
+	Est-ce légal ?
+*/
+(% + conjugate(%)) / 2$
+
+fullratsimp(%)$
+m: %;
+
+/*
+	Quand A=0, on a des divisions par 0, mais la limite est bien définie.
+*/
+limit(m, A, 0);
+
+/*
+	J'ai trituré les expressions à la main pour les rendre plus lisibles.
+	À droite, entre parenthèses, ce sont les expressions copiées-collées dans le code C++.
+	S'il n'y a pas d'erreur de calcul, ces 6 différences seront nulles.
+*/
+C: cos(A * t)$
+S: sin(A * t)$
+_(_) := fullratsimp(simp_abc(_))$
+_(m[1,4]-(  (a * (a * x + b * y + c * z) * (A * t - S) + (b * z - c * y) * (1 - C) + x * S) / A  ));
+_(m[2,4]-(  (b * (a * x + b * y + c * z) * (A * t - S) + (c * x - a * z) * (1 - C) + y * S) / A  ));
+_(m[3,4]-(  (c * (a * x + b * y + c * z) * (A * t - S) + (a * y - b * x) * (1 - C) + z * S) / A  ));
+_(m[1,1]-(  a * a * (1 - C) + C  ));
+_(m[2,1]-(  b * a * (1 - C) + c * S  ));
+_(m[3,1]-(  c * a * (1 - C) - b * S  ));

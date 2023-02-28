@@ -1,0 +1,39 @@
+namespace boost {
+
+/// Incrementable Iterator Concept
+struct IncrementableIterator: CopyConstructible {};
+
+/// Single Pass Iterator Concept
+struct SinglePassIterator: IncrementableIterator, EqualityComparable {};
+
+/// Forward Iterator Concept
+struct ForwardIterator: SinglePassIterator, DefaultConstructible {};
+
+/// Bidirectional Iterator Concept
+struct BidirectionalIterator: ForwardIterator {};
+
+/// Random Access Iterator Concept
+struct RandomAccessIterator: BidirectionalIterator {};
+
+/// Single Pass Range Concept
+struct SinglePassRange {};
+
+/// Forward Range Concept
+struct ForwardRange: SinglePassRange {};
+
+/// Writeable Range Concept
+struct WriteableRange {};
+
+/// Writeable Forward Range Concept
+struct WriteableForwardRange: ForwardRange, WriteableRange {};
+
+/// Writeable Bidirectional Range Concept
+struct WriteableBidirectionalRange: BidirectionalRange, WriteableRange {};
+
+/// Random Access Range Concept
+struct RandomAccessRange: BidirectionalRange {};
+
+/// Writeable Random Access Range Concept
+struct WriteableRandomAccessRange: RandomAccessRange, WriteableRange {};
+
+}

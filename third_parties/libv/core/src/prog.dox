@@ -1,0 +1,14 @@
+/**
+
+\addtogroup prog Programming Techniques
+
+\{
+  \addtogroup opaque Opaque Pointer
+  \addtogroup parallelism
+  \addtogroup polymorphism
+  \addtogroup preprocessor
+  \addtogroup tag_dispatch Tag Dispatch
+  \addtogroup type_traits Type Traits
+\}
+
+*/

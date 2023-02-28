@@ -1,0 +1,39 @@
+/**
+
+\addtogroup logger Logging and Debugging
+\details
+
+Use it like this:
+
+\code
+  // define a logger writing in stderr and enabled with -DENABLE_LOG
+  #define MY_LOGGER V_NEW_LOGGER_IF(ENABLE_LOG, v::log_stderr)
+
+  // log some useful data
+  MY_LOGGER << my << message;
+\endcode
+
+You can write in a custom stream like this:
+
+\code
+  // define a custom logging function
+  void my_logger(std::ostringstream *s)
+  {
+    static std::ofstream file("debug.log");
+    file << s->str();
+  }
+
+  // define a logger writing in debug.log and enabled with -DENABLE_LOG
+  #define MY_LOGGER V_NEW_LOGGER_IF(ENABLE_LOG, my_logger)
+
+  // log some useful data
+  MY_LOGGER << my << message;
+\endcode
+
+Also, append the following chant to your command line to get pretty colors:
+
+\code
+  2>&1 | c++filt | perl -pe 's{$}{\e[m}; s{^}{\e[31m} if m{\berror:}i; s{^}{\e[33m} if m{\bwarning:}i; s{^}{\e[34m} if m{\bnote:}i; s{^}{\e[1m} if s{(:\s)}{$1\e[21m}'
+\endcode
+
+*/

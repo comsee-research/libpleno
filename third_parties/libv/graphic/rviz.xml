@@ -1,0 +1,7 @@
+<library path="lib/liblibv-graphic">
+<class name="libv_graphic/FourWheelSteering" type="v::graphic::rviz_display_FourWheelSteering" base_class_type="rviz::Display"><message_type>four_wheel_steering_msgs/FourWheelSteering</message_type><description>Plugin rviz pour afficher un FourWheelSteering.</description></class>
+<class name="libv_graphic/FourWheelSteeringStamped" type="v::graphic::rviz_display_FourWheelSteeringStamped" base_class_type="rviz::Display"><message_type>four_wheel_steering_msgs/FourWheelSteeringStamped</message_type><description>Plugin rviz pour afficher un FourWheelSteeringStamped.</description></class>
+<class name="libv_graphic/Twist" type="v::graphic::rviz_display_Twist" base_class_type="rviz::Display"><message_type>geometry_msgs/Twist</message_type><description>Plugin rviz pour afficher un Twist.</description></class>
+<class name="libv_graphic/TwistStamped" type="v::graphic::rviz_display_TwistStamped" base_class_type="rviz::Display"><message_type>geometry_msgs/TwistStamped</message_type><description>Plugin rviz pour afficher un TwistStamped.</description></class>
+<class name="libv_graphic/Odometry_twist" type="v::graphic::rviz_display_Odometry_twist" base_class_type="rviz::Display"><message_type>geometry_msgs/Odometry_twist</message_type><description>Plugin rviz pour afficher le Twist contenu dans un message Odometry.</description></class>
+</library>

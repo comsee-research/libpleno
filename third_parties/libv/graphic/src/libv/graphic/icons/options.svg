@@ -1,0 +1,11 @@
+<svg viewBox="-6 -6 12 12" stroke-linejoin="round" fill="none">
+  <path stroke="white" stroke-width="3" d="
+    M 4,0 L -3.5,2 2,-3.5 0,4 -2,-3.5 3.5,2 -4,0 3.5,-2 -2,3.5 0,-4 2,3.5 -3.5,-2 z
+    "/>
+  <path stroke="black" d="
+    M 4,0 L -3.5,2 2,-3.5 0,4 -2,-3.5 3.5,2 -4,0 3.5,-2 -2,3.5 0,-4 2,3.5 -3.5,-2 z
+    "/>
+  <path fill="white" d="
+    M -2,0 A 2,2 0 0 1 2,0 A 2,2 0 0 1 -2,0 z
+    "/>
+</svg>

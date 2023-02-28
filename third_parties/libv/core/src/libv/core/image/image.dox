@@ -1,0 +1,87 @@
+/**
+
+\addtogroup image Image Types
+
+Read the <a href="#details">detailed description</a> before anything else.
+
+\section typedefs Naming scheme
+
+Images have many facets, so referring them in a precise yet concise manner is quite challenging.
+For now we chose to use a BLAS-like code with the 5 informations presented in the table below.
+
+For examples, see the <a href="#typedef-members">typedefs</a>.
+
+<table>
+<tr><th colspan=2> Number of planes
+<tr><th><td><em> Omit this field if the image has 1 plane or a layout. </em>
+<tr><th> V3 <td> The image has 3 planes.
+<tr><th> V <td> The image has a variable number of planes. This might prove useful when working with histograms.
+<tr><td colspan=2>
+<tr><th colspan=2> Layout
+<tr><th><td><em> Omit this field if the image has no particular layout. </em>
+<tr><th> RGB <td> The image has 3 planes and the pixel type provides \c r(), \c g() and \c b() accessors.
+<tr><th> XY <td> The image has 2 planes and the pixel type provides \c x() and \c y() accessors.
+<tr><th> … <td>
+<tr><td colspan=2>
+<tr><th colspan=2> Scalar type
+<tr><th> U8 <td> The scalar type is \c uint8_t.
+<tr><th> I16 <td> The scalar type is \c int16_t.
+<tr><th> F32 <td> The scalar type is \c float.
+<tr><th> F64 <td> The scalar type is \c double.
+<tr><th> … <td>
+<tr><td colspan=2>
+<tr><th colspan=2> Constness
+<tr><th> c <td> The image contains constant data. Obviously this does not apply to images with value semantic, because their contents could not even be initialized.
+<tr><th><td> The image contains mutable data.
+<tr><td colspan=2>
+<tr><th colspan=2> Semantic
+<tr><th><td> The image has v::core::IMAGE_SEMANTIC_VALUE "value semantic". Use this to store your own images.
+<tr><th> p <td> The image has v::core::IMAGE_SEMANTIC_POINTER "pointer semantic". Use this to interpret an image provided by another library as a Libv image.
+<tr><th> r <td> The image has v::core::IMAGE_SEMANTIC_REFERENCE "reference semantic". Use this in function parameters.
+</table>
+
+\section tech Comment ça marche ?
+
+Une image est un tableau tridimensionnel.
+Pour le décrire on a donc besoin de son nombre de lignes, de colonnes et de plans.
+De plus, le contenu d'une image n'est pas forcément contigu.
+Pour aligner chaque début de ligne sur un multiple de 16 octets, ou pour mapper une zone de la mémoire gérée par une autre bibliothèque, on a besoin de laisser de l'espace vide entre deux lignes consécutives.
+Il faut donc ajouter aux 3 nombres cités plus haut la distance entre deux lignes consécutives.
+Les lignes semblent être toujours contiguës, donc nous ne nous occuperons pas pour l'instant de la distance entre deux colonnes consécutives ou deux scalaires consécutifs.
+
+Ces dimensions peuvent être connues à l'avance (on manipule souvent des images à 1, 3 ou 4 plans) ou découvertes au moment de l'exécution du programme (nombre de lignes et colonnes d'une image lue dans un fichier).
+Par souci de minimalisme autant que d'optimisation du code, nous préférerions stocker en tant que paramètres template ceux qui sont connus au moment de la compilation, et en tant qu'attributs d'instance seulement ceux susceptibles de changer pendant l'exécution du programme.
+La classe Image prend 4 paramètres template pour renseigner les dimensions constantes.
+Dans le cas des dimensions variables, ces paramètres prendront la valeur spéciale 0.
+Remarquons que la classe Image dérive 4 fois de internal::image_size avec en paramètres template un identifiant (nécessaire pour définir sans ambiguïté les typedefs \c the_row_count, \c the_column_count, etc.) et le nombre de lignes, colonnes, etc. connu au moment de la compilation.
+Dans les cas où la dimension est constante, les méthodes internal::image_size::get() et internal::image_size::set() sont statiques.
+Dans le cas où elle est variable, par contre, une spécialisation template de internal::image_size peut la contenir dans un attribut d'instance, et ses méthodes donnent accès à cet attribut.
+Le résultat de tout ceci est que la classe Image contient un attribut d'instance pour chaque dimension variable, et seulement pour celles-ci.
+
+À présent, le moment semble bien choisi pour remarquer qu'une ligne d'une image est une image avec 1 seule ligne, ce 1 étant connu au moment de la compilation.
+Le type «ligne d'une image» sera donc un simple typedef de la classe Image avec les mêmes paramètres template, sauf le nombre de lignes qui sera fixé à 1.
+De même, le type «pixel» sera un typedef de la classe Image avec les nombres de lignes et de colonnes fixés à 1.
+
+Les deux autres paramètres template de la classe Image sont le type de scalaire manipulé (\c souvent uint8_t ou \c float) et des flags permettant de définir le comportement des images (détaillé dans \ref ImageSemantic) et l'interprétation des plans (détaillée dans \ref ImageLayout).
+
+Voici comment nous réglons le problème des layouts.
+En plus de internal::image_size, la classe Image dérive de internal::image_layout, avec des paramètres template qu'il vaut mieux ne pas regarder pour l'instant.
+Dans le cas général, internal::image_layout ne contient rien.
+Dans les cas où l'image est réduite à un pixel, le nombre de plan est connu et le flag \ref ImageLayout est donné, alors internal::image_layout a une spécialisation template qui fournit des accesseurs sémantiquement riches.
+Par exemple, un pixel d'une image RGB fournira les accesseurs \c r, \c g et \c b.
+
+Tous ces paramètres sont utilisés tout au long de la définition de la classe Image, soit directement dans des calculs ou des conditions, soit avec \ref numeric_tag, #V_ENABLE_IF, \c std::enable_if ou \c std::conditional pour activer ou désactiver des portions de code au moment de la compilation.
+- \ref numeric_tag, utilisé comme paramètre de fonction, permet de sélectionner une surcharge parmi plusieurs possibles en fonction d'une condition ou d'une valeur numérique.
+Parfois, il est impossible d'utiliser un simple \c if, parce que ça générerait des erreurs pendant la compilation.
+Par exemple, Image::begin() retourne un pointeur si l'image est unidimensionnelle et un itérateur sinon.
+Utiliser un simple \c if générerait une erreur lors de la conversion d'un pointeur en itérateur ou d'un itérateur en pointeur.
+Pour contourner ce problème, nous déportons chaque cas dans une fonction privée, et la fonction publique ne sert qu'à sélectionner la bonne.
+- #V_ENABLE_IF, autour du premier paramètre d'une fonction, génère un type farfelu pour ce paramètre si la condition donnée est fausse, empêchant ainsi l'utilisation de la fonction.
+Ce comportement s'inspire de \c std::enable_if, mais ne nécessite pas que la fonction soit template.
+Nous l'utilisons dans Image::at() et Image::operator()() pour adapter le nombre de paramètres et le type de retour à la dimension de l'image, ainsi que dans certains constructeurs valides seulement dans certains contextes.
+- \c std::enable_if, utilisé comme dernier paramètre d'une fonction template, permet d'activer cette fonction seulement si la condition donnée est vraie.
+Nous l'utilisons dans les constructeurs de recopie pour tester la compatibilité des types template.
+- \c std::conditional génère un certain type si la condition donnée est vraie, et un autre type sinon.
+Nous l'utilisons pour générer des typedefs pour std::RandomAccessContainer, ainsi que le typedef \c const_this_type, qui permet de fournir des accesseurs constants dans le cas d'une sémantique de valeur et des accesseurs non-constants dans le cas d'une sémantique de pointeur ou de référence.
+
+*/

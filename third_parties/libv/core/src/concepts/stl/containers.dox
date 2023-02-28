@@ -1,0 +1,97 @@
+namespace std {
+
+/// Container Concept
+struct Container: Assignable
+{
+  /// Distance type
+  typedef UNDEFINED difference_type;
+
+  /// Size type
+  typedef UNDEFINED size_type;
+
+  /// Value type
+  typedef UNDEFINED value_type;
+
+  /// Reference type
+  typedef UNDEFINED reference;
+
+  /// Pointer type
+  typedef UNDEFINED pointer;
+
+  /// Iterator type
+  typedef InputIterator iterator;
+
+  /// Beginning of range
+  /// \returns An iterator pointing to the first element in the container.
+  iterator begin(void);
+
+  /// \copydoc begin
+  const_iterator begin(void) const;
+
+  /// End of range
+  /// \returns An iterator pointing one past the last element in the container.
+  iterator end(void);
+
+  /// \copydoc end
+  const_iterator end(void) const;
+
+  /// Size
+  /// \returns The size of the container, that is, its number of elements.
+  size_type size(void) const;
+
+  /// Maximum size
+  /// \returns The largest size that this container can ever have.
+  static size_type max_size(void);
+
+  /// Empty container
+  /// \returns \code size() == 0 \endcode
+  bool empty(void) const;
+};
+
+/// Forward Container Concept
+struct ForwardContainer: Container, EqualityComparable, LessThanComparable
+{
+  /// Iterator type
+  typedef ForwardIterator iterator;
+};
+
+/// Reversible Container Concept
+struct ReversibleContainer: ForwardContainer
+{
+  /// Iterator type
+  typedef BidirectionalIterator iterator;
+
+  /// Reverse iterator type
+  typedef UNDEFINED reverse_iterator;
+
+  /// Beginning of reverse range
+  /// \returns \code reverse_iterator(end()) \endcode
+  reverse_iterator rbegin(void);
+
+  /// \copydoc rbegin
+  const_reverse_iterator rbegin(void) const;
+
+  /// End of reverse range
+  /// \returns \code reverse_iterator(begin()) \endcode
+  reverse_iterator rend(void);
+
+  /// \copydoc rend
+  const_reverse_iterator rend(void) const;
+};
+
+/// Random Access Container Concept
+struct RandomAccessContainer: ReversibleContainer
+{
+  /// Iterator type
+  typedef RandomAccessIterator iterator;
+
+  /// Element access
+  /// \param i The index of an element.
+  /// \returns A reference to the \f$ i \f$-th element from the beginning of the container.
+  reference operator[](size_type i);
+
+  /// \copydoc operator[]()
+  const_reference operator[](size_type i) const;
+};
+
+}

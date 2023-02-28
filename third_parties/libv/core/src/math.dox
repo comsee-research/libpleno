@@ -1,0 +1,9 @@
+/**
+
+\addtogroup math Mathematics
+
+\{
+  \addtogroup core_math Basic Arithmetic
+\}
+
+*/
